@@ -312,6 +312,19 @@ class CarlinkoApi:
         )
         return data if isinstance(data, bool) else None
 
+    async def get_maintain(self, vehicle_id: str) -> list[dict[str, Any]]:
+        """Dealer service records, newest first per the app; [] when none logged."""
+        q = {"vehicleId": str(vehicle_id), "queryKey": "", "page": "1", "size": "20"}
+        data = await self._request("GET", "/user/maintain/page", params=q, sign_params=q)
+        return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+
+    async def get_maintain_details(self, maintain_id: str) -> dict[str, Any]:
+        mid = str(maintain_id)
+        data = await self._request(
+            "GET", f"/user/maintain/details/{mid}", sign_params={"maintainId": mid}
+        )
+        return data if isinstance(data, dict) else {}
+
     async def locate(self, device_sn: str) -> dict[str, Any]:
         body = {"sn": str(device_sn), "showAddress": 1, "timestamp": self._ts()}
         data = await self._request(

@@ -109,6 +109,9 @@ CARLINKO_ACCOUNT=your_email CARLINKO_PASSWORD=your_password CARLINKO_REGION=sea 
 # Lock the vehicle (opcode 740100)
 python3 tools/cli.py send 740100
 
+# Dealer service records (empty if your dealer does not log them in CarLinko)
+python3 tools/cli.py maintain
+
 # Run integration tests
 python3 -m pytest tests -q
 ```

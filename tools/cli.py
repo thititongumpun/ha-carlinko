@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import asyncio
 import os
 import socket
@@ -57,6 +58,15 @@ async def run(args: argparse.Namespace) -> int:
                 for k, val in state.items():
                     print(f"  {k}: {val}")
                 print(f"  raw: {raw}")
+            elif args.cmd == "maintain":
+                records = await api.get_maintain(vid)
+                if not records:
+                    print("  no maintenance records on this vehicle")
+                for r in records:
+                    print(f"  {json.dumps(r, ensure_ascii=False)}")
+                if records and records[0].get("maintainId"):
+                    details = await api.get_maintain_details(records[0]["maintainId"])
+                    print(f"  details(newest): {json.dumps(details, ensure_ascii=False)}")
             elif args.cmd == "locate":
                 print(f"  {await api.locate(sn)}")
             elif args.cmd == "send":
@@ -70,6 +80,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("status")
     sub.add_parser("locate")
+    sub.add_parser("maintain")
     send = sub.add_parser("send")
     send.add_argument("opcode")
     args = parser.parse_args()
