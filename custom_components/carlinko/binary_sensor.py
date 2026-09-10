@@ -83,7 +83,7 @@ class CarlinkoBinarySensor(CarlinkoEntity, BinarySensorEntity):
         super().__init__(coordinator, vehicle_id)
         self.entity_description = description
         self._attr_translation_key = description.key
-        self._attr_unique_id = f"{self.vehicle['vin']}_{description.key}"
+        self._attr_unique_id = f"{self.vin}_{description.key}"
 
     @property
     def is_on(self) -> bool | None:

@@ -11,14 +11,21 @@ import asyncio
 import os
 import socket
 import sys
-from pathlib import Path
 
 import aiohttp
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+# Register the integration dir as a standalone top-level "carlinko" package
+# before anything imports it, so importing api.py never runs the real
+# custom_components.carlinko.__init__ (which pulls in homeassistant).
+import importlib.util
+from importlib.machinery import ModuleSpec
+from pathlib import Path
+_p = importlib.util.module_from_spec(ModuleSpec("carlinko", None, is_package=True))
+_p.__path__ = [str(Path(__file__).resolve().parents[1] / "custom_components" / "carlinko")]
+sys.modules["carlinko"] = _p
 
-from custom_components.carlinko.api import CarlinkoApi, CarlinkoError  # noqa: E402
-from custom_components.carlinko.const import DEFAULT_REGION  # noqa: E402
+from carlinko.api import CarlinkoApi, CarlinkoError  # noqa: E402
+from carlinko.const import DEFAULT_REGION  # noqa: E402
 
 
 async def run(args: argparse.Namespace) -> int:

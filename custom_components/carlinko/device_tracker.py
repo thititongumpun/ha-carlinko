@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.device_tracker import SourceType, TrackerEntity
+from homeassistant.components.device_tracker import TrackerEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -28,11 +28,10 @@ class CarlinkoTracker(CarlinkoEntity, TrackerEntity):
     """Tracks a vehicle's last known location."""
 
     _attr_translation_key = "location"
-    _attr_source_type = SourceType.GPS  # TrackerEntity already defaults to GPS; explicit is fine
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
         super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vehicle['vin']}_location"
+        self._attr_unique_id = f"{self.vin}_location"
 
     @property
     def _loc(self) -> dict | None:

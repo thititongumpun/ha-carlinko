@@ -31,7 +31,7 @@ class CarlinkoStopChargingButton(CarlinkoEntity, ButtonEntity):
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
         super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vehicle['vin']}_{self._attr_translation_key}"
+        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
 
     async def async_press(self) -> None:
         """Stop charging."""

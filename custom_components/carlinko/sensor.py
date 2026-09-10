@@ -125,7 +125,7 @@ class CarlinkoSensor(CarlinkoEntity, SensorEntity):
         super().__init__(coordinator, vehicle_id)
         self.entity_description = description
         self._attr_translation_key = description.key
-        self._attr_unique_id = f"{self.vehicle['vin']}_{description.key}"
+        self._attr_unique_id = f"{self.vin}_{description.key}"
 
     @property
     def native_value(self) -> Any:

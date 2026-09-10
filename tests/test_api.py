@@ -7,7 +7,7 @@ import json
 
 import pytest
 
-from custom_components.carlinko.api import CarlinkoError, parse_blob, sign
+from carlinko.api import CarlinkoError, parse_blob, sign
 
 # Sample from api-map.md: J5 EV parked/asleep, 73 bytes.
 SAMPLE = (

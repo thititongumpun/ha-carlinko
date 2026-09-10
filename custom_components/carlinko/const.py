@@ -17,8 +17,6 @@ USER_AGENT = "Dart/3.10 (dart:io)"
 
 STALE_TOKEN_CODES = {"9997", "40001", "40003", "401", "1001", "1002"}
 CODE_OK = "0000"
-CODE_ASLEEP = "50043"  # device unreachable / use Bluetooth
-CODE_LOCATE_FAILED = "50052"
 
 SCAN_INTERVAL = 60  # seconds
 LOCATE_EVERY = 15  # every Nth refresh

@@ -7,7 +7,7 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 ### Via HACS (Recommended)
 1. Add this repository as a custom repository in HACS:
    - Open HACS → Integrations → ⋯ menu → Custom repositories
-   - Add `https://github.com/yourusername/ha-carlinko` as an Integration
+   - Add `https://github.com/thititongumpun/ha-carlinko` as an Integration
 
 2. Install the integration and restart Home Assistant
 
@@ -18,7 +18,7 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 ## Configuration
 
 1. Go to Settings → Devices & Services
-2. Click "Create Integration" and select "CarLinko"
+2. Click "Add integration" and select "CarLinko"
 3. Enter:
    - **Account:** Email or phone number registered with CarLinko
    - **Password:** Your CarLinko password

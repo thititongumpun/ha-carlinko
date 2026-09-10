@@ -10,6 +10,7 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import time
 from typing import Any
 
@@ -25,6 +26,8 @@ from .const import (
     STALE_TOKEN_CODES,
     USER_AGENT,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class CarlinkoError(Exception):
@@ -150,6 +153,7 @@ class CarlinkoApi:
         self.base = API_HOST.format(region=self.region)
         self.token = token
         self.skew_ms = 0
+        self._synced = False
 
     # --- plumbing -----------------------------------------------------
 
@@ -189,6 +193,15 @@ class CarlinkoApi:
         auth: bool = True,
         retry: bool = True,
     ) -> Any:
+        if not self._synced:
+            # ponytail: one-shot clock sync per process; re-sync on a timestamp-
+            # rejection code if the server ever reports one
+            try:
+                await self._sync_clock()
+            except CarlinkoError as err:
+                _LOGGER.debug("clock sync failed, proceeding with skew 0: %s", err)
+            else:
+                self._synced = True
         ts = self._ts()
         if body is not None and "timestamp" in body:
             body["timestamp"] = ts  # body and header must carry the signed timestamp
@@ -237,6 +250,7 @@ class CarlinkoApi:
 
     async def login(self) -> str:
         await self._sync_clock()
+        self._synced = True
         ts = self._ts()
         body = {
             "account": self._account,

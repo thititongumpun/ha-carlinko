@@ -18,12 +18,13 @@ class CarlinkoEntity(CoordinatorEntity[CarlinkoCoordinator]):
         super().__init__(coordinator)
         self.vehicle_id = vehicle_id
         row = coordinator.data[vehicle_id]["vehicle"]
+        self.vin = row.get("vin") or vehicle_id
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, row["vin"])},
+            identifiers={(DOMAIN, self.vin)},
             manufacturer=row.get("brand"),
             model=row.get("model"),
             name=row.get("licenseNumber") or row.get("model"),
-            serial_number=row.get("vin"),
+            serial_number=self.vin,
         )
 
     @property

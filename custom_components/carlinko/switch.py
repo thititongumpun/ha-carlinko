@@ -38,7 +38,7 @@ class CarlinkoClimateSwitch(CarlinkoEntity, SwitchEntity):
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
         super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vehicle['vin']}_{self._attr_translation_key}"
+        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
 
     @property
     def is_on(self) -> bool | None:
