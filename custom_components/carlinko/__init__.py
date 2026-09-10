@@ -19,9 +19,11 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.COVER,
+    Platform.DATE,
     Platform.DEVICE_TRACKER,
     Platform.IMAGE,
     Platform.LOCK,
+    Platform.NUMBER,
     Platform.SENSOR,
     Platform.SWITCH,
 ]
@@ -58,7 +60,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: CarlinkoConfigEntry) -> 
 
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_options_updated))
     return True
+
+
+async def _options_updated(hass: HomeAssistant, entry: CarlinkoConfigEntry) -> None:
+    """Re-render the service sensors after a number/date write. No reload needed."""
+    entry.runtime_data.async_update_listeners()
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: CarlinkoConfigEntry) -> bool:

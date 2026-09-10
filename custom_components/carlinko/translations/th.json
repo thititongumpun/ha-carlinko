@@ -80,6 +80,21 @@
       },
       "wltc_range": {
         "name": "ระยะทางมาตรฐาน (WLTC)"
+      },
+      "km_until_service": {
+        "name": "ระยะทางก่อนเข้าศูนย์"
+      },
+      "days_until_service": {
+        "name": "จำนวนวันก่อนเข้าศูนย์"
+      },
+      "next_service": {
+        "name": "เข้าศูนย์ครั้งถัดไป",
+        "state": {
+          "overdue": "เลยกำหนด",
+          "km": "ตามระยะทาง",
+          "days": "ตามวันที่",
+          "unset": "ยังไม่ตั้งค่า"
+        }
       }
     },
     "binary_sensor": {
@@ -145,6 +160,22 @@
     "image": {
       "vehicle": {
         "name": "รูปรถ"
+      }
+    },
+    "number": {
+      "last_service_odometer": {
+        "name": "เลขไมล์เข้าศูนย์ล่าสุด"
+      },
+      "service_interval_km": {
+        "name": "ระยะเข้าศูนย์ (กม.)"
+      },
+      "service_interval_days": {
+        "name": "ระยะเข้าศูนย์ (วัน)"
+      }
+    },
+    "date": {
+      "last_service_date": {
+        "name": "วันที่เข้าศูนย์ล่าสุด"
       }
     }
   }

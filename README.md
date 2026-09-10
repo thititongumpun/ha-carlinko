@@ -16,7 +16,7 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 2. Restart Home Assistant
 
 ### Lovelace card
-The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.4` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
+The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.5` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
 
 ## Configuration
 
@@ -84,9 +84,26 @@ The integration ships a Lovelace card for showing a vehicle at a glance; add the
 - A/C target temperature
 - Energy consumption (kWh/100 km)
 - Rated range (WLTC)
+- Distance until service (km)
+- Days until service
+- Next service (Overdue / By distance / By date / Not set)
+
+### Numbers (config)
+- Last service odometer (km)
+- Service interval (km)
+- Service interval (days)
+
+### Date (config)
+- Last service date
 
 ### Switches
 - Air conditioning
+
+## Service reminder
+
+CarLinko dealers rarely log service visits, so the integration tracks them for you.
+On the vehicle's device page set **Last service odometer** and **Last service date** after each visit.
+Intervals default to 20,000 km / 365 days and are editable per vehicle; the service sensors update immediately.
 
 ## Important Caveats
 

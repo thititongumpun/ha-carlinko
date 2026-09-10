@@ -8,6 +8,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .coordinator import CarlinkoCoordinator
 
+SERVICE_DEFAULTS = {"interval_km": 20000, "interval_days": 365}
+
 
 class CarlinkoEntity(CoordinatorEntity[CarlinkoCoordinator]):
     """Common device_info and data accessors for one vehicle."""
@@ -36,3 +38,18 @@ class CarlinkoEntity(CoordinatorEntity[CarlinkoCoordinator]):
     def state_data(self) -> dict:
         """Parsed telemetry blob for this vehicle."""
         return self.coordinator.data[self.vehicle_id]["state"]
+
+    @property
+    def service(self) -> dict:
+        """Manually tracked service settings for this vehicle, defaults merged in."""
+        entry = self.coordinator.config_entry
+        return {**SERVICE_DEFAULTS, **entry.options.get("service", {}).get(self.vin, {})}
+
+    def set_service(self, key: str, value: int | str) -> None:
+        """Persist one service setting into the config entry options."""
+        entry = self.coordinator.config_entry
+        per_vin = dict(entry.options.get("service", {}))
+        per_vin[self.vin] = {**per_vin.get(self.vin, {}), key: value}
+        self.hass.config_entries.async_update_entry(
+            entry, options={**entry.options, "service": per_vin}
+        )

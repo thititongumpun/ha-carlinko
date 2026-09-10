@@ -19,7 +19,7 @@ Then reload the browser (Ctrl+Shift+R).
 ### Cache busting
 
 Browsers cache Lovelace resources aggressively. After updating the integration, edit the
-resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.4`, and reload.
+resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.5`, and reload.
 
 ## YAML example
 
@@ -57,7 +57,7 @@ type: custom:carlinko-card
 | `type` | string | — | `custom:carlinko-card` (required) |
 | `device_id` | string | first CarLinko device | Device registry id of the car to show |
 | `battery_kwh` | number | `61` | Usable pack size, used for "energy left" |
-| `mask_plate` | bool | `true` | Mask the plate (`B •••• PGB`); the eye button toggles it live |
+| `mask_plate` | bool | `true` | Mask the plate (`B •••• PGB`)CARLINKO_ACCOUNT=… CARLINKO_PASSWORD=… CARLINKO_REGION=sea python3 tools/cli.py maintain; the eye button toggles it live |
 
 To change the accent colour, set the CSS variable in your theme: `carlinko-accent: "#1f6f4a"`.
 

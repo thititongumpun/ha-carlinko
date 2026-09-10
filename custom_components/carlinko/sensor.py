@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import date, timedelta
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -36,7 +37,33 @@ _CHARGE_MODE = {0: "none", 1: "ac", 16: "dc"}
 class CarlinkoSensorDescription(SensorEntityDescription):
     """Describes a CarLinko sensor entity."""
 
-    value_fn: Callable[[dict], Any]
+    value_fn: Callable[[dict], Any] | None = None
+    service_fn: Callable[[int | None, int | None], Any] | None = None
+
+
+def service_left(service: dict, odometer: int | None) -> tuple[int | None, int | None]:
+    """Kilometres and days left until the next service; None where inputs are unset."""
+    last_km = service.get("last_odometer")
+    km = None if last_km is None or odometer is None else last_km + service["interval_km"] - odometer
+    last_date = service.get("last_date")
+    days = (
+        None
+        if not last_date
+        else (
+            date.fromisoformat(last_date) + timedelta(days=service["interval_days"]) - date.today()
+        ).days
+    )
+    return km, days
+
+
+def next_service(km: int | None, days: int | None) -> str:
+    """Which limit the next service will hit first."""
+    if km is None or days is None:
+        return "unset"
+    if km <= 0 or days <= 0:
+        return "overdue"
+    # ponytail: flat 50 km/day assumption; read the odometer trend if it ever matters
+    return "km" if km / 50 < days else "days"
 
 
 SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
@@ -120,6 +147,24 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: d["wltc_range"],
     ),
+    CarlinkoSensorDescription(
+        key="km_until_service",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        service_fn=lambda km, days: km,
+    ),
+    CarlinkoSensorDescription(
+        key="days_until_service",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        service_fn=lambda km, days: days,
+    ),
+    CarlinkoSensorDescription(
+        key="next_service",
+        device_class=SensorDeviceClass.ENUM,
+        options=["overdue", "km", "days", "unset"],
+        service_fn=next_service,
+    ),
 )
 
 
@@ -149,6 +194,20 @@ class CarlinkoSensor(CarlinkoEntity, SensorEntity):
         self._attr_unique_id = f"{self.vin}_{description.key}"
 
     @property
+    def _service_left(self) -> tuple[int | None, int | None]:
+        return service_left(self.service, self.state_data["odometer"])
+
+    @property
     def native_value(self) -> Any:
         """Return the state of the sensor."""
+        if self.entity_description.service_fn:
+            return self.entity_description.service_fn(*self._service_left)
         return self.entity_description.value_fn(self.state_data)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Expose the raw km/days figures behind the next-service verdict."""
+        if self.entity_description.key != "next_service":
+            return None
+        km, days = self._service_left
+        return {"km": km, "days": days}

@@ -80,6 +80,21 @@
       },
       "wltc_range": {
         "name": "Rated range (WLTC)"
+      },
+      "km_until_service": {
+        "name": "Distance until service"
+      },
+      "days_until_service": {
+        "name": "Days until service"
+      },
+      "next_service": {
+        "name": "Next service",
+        "state": {
+          "overdue": "Overdue",
+          "km": "By distance",
+          "days": "By date",
+          "unset": "Not set"
+        }
       }
     },
     "binary_sensor": {
@@ -145,6 +160,22 @@
     "image": {
       "vehicle": {
         "name": "Vehicle image"
+      }
+    },
+    "number": {
+      "last_service_odometer": {
+        "name": "Last service odometer"
+      },
+      "service_interval_km": {
+        "name": "Service interval (km)"
+      },
+      "service_interval_days": {
+        "name": "Service interval (days)"
+      }
+    },
+    "date": {
+      "last_service_date": {
+        "name": "Last service date"
       }
     }
   }
