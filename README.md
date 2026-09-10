@@ -51,7 +51,7 @@ Each vehicle on the account becomes a device named after its licence plate.
 
 ## Lovelace card
 
-Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.7`, type **JavaScript module**. Then:
+Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.8`, type **JavaScript module**. Then:
 
 ```yaml
 type: custom:carlinko-card
@@ -66,7 +66,7 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 
 | Platform | Entities |
 |---|---|
-| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, A/C target temperature, distance until service, days until service, next service |
+| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4 |
 | Binary sensor | charging, cable connected, door open, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
 | Switch | air conditioning |

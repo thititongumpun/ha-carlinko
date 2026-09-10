@@ -95,6 +95,30 @@
           "days": "By date",
           "unset": "Not set"
         }
+      },
+      "tyre_fl_pressure": {
+        "name": "Front left tyre pressure"
+      },
+      "tyre_fl_temp": {
+        "name": "Front left tyre temperature"
+      },
+      "tyre_fr_pressure": {
+        "name": "Front right tyre pressure"
+      },
+      "tyre_fr_temp": {
+        "name": "Front right tyre temperature"
+      },
+      "tyre_rl_pressure": {
+        "name": "Rear left tyre pressure"
+      },
+      "tyre_rl_temp": {
+        "name": "Rear left tyre temperature"
+      },
+      "tyre_rr_pressure": {
+        "name": "Rear right tyre pressure"
+      },
+      "tyre_rr_temp": {
+        "name": "Rear right tyre temperature"
       }
     },
     "binary_sensor": {

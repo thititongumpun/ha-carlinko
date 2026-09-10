@@ -50,15 +50,42 @@ views:
       heading: ควบคุม
       heading_style: title
       icon: mdi:car-key
-    - type: tile
+    - type: custom:mushroom-template-card
       entity: lock.CAR_door_lock
-      vertical: false
       icon: mdi:car-door-lock
-      color: amber
-      features:
-      - type: lock-commands
-      features_position: inline
-      name: ล็อกประตู
+      icon_color: '{{ ''green'' if is_state(''lock.CAR_door_lock'',''locked'') else ''grey'' }}'
+      primary: ล็อก
+      secondary: '{{ ''ล็อกอยู่'' if is_state(''lock.CAR_door_lock'',''locked'') else ''ปลดล็อกอยู่'' }}'
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: perform-action
+        perform_action: lock.lock
+        target:
+          entity_id: lock.CAR_door_lock
+      hold_action:
+        action: more-info
+    - type: custom:mushroom-template-card
+      entity: lock.CAR_door_lock
+      icon: mdi:car-door
+      icon_color: '{{ ''amber'' if is_state(''lock.CAR_door_lock'',''unlocked'') else ''grey'' }}'
+      primary: ปลดล็อก
+      secondary: แตะค้างเพื่อดูรายละเอียด
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: perform-action
+        perform_action: lock.unlock
+        target:
+          entity_id: lock.CAR_door_lock
+        confirmation:
+          text: ปลดล็อกรถตอนนี้?
+      hold_action:
+        action: more-info
     - type: tile
       entity: switch.CAR_air_conditioning
       vertical: true
@@ -323,6 +350,114 @@ views:
       grid_options:
         columns: 6
       name: ระยะทางมาตรฐาน (WLTC)
+  - type: grid
+    cards:
+    - type: heading
+      heading: ยาง
+      heading_style: title
+      icon: mdi:car-tire-alert
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_front_left_tyre_pressure
+      icon: mdi:car-tire-alert
+      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_front_left_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
+      primary: ซ้ายหน้า
+      secondary: "{{ states('sensor.CAR_front_left_tyre_pressure', with_unit=True) }}"
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: more-info
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_front_right_tyre_pressure
+      icon: mdi:car-tire-alert
+      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_front_right_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
+      primary: ขวาหน้า
+      secondary: "{{ states('sensor.CAR_front_right_tyre_pressure', with_unit=True) }}"
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: more-info
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_rear_left_tyre_pressure
+      icon: mdi:car-tire-alert
+      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_rear_left_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
+      primary: ซ้ายหลัง
+      secondary: "{{ states('sensor.CAR_rear_left_tyre_pressure', with_unit=True) }}"
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: more-info
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_rear_right_tyre_pressure
+      icon: mdi:car-tire-alert
+      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_rear_right_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
+      primary: ขวาหลัง
+      secondary: "{{ states('sensor.CAR_rear_right_tyre_pressure', with_unit=True) }}"
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: more-info
+    - type: custom:mushroom-chips-card
+      alignment: center
+      chips:
+      - type: template
+        icon: mdi:thermometer
+        icon_color: orange
+        content: "{% set t = ['sensor.CAR_front_left_tyre_temperature','sensor.CAR_front_right_tyre_temperature','sensor.CAR_rear_left_tyre_temperature','sensor.CAR_rear_right_tyre_temperature']|map('states')|select('is_number')|map('float')|list %}{{ (t|max)|round(1) ~ ' °C' if t else 'ไม่มีข้อมูล' }}"
+        tap_action:
+          action: none
+      - type: template
+        icon: mdi:arrow-collapse-vertical
+        icon_color: grey
+        content: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{{ ('ต่างกัน ' ~ (v|max - v|min)|round(1)) if v else 'ไม่มีข้อมูล' }}"
+        tap_action:
+          action: none
+    - type: custom:apexcharts-card
+      header:
+        show: true
+        title: แรงดันลมยาง 24 ชั่วโมง
+        show_states: true
+        colorize_states: true
+      graph_span: 24h
+      apex_config:
+        chart:
+          height: 230
+      series:
+      - entity: sensor.CAR_front_left_tyre_pressure
+        name: ซ้ายหน้า
+        type: line
+        stroke_width: 2
+        group_by:
+          func: avg
+          duration: 30min
+      - entity: sensor.CAR_front_right_tyre_pressure
+        name: ขวาหน้า
+        type: line
+        stroke_width: 2
+        group_by:
+          func: avg
+          duration: 30min
+      - entity: sensor.CAR_rear_left_tyre_pressure
+        name: ซ้ายหลัง
+        type: line
+        stroke_width: 2
+        group_by:
+          func: avg
+          duration: 30min
+      - entity: sensor.CAR_rear_right_tyre_pressure
+        name: ขวาหลัง
+        type: line
+        stroke_width: 2
+        group_by:
+          func: avg
+          duration: 30min
   - type: grid
     cards:
     - type: heading

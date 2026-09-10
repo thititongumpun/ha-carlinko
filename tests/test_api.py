@@ -49,17 +49,39 @@ def test_parse_blob_sample():
     assert s["hv_state"] == 2
     assert s["doors"] == 0
     assert s["unlocked"] == 0
+    assert s["ac_on"] is False  # b23 == 1 means off
     assert s["charge_remain_min"] is None  # 0x3FF sentinel
     assert s["charge_power_kw"] is None  # idle
-    assert len(s) == 19
+    assert s["tyre_fl_pressure"] is None  # 0xFF = no TPMS reading
+    assert len(s) == 27
 
 
 def test_parse_blob_short_is_lenient():
     s = parse_blob("7700")
     assert s["battery_pct"] is None
-    assert len(s) == 19
+    assert len(s) == 27
 
 
 def test_parse_blob_rejects_non_hex():
     with pytest.raises(CarlinkoError):
         parse_blob("zzzz")
+
+
+# Live blob: A/C off, all four tyres reading 40 psi in the app.
+LIVE = (
+    "77000000000000000000FF7F058300000000005262000101290201004B014129"
+    "000000000000000000000000C7C9C7C96D6D6B6B000000880000000000000000"
+    "000000000141000002"
+)
+
+
+def test_parse_blob_tyres():
+    s = parse_blob(LIVE)
+    # 199/201 raw * 1.375 kPa = 39.7/40.1 psi, both shown as 40 in the app.
+    assert s["tyre_fl_pressure"] == 273.6
+    assert s["tyre_fr_pressure"] == 276.4
+    assert s["tyre_rl_pressure"] == 273.6
+    assert s["tyre_rr_pressure"] == 276.4
+    assert s["tyre_fl_temp"] == 29.5  # app shows 30
+    assert s["tyre_rr_temp"] == 28.5  # app shows 29
+    assert s["ac_on"] is False  # b23 == 1, A/C was off

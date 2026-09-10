@@ -54,6 +54,8 @@ def sign(params: dict, ts: str) -> str:
     return base64.b64encode(hmac.new(SIGN_KEY, msg, hashlib.sha256).digest()).decode()
 
 
+_TYRES = ("fl", "fr", "rl", "rr")
+
 _BLOB_KEYS = (
     "doors",
     "unlocked",
@@ -74,7 +76,7 @@ _BLOB_KEYS = (
     "charge_remain_min",
     "charge_power_kw",
     "wltc_range",
-)
+) + tuple(f"tyre_{pos}_{m}" for m in ("pressure", "temp") for pos in _TYRES)
 
 
 def parse_blob(hex_str: str) -> dict[str, Any]:
@@ -113,8 +115,9 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
     out["volt12"] = scale(u16(12), 0.01, 2)
     out["speed"] = scale(u16(14), 1 / 16, 1)
     out["odometer"] = u24(18)
+    # b23 is inverted: 1 = A/C off, 0 = A/C on (confirmed against the app)
     ac = u8(23)
-    out["ac_on"] = None if ac is None else ac != 0
+    out["ac_on"] = None if ac is None else ac == 0
     out["ac_temp"] = u8(24)
     out["battery_pct"] = u8(28)
     out["range_km"] = u16(29)
@@ -132,6 +135,17 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
     out["charge_power_kw"] = scale(power, 0.1, 1) if state not in (None, 0) else None
 
     out["wltc_range"] = u16(68)
+
+    # TPMS, order FL, FR, RL, RR: b44-47 pressure, b48-51 temperature.
+    # kPa = raw * 1.375 (confirmed: 199/201 -> 39.7/40.1 psi, app shows 40).
+    # degC = raw * 0.5 - 25 (confirmed: 109/107 -> 29.5/28.5, app shows 30/29).
+    # 0x00/0xFF mean "no reading" (a parked sample reports 0xFF on all eight).
+    for i, pos in enumerate(_TYRES):
+        kpa = u8(44 + i)
+        out[f"tyre_{pos}_pressure"] = None if kpa in (None, 0, 0xFF) else round(kpa * 1.375, 1)
+        temp = u8(48 + i)
+        out[f"tyre_{pos}_temp"] = None if temp in (None, 0, 0xFF) else temp * 0.5 - 25
+
     return out
 
 

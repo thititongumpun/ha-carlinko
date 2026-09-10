@@ -95,6 +95,30 @@
           "days": "ตามวันที่",
           "unset": "ยังไม่ตั้งค่า"
         }
+      },
+      "tyre_fl_pressure": {
+        "name": "หน้าซ้าย แรงดันลมยาง"
+      },
+      "tyre_fl_temp": {
+        "name": "หน้าซ้าย อุณหภูมิยาง"
+      },
+      "tyre_fr_pressure": {
+        "name": "หน้าขวา แรงดันลมยาง"
+      },
+      "tyre_fr_temp": {
+        "name": "หน้าขวา อุณหภูมิยาง"
+      },
+      "tyre_rl_pressure": {
+        "name": "หลังซ้าย แรงดันลมยาง"
+      },
+      "tyre_rl_temp": {
+        "name": "หลังซ้าย อุณหภูมิยาง"
+      },
+      "tyre_rr_pressure": {
+        "name": "หลังขวา แรงดันลมยาง"
+      },
+      "tyre_rr_temp": {
+        "name": "หลังขวา อุณหภูมิยาง"
       }
     },
     "binary_sensor": {
