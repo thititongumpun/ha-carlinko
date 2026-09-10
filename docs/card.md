@@ -28,7 +28,20 @@ type: custom:carlinko-card
 device_id: 1a2b3c4d5e6f7890abcdef1234567890   # optional
 battery_kwh: 61
 mask_plate: true
-accent: "#1f6f4a"
+```
+
+In a sections dashboard the card goes inside a section's `cards:` list:
+
+```yaml
+views:
+  - type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: My Omoda
+          - type: custom:carlinko-card
+            battery_kwh: 61
 ```
 
 Minimal version (auto-picks the first CarLinko car):
@@ -45,7 +58,8 @@ type: custom:carlinko-card
 | `device_id` | string | first CarLinko device | Device registry id of the car to show |
 | `battery_kwh` | number | `61` | Usable pack size, used for "energy left" |
 | `mask_plate` | bool | `true` | Mask the plate (`B •••• PGB`); the eye button toggles it live |
-| `accent` | string | `#1f6f4a` | Accent colour for the ring, bars and active pills |
+
+To change the accent colour, set the CSS variable in your theme: `carlinko-accent: "#1f6f4a"`.
 
 ## What it shows
 
