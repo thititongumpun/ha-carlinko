@@ -1,0 +1,442 @@
+# ตัวอย่างแดชบอร์ด (Thai) — replace every `CAR` with your car's entity prefix, e.g. 6khkh5101.
+# Needs HACS: Mushroom, ApexCharts card. Paste via Edit dashboard → ⋮ → Raw configuration editor.
+title: OMODA C5 EV
+views:
+- title: รถของฉัน
+  path: car
+  icon: mdi:car-electric
+  type: sections
+  max_columns: 3
+  dense_section_placement: true
+  badges:
+  - type: entity
+    entity: sensor.CAR_battery
+    color: green
+    show_name: false
+  - type: entity
+    entity: sensor.CAR_range
+    color: teal
+    show_name: false
+  - type: entity
+    entity: lock.CAR_door_lock
+    color: amber
+    show_name: false
+  - type: entity
+    entity: binary_sensor.CAR_charging
+    color: blue
+    show_name: false
+    visibility:
+    - condition: state
+      entity: binary_sensor.CAR_charging
+      state: 'on'
+  - type: entity
+    entity: binary_sensor.CAR_online
+    color: grey
+    show_name: false
+    visibility:
+    - condition: state
+      entity: binary_sensor.CAR_online
+      state: 'off'
+  sections:
+  - type: grid
+    column_span: 1
+    cards:
+    - type: custom:carlinko-card
+      battery_kwh: 61
+      mask_plate: false
+  - type: grid
+    cards:
+    - type: heading
+      heading: ควบคุม
+      heading_style: title
+      icon: mdi:car-key
+    - type: tile
+      entity: lock.CAR_door_lock
+      vertical: false
+      icon: mdi:car-door-lock
+      color: amber
+      features:
+      - type: lock-commands
+      features_position: inline
+      name: ล็อกประตู
+    - type: tile
+      entity: switch.CAR_air_conditioning
+      vertical: true
+      icon: mdi:air-conditioner
+      color: cyan
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 6
+      name: แอร์
+    - type: custom:mushroom-template-card
+      icon: mdi:car-search
+      icon_color: amber
+      primary: ค้นหารถ
+      secondary: กระพริบไฟ / แตร
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_find_car
+    - type: tile
+      entity: cover.CAR_windows
+      vertical: false
+      icon: mdi:car-door
+      color: teal
+      features:
+      - type: cover-open-close
+      name: กระจกหน้าต่าง
+    - type: custom:mushroom-template-card
+      icon: mdi:window-open-variant
+      icon_color: teal
+      primary: แง้มกระจก
+      secondary: เปิดกระจกทั้ง 4 บานเล็กน้อย
+      fill_container: true
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_vent_windows
+    - type: tile
+      entity: cover.CAR_tailgate
+      vertical: false
+      icon: mdi:car-back
+      color: teal
+      features:
+      - type: cover-open-close
+      grid_options:
+        columns: 6
+      name: ฝาท้าย
+    - type: tile
+      entity: cover.CAR_sunroof
+      vertical: false
+      icon: mdi:car-select
+      color: teal
+      features:
+      - type: cover-open-close
+      grid_options:
+        columns: 6
+      name: ซันรูฟ
+    - type: custom:mushroom-chips-card
+      alignment: center
+      chips:
+      - type: template
+        entity: binary_sensor.CAR_door_open
+        icon: mdi:car-door
+        content: ประตูเปิด
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_door_open'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_tailgate_open
+        icon: mdi:car-back
+        content: ฝาท้ายเปิด
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_tailgate_open'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_online
+        icon: mdi:cloud-check
+        content: ออนไลน์
+        icon_color: '{{ ''green'' if is_state(''binary_sensor.CAR_online'',''on'') else ''red'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_high_voltage_system
+        icon: mdi:flash-triangle
+        content: ระบบไฟฟ้าแรงสูง
+        icon_color: '{{ ''orange'' if is_state(''binary_sensor.CAR_high_voltage_system'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+  - type: grid
+    cards:
+    - type: heading
+      heading: การชาร์จ
+      heading_style: title
+      icon: mdi:ev-station
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_battery
+      icon: '{% set b = states(''sensor.CAR_battery'')|int(0) %}mdi:battery{{ ''-charging'' if is_state(''binary_sensor.CAR_charging'',''on'') else '''' }}{{ '''' if b > 95 else ''-'' ~ ((b // 10) * 10
+        if b >= 10 else 10) }}'
+      icon_color: '{% set b = states(''sensor.CAR_battery'')|int(0) %}{{ ''green'' if b > 50 else ''orange'' if b > 20 else ''red'' }}'
+      primary: '{{ states(''sensor.CAR_battery'') }}% · วิ่งได้อีก {{ states(''sensor.CAR_range'')|int }} กม.'
+      secondary: '{% set s = states(''sensor.CAR_charging_status'') %}{% set m = states(''sensor.CAR_charging_mode'') %}{% set p = states(''sensor.CAR_charging_power'') %}{% set t = states(''sensor.CAR_charging_time_remaining'')
+        %}{% if s == ''charging'' %}กำลังชาร์จ {{ ''DC'' if m == ''dc'' else ''AC'' }} {{ p }} kW · เหลือ {{ t }} นาที{% elif s == ''complete'' %}ชาร์จเสร็จแล้ว{% elif m != ''none'' %}เสียบสายอยู่ ยังไม่ชาร์จ{%
+        else %}ไม่ได้เสียบสาย{% endif %}'
+      fill_container: true
+      multiline_secondary: true
+    - type: custom:apexcharts-card
+      header:
+        show: true
+        title: แบตเตอรี่ 24 ชั่วโมง
+        show_states: true
+        colorize_states: true
+      graph_span: 24h
+      apex_config:
+        chart:
+          height: 230
+        legend:
+          show: false
+      series:
+      - entity: sensor.CAR_battery
+        name: แบตเตอรี่
+        yaxis_id: pct
+        type: area
+        stroke_width: 2
+        color: '#22c55e'
+        opacity: 0.15
+        extend_to: now
+      - entity: sensor.CAR_charging_power
+        name: กำลังไฟชาร์จ
+        yaxis_id: kw
+        type: column
+        color: '#3b82f6'
+        group_by:
+          func: max
+          duration: 15min
+      yaxis:
+      - id: pct
+        min: 0
+        max: 100
+        decimals: 0
+      - id: kw
+        opposite: true
+        min: 0
+        decimals: 1
+    - type: tile
+      entity: sensor.CAR_charging_status
+      vertical: false
+      icon: mdi:battery-clock
+      color: blue
+      grid_options:
+        columns: 6
+      name: สถานะการชาร์จ
+    - type: tile
+      entity: sensor.CAR_charging_mode
+      vertical: false
+      icon: mdi:power-plug
+      color: blue
+      grid_options:
+        columns: 6
+      name: โหมดการชาร์จ
+    - type: tile
+      entity: sensor.CAR_charging_power
+      vertical: false
+      icon: mdi:flash
+      color: blue
+      grid_options:
+        columns: 6
+      name: กำลังไฟชาร์จ
+    - type: tile
+      entity: sensor.CAR_charging_time_remaining
+      vertical: false
+      icon: mdi:timer-sand
+      color: blue
+      grid_options:
+        columns: 6
+      name: เวลาชาร์จที่เหลือ
+    - type: custom:mushroom-template-card
+      icon: mdi:stop-circle
+      icon_color: red
+      primary: หยุดชาร์จ
+      secondary: แตะเพื่อหยุดชาร์จทันที
+      fill_container: true
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_stop_charging
+        confirmation:
+          text: หยุดชาร์จตอนนี้?
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
+  - type: grid
+    cards:
+    - type: heading
+      heading: การเดินทาง
+      heading_style: title
+      icon: mdi:road-variant
+    - type: custom:apexcharts-card
+      header:
+        show: true
+        title: ระยะทางต่อวัน (30 วัน)
+        show_states: true
+        colorize_states: true
+      graph_span: 30d
+      apex_config:
+        chart:
+          height: 230
+        legend:
+          show: false
+        plotOptions:
+          bar:
+            borderRadius: 4
+            columnWidth: 70%
+      series:
+      - entity: sensor.CAR_odometer
+        name: กม.
+        type: column
+        color: '#1f6f4a'
+        statistics:
+          type: change
+          period: day
+        show:
+          datalabels: false
+      span:
+        end: day
+    - type: tile
+      entity: sensor.CAR_odometer
+      vertical: false
+      icon: mdi:counter
+      color: green
+      grid_options:
+        columns: 6
+      name: เลขไมล์
+    - type: tile
+      entity: sensor.CAR_range
+      vertical: false
+      icon: mdi:map-marker-distance
+      color: green
+      grid_options:
+        columns: 6
+      name: ระยะทางที่วิ่งได้
+    - type: tile
+      entity: sensor.CAR_energy_consumption
+      vertical: false
+      icon: mdi:lightning-bolt
+      color: orange
+      grid_options:
+        columns: 6
+      name: อัตราสิ้นเปลืองพลังงาน
+    - type: tile
+      entity: sensor.CAR_rated_range_wltc
+      vertical: false
+      icon: mdi:certificate-outline
+      color: grey
+      grid_options:
+        columns: 6
+      name: ระยะทางมาตรฐาน (WLTC)
+  - type: grid
+    cards:
+    - type: heading
+      heading: ตำแหน่ง
+      heading_style: title
+      icon: mdi:map-marker
+    - type: map
+      entities:
+      - entity: device_tracker.CAR_location
+      - entity: zone.home
+      theme_mode: auto
+      default_zoom: 15
+      aspect_ratio: '16:10'
+      fit_zones: false
+    - type: custom:mushroom-template-card
+      entity: device_tracker.CAR_location
+      icon: mdi:car-connected
+      icon_color: '{{ ''green'' if is_state(''device_tracker.CAR_location'',''home'') else ''blue'' }}'
+      primary: '{% set s = states(''device_tracker.CAR_location'') %}{{ ''อยู่บ้าน'' if s == ''home'' else ''อยู่ข้างนอก'' if s == ''not_home'' else s }}'
+      secondary: '{{ state_attr(''device_tracker.CAR_location'',''address'') or ''ไม่ทราบที่อยู่'' }}'
+      multiline_secondary: true
+      fill_container: true
+      tap_action:
+        action: more-info
+  - type: grid
+    cards:
+    - type: heading
+      heading: เข้าศูนย์
+      heading_style: title
+      icon: mdi:car-wrench
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_next_service
+      icon: mdi:car-wrench
+      icon_color: '{% set s = states(''sensor.CAR_next_service'') %}{% set km = states(''sensor.CAR_distance_until_service'')|int(99999) %}{% set d = states(''sensor.CAR_days_until_service'')|int(9999)
+        %}{{ ''red'' if s == ''overdue'' else ''orange'' if km < 1000 or d < 30 else ''green'' if s != ''unset'' else ''grey'' }}'
+      primary: '{% set s = states(''sensor.CAR_next_service'') %}{% if s == ''overdue'' %}เลยกำหนดเข้าศูนย์แล้ว{% elif s == ''unset'' %}ยังไม่ตั้งค่า{% else %}อีก {{ ''{:,}''.format(states(''sensor.CAR_distance_until_service'')|int(0))
+        }} กม. / {{ states(''sensor.CAR_days_until_service'') }} วัน{% endif %}'
+      secondary: ทุก {{ '{:,}'.format(states('number.CAR_service_interval_km')|int) }} กม. หรือ {{ states('number.CAR_service_interval_days')|int }} วัน · ล่าสุด {{ states('date.CAR_last_service_date')
+        }} ({{ '{:,}'.format(states('number.CAR_last_service_odometer')|int) }} กม.)
+      multiline_secondary: true
+      fill_container: true
+      grid_options:
+        columns: full
+    - type: tile
+      entity: number.CAR_last_service_odometer
+      icon: mdi:counter
+      features:
+      - type: numeric-input
+        style: buttons
+      name: เลขไมล์เข้าศูนย์ล่าสุด
+    - type: tile
+      entity: date.CAR_last_service_date
+      icon: mdi:calendar-check
+      name: วันที่เข้าศูนย์ล่าสุด
+  - type: grid
+    cards:
+    - type: heading
+      heading: สุขภาพรถ
+      heading_style: title
+      icon: mdi:heart-pulse
+    - type: custom:apexcharts-card
+      header:
+        show: true
+        title: แบตเตอรี่ 12V (7 วัน)
+        show_states: true
+        colorize_states: true
+      graph_span: 7d
+      apex_config:
+        chart:
+          height: 230
+        legend:
+          show: false
+      series:
+      - entity: sensor.CAR_12v_battery_voltage
+        name: 12V
+        type: line
+        stroke_width: 2
+        color: '#f59e0b'
+        group_by:
+          func: avg
+          duration: 1h
+      yaxis:
+      - decimals: 2
+        min: auto
+        max: auto
+    - type: tile
+      entity: sensor.CAR_12v_battery_voltage
+      vertical: false
+      icon: mdi:car-battery
+      color: amber
+      grid_options:
+        columns: 6
+      name: แรงดันแบตเตอรี่ 12V
+    - type: tile
+      entity: binary_sensor.CAR_high_voltage_system
+      vertical: false
+      icon: mdi:flash-triangle
+      color: orange
+      grid_options:
+        columns: 6
+      name: ระบบไฟฟ้าแรงสูง
+    - type: tile
+      entity: binary_sensor.CAR_air_conditioning
+      vertical: false
+      icon: mdi:snowflake
+      color: cyan
+      grid_options:
+        columns: 6
+      name: แอร์
+    - type: tile
+      entity: sensor.CAR_speed
+      vertical: false
+      icon: mdi:speedometer
+      color: grey
+      grid_options:
+        columns: 6
+      name: ความเร็ว

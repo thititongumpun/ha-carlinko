@@ -71,3 +71,7 @@ bar chart, and efficiency figures. Labels follow `hass.language` (Thai or Englis
 Anything missing or unavailable shows `—`; the driven/bar section hides itself if the recorder
 statistics call fails (recorder disabled). Tyre and cost/insight sections from the stock app are
 not included — the integration exposes no data for them.
+
+## Full dashboard example
+
+A complete Thai sections dashboard (controls, charging, trips, map, service reminder, health) using this card plus Mushroom and ApexCharts is in [`dashboard-th.yaml`](dashboard-th.yaml). Replace `CAR` with your entity prefix.
