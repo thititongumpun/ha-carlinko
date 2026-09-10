@@ -8,7 +8,7 @@ from __future__ import annotations
 
 DOMAIN = "carlinko"
 
-SIGN_KEY = b"mYj3fzMpn77bir66"
+SIGN_KEY = b"mYj3fzMpn77bir66"  # app-global key from the CarLinko APK, not a user secret (see README credits)
 API_HOST = "https://cqr-api-{region}.hzhjcl.com"
 REGIONS = ["sea", "ap", "emea", "me", "naf", "saf", "sam", "uzb", "vn"]
 DEFAULT_REGION = "sea"
