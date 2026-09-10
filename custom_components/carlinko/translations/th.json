@@ -1,0 +1,83 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "เชื่อมต่อ CarLinko",
+        "data": {
+          "account": "บัญชี (อีเมลหรือเบอร์โทร)",
+          "password": "รหัสผ่าน",
+          "region": "ภูมิภาค"
+        }
+      },
+      "reauth_confirm": {
+        "title": "เข้าสู่ระบบ CarLinko อีกครั้ง",
+        "description": "เซสชัน CarLinko หมดอายุ กรุณาใส่รหัสผ่านอีกครั้ง หมายเหตุ: CarLinko อนุญาตให้ล็อกอินได้บัญชีละหนึ่งเครื่อง การเข้าสู่ระบบที่นี่อาจทำให้แอปในมือถือหลุด",
+        "data": {
+          "account": "บัญชี (อีเมลหรือเบอร์โทร)",
+          "password": "รหัสผ่าน",
+          "region": "ภูมิภาค"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "บัญชีหรือรหัสผ่านไม่ถูกต้อง",
+      "cannot_connect": "เชื่อมต่อไม่สำเร็จ",
+      "unknown": "เกิดข้อผิดพลาดที่ไม่คาดคิด"
+    },
+    "abort": {
+      "already_configured": "บัญชีนี้ถูกตั้งค่าไว้แล้ว",
+      "reauth_successful": "เข้าสู่ระบบใหม่สำเร็จ",
+      "wrong_account": "กรุณาเข้าสู่ระบบด้วยบัญชีเดิม"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": { "name": "แบตเตอรี่" },
+      "range": { "name": "ระยะทางที่วิ่งได้" },
+      "odometer": { "name": "เลขไมล์" },
+      "charge_power": { "name": "กำลังชาร์จ" },
+      "charge_remaining": { "name": "เวลาชาร์จที่เหลือ" },
+      "charge_state": {
+        "name": "สถานะการชาร์จ",
+        "state": {
+          "idle": "ไม่ได้ชาร์จ",
+          "charging": "กำลังชาร์จ",
+          "complete": "ชาร์จเสร็จแล้ว",
+          "canceled": "ยกเลิก",
+          "hot": "อุณหภูมิสูง",
+          "stopped": "หยุดชาร์จ"
+        }
+      },
+      "charge_mode": {
+        "name": "โหมดการชาร์จ",
+        "state": {
+          "none": "ไม่ได้เสียบ",
+          "ac": "ไฟบ้าน (AC)",
+          "dc": "ชาร์จเร็ว (DC)"
+        }
+      },
+      "volt12": { "name": "แรงดันแบตเตอรี่ 12V" },
+      "speed": { "name": "ความเร็ว" }
+    },
+    "binary_sensor": {
+      "door_open": { "name": "ประตูเปิด" },
+      "trunk_open": { "name": "ฝาท้ายเปิด" },
+      "charging": { "name": "กำลังชาร์จอยู่" },
+      "plugged_in": { "name": "เสียบสายชาร์จ" },
+      "ac_on": { "name": "แอร์" },
+      "hv_active": { "name": "ระบบไฟฟ้าแรงสูง" }
+    },
+    "lock": {
+      "door_lock": { "name": "ล็อกประตู" }
+    },
+    "switch": {
+      "climate": { "name": "แอร์" }
+    },
+    "button": {
+      "stop_charging": { "name": "หยุดชาร์จ" }
+    },
+    "device_tracker": {
+      "location": { "name": "ตำแหน่งรถ" }
+    }
+  }
+}

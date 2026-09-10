@@ -1,0 +1,12 @@
+{
+  "domain": "carlinko",
+  "name": "CarLinko",
+  "codeowners": ["@thititongumpun"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/thititongumpun/ha-carlinko",
+  "integration_type": "device",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,83 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to CarLinko",
+        "data": {
+          "account": "Account (email or phone)",
+          "password": "Password",
+          "region": "Region"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate CarLinko",
+        "description": "Your CarLinko session expired. Enter your password again. Note: CarLinko allows only one session per account, so signing in here can sign out the phone app.",
+        "data": {
+          "account": "Account (email or phone)",
+          "password": "Password",
+          "region": "Region"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid account or password",
+      "cannot_connect": "Failed to connect",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Account is already configured",
+      "reauth_successful": "Re-authentication was successful",
+      "wrong_account": "Please sign in with the same account"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": { "name": "Battery" },
+      "range": { "name": "Range" },
+      "odometer": { "name": "Odometer" },
+      "charge_power": { "name": "Charging power" },
+      "charge_remaining": { "name": "Charging time remaining" },
+      "charge_state": {
+        "name": "Charging status",
+        "state": {
+          "idle": "Idle",
+          "charging": "Charging",
+          "complete": "Complete",
+          "canceled": "Canceled",
+          "hot": "Overheated",
+          "stopped": "Stopped"
+        }
+      },
+      "charge_mode": {
+        "name": "Charging mode",
+        "state": {
+          "none": "Not connected",
+          "ac": "AC",
+          "dc": "DC fast"
+        }
+      },
+      "volt12": { "name": "12V battery voltage" },
+      "speed": { "name": "Speed" }
+    },
+    "binary_sensor": {
+      "door_open": { "name": "Door open" },
+      "trunk_open": { "name": "Tailgate open" },
+      "charging": { "name": "Charging" },
+      "plugged_in": { "name": "Cable connected" },
+      "ac_on": { "name": "Air conditioning" },
+      "hv_active": { "name": "High-voltage system" }
+    },
+    "lock": {
+      "door_lock": { "name": "Door lock" }
+    },
+    "switch": {
+      "climate": { "name": "Air conditioning" }
+    },
+    "button": {
+      "stop_charging": { "name": "Stop charging" }
+    },
+    "device_tracker": {
+      "location": { "name": "Location" }
+    }
+  }
+}
