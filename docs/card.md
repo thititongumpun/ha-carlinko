@@ -19,7 +19,7 @@ Then reload the browser (Ctrl+Shift+R).
 ### Cache busting
 
 Browsers cache Lovelace resources aggressively. After updating the integration, edit the
-resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.9`, and reload.
+resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.10`, and reload.
 
 ## YAML example
 

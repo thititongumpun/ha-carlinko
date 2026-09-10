@@ -212,7 +212,7 @@ class CarlinkoCard extends HTMLElement {
       return `<div class="tyre ${tyreLvl[i]}">
         <div>
           <div class="label">${t[k]}</div>
-          <div class="v">${fmt(tyrePress[i])}<span class="unit">${esc(String(tyreUnit))}</span></div>
+          <div class="v">${fmt(tyrePress[i], 2)}<span class="unit">${esc(String(tyreUnit))}</span></div>
         </div>
         ${temp === null ? '' : `<div class="t">${fmt(temp, 1)}${esc(String(tUnit))}</div>`}
       </div>`

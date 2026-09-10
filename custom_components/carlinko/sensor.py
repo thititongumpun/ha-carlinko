@@ -162,7 +162,7 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.KPA,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=0,
+        suggested_display_precision=2,
         value_fn=lambda d, k=f"tyre_fl_pressure": d[k],
     ),
     CarlinkoSensorDescription(
@@ -178,7 +178,7 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.KPA,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=0,
+        suggested_display_precision=2,
         value_fn=lambda d, k=f"tyre_fr_pressure": d[k],
     ),
     CarlinkoSensorDescription(
@@ -194,7 +194,7 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.KPA,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=0,
+        suggested_display_precision=2,
         value_fn=lambda d, k=f"tyre_rl_pressure": d[k],
     ),
     CarlinkoSensorDescription(
@@ -210,7 +210,7 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.KPA,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=0,
+        suggested_display_precision=2,
         value_fn=lambda d, k=f"tyre_rr_pressure": d[k],
     ),
     CarlinkoSensorDescription(

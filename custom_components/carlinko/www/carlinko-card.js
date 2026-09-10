@@ -209,7 +209,7 @@ class mt extends HTMLElement {
       return `<div class="tyre ${tt[f]}">
         <div>
           <div class="label">${t[c]}</div>
-          <div class="v">${l(k[f])}<span class="unit">${p(String(et))}</span></div>
+          <div class="v">${l(k[f], 2)}<span class="unit">${p(String(et))}</span></div>
         </div>
         ${v === null ? "" : `<div class="t">${l(v, 1)}${p(String(ot))}</div>`}
       </div>`;
