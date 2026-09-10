@@ -1,140 +1,138 @@
-# CarLinko Home Assistant Integration
+# CarLinko for Home Assistant
 
-CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaecoo, and Chery electric vehicles using your existing CarLinko mobile app account.
+[![Version](https://img.shields.io/github/v/release/thititongumpun/ha-carlinko?label=version)](https://github.com/thititongumpun/ha-carlinko/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
+![HA 2025.1+](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue)
+
+Home Assistant integration for **Omoda, Jaecoo and Chery EVs** that use the **CarLinko** app
+(Thailand, Malaysia, Indonesia, Uzbekistan, UAE, South Africa, Vietnam …). Logs in with your CarLinko
+account, polls the car over the same cloud API the app uses, and exposes it as normal Home Assistant
+entities plus a ready-made Lovelace card. Developed on an **Omoda C5 EV** (Thailand).
+
+<p align="center">
+  <img src="docs/screenshots/card.png" width="360" alt="carlinko-card">
+  <img src="docs/screenshots/dashboard.png" width="360" alt="Thai dashboard">
+</p>
+
+## Features
+
+- **Telemetry** every 60 s: battery %, range, odometer, speed, 12 V battery, consumption, WLTC range
+- **Charging**: status, AC/DC mode, power, time remaining, plugged-in and charging flags
+- **Body**: door lock state, doors, tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
+- **Controls**: lock / unlock, A/C on / off, windows open / close / vent, tailgate, sunroof, find car, stop charging
+- **Location**: GPS device tracker every 15 min, with a street address (OpenStreetMap fallback when CarLinko has none)
+- **Vehicle image**: the CDN render of your exact car, as an `image` entity
+- **Service reminder**: last service odometer / date + intervals on the device page → km and days until service, overdue state
+- **Lovelace card** `custom:carlinko-card` (car image, battery ring, range, state, quick actions, driven today / week / month, efficiency), plus a full Thai dashboard example
+- **English and Thai** translations for the setup flow, every entity, and enum states
+- Token persisted across restarts (CarLinko allows one session per account), automatic re-login, re-auth flow
+- No extra Python dependencies
 
 ## Installation
 
-### Via HACS (Recommended)
-1. Add this repository as a custom repository in HACS:
-   - Open HACS → Integrations → ⋯ menu → Custom repositories
-   - Add `https://github.com/thititongumpun/ha-carlinko` as an Integration
-
-2. Install the integration and restart Home Assistant
+### HACS (recommended)
+1. HACS → Integrations → ⋮ → **Custom repositories** → add `https://github.com/thititongumpun/ha-carlinko` as *Integration*
+2. Install **CarLinko**, restart Home Assistant
 
 ### Manual
-1. Copy `custom_components/carlinko` to your Home Assistant `config/custom_components/carlinko`
-2. Restart Home Assistant
-
-### Lovelace card
-The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.7` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
+Copy `custom_components/carlinko` into `config/custom_components/` and restart.
 
 ## Configuration
 
-1. Go to Settings → Devices & Services
-2. Click "Add integration" and select "CarLinko"
-3. Enter:
-   - **Account:** Email or phone number registered with CarLinko
-   - **Password:** Your CarLinko password
-   - **Region:** Your region (default: `sea`)
+Settings → Devices & services → **Add integration** → *CarLinko*:
 
-## Supported Regions
+| Field | Value |
+|---|---|
+| Account | e-mail or phone registered in the CarLinko app |
+| Password | your CarLinko password |
+| Region | `sea` for Thailand / Malaysia / Indonesia (default); `ap`, `emea`, `me`, `naf`, `saf`, `sam`, `uzb`, `vn` |
 
-| Code  | Region                              |
-|-------|-------------------------------------|
-| `sea` | Thailand, Malaysia, Indonesia       |
-| `ap`  | Asia-Pacific                        |
-| `emea`| Europe, Middle East, Africa         |
-| `me`  | Middle East                         |
-| `naf` | North Africa                        |
-| `saf` | South Africa                        |
-| `sam` | South America                       |
-| `uzb` | Uzbekistan                          |
-| `vn`  | Vietnam                             |
+Each vehicle on the account becomes a device named after its licence plate.
+
+## Lovelace card
+
+Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.7`, type **JavaScript module**. Then:
+
+```yaml
+type: custom:carlinko-card
+battery_kwh: 61      # usable pack size, for "energy left"
+mask_plate: true     # show the plate as B •••• PGB
+```
+
+Options, a sections-view example and a full Thai dashboard (Mushroom + ApexCharts) are in
+[docs/card.md](docs/card.md) and [docs/dashboard-th.yaml](docs/dashboard-th.yaml).
 
 ## Entities
 
-### Binary Sensors
-- Air conditioning status
-- Charging status
-- Door open
-- High-voltage system active
-- Cable connected (plugged in)
-- Tailgate open
-- Online (car reachable by the cloud)
-
-### Buttons
-- Stop charging
-- Vent windows
-- Find car (flash / horn)
-
-### Cover
-- Windows (open / close)
-- Tailgate (open / close)
-- Sunroof (open / close / tilt) — disable if your car has no opening sunroof
-
-### Device Tracker
-- Vehicle location
-
-### Image
-- Vehicle image (from CarLinko CDN)
-
-### Lock
-- Door lock
-
-### Sensors
-- Battery level (%)
-- Charging mode (AC, DC fast, Not connected)
-- Charging power (kW)
-- Charging time remaining
-- Charging status (Idle, Charging, Complete, Stopped, Canceled, Overheated)
-- Odometer (km)
-- Range (km)
-- Speed (km/h)
-- 12V battery voltage (V)
-- A/C target temperature
-- Energy consumption (kWh/100 km)
-- Rated range (WLTC)
-- Distance until service (km)
-- Days until service
-- Next service (Overdue / By distance / By date / Not set)
-
-### Numbers (config)
-- Last service odometer (km)
-- Service interval (km)
-- Service interval (days)
-
-### Date (config)
-- Last service date
-
-### Switches
-- Air conditioning
+| Platform | Entities |
+|---|---|
+| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, A/C target temperature, distance until service, days until service, next service |
+| Binary sensor | charging, cable connected, door open, tailgate open, air conditioning, high-voltage system (car on), online |
+| Lock | door lock |
+| Switch | air conditioning |
+| Cover | windows, tailgate, sunroof (open / close / tilt) |
+| Button | find car, vent windows, stop charging |
+| Device tracker | location (+ `address` attribute) |
+| Image | vehicle image |
+| Number (config) | last service odometer, service interval km, service interval days |
+| Date (config) | last service date |
 
 ## Service reminder
 
-CarLinko dealers rarely log service visits, so the integration tracks them for you.
-On the vehicle's device page set **Last service odometer** and **Last service date** after each visit.
-Intervals default to 20,000 km / 365 days and are editable per vehicle; the service sensors update immediately.
+Dealers rarely log visits into CarLinko, so the integration tracks them itself. On the car's device page
+set **Last service odometer** and **Last service date** after each visit. Intervals default to
+20,000 km / 365 days and are editable per car. The sensors update immediately, no reload.
 
-## Important Caveats
+Example automation, a month ahead and again when overdue (replace `CAR` with your entity prefix):
 
-**CarLinko allows only one active session per account.** Logging in from Home Assistant will sign out the phone app and vice versa.
+```yaml
+alias: Car service reminder
+triggers:
+  - trigger: numeric_state
+    entity_id: sensor.CAR_distance_until_service
+    below: 1000
+  - trigger: numeric_state
+    entity_id: sensor.CAR_days_until_service
+    below: 30
+  - trigger: state
+    entity_id: sensor.CAR_next_service
+    to: overdue
+actions:
+  - action: notify.mobile_app_YOUR_PHONE
+    data:
+      title: Car service due
+      message: "{{ states('sensor.CAR_distance_until_service') }} km / {{ states('sensor.CAR_days_until_service') }} days left"
+```
 
-The integration forces IPv4 (AF_INET) for all connections because the CarLinko API misbehaves over IPv6 on some ISPs.
+## Caveats
 
-**Polling:** Vehicle data is polled every 60 seconds; location is updated every 15 minutes. When CarLinko returns no street address (e.g. Thailand), the tracker's `address` attribute is filled from OpenStreetMap Nominatim, only when the car has moved.
+- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login.
+- **Static-decode commands.** A/C on/off, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
+- **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value and is best left off dashboards.
+- **Tyre pressure** is not available on cars with indirect TPMS (C5 EV / E5 / J5): the cloud always reports "no data".
+- **Sunroof** entity is always created; disable it if your car has no opening roof.
+- The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
+- Unofficial, reverse-engineered API. Use at your own risk; a CarLinko app update can break it.
 
-**A/C and window vent:** the A/C on/off, window vent, find-car, and sunroof opcodes are a static decode pending live confirmation (window open/close are runtime-confirmed on a Jaecoo J5).
-
-## Testing
-
-Test your setup from the command line:
+## Command-line testing
 
 ```bash
-# Check vehicle status
-CARLINKO_ACCOUNT=your_email CARLINKO_PASSWORD=your_password CARLINKO_REGION=sea python3 tools/cli.py status
+export CARLINKO_ACCOUNT=you@example.com CARLINKO_PASSWORD=secret CARLINKO_REGION=sea
+python3 tools/cli.py status      # login, list vehicles, decoded telemetry + raw hex
+python3 tools/cli.py locate      # GPS position
+python3 tools/cli.py send 740100 # raw opcode (740100 = lock)
+python3 tools/cli.py maintain    # dealer service records, if any
+python3 -m pytest tests -q       # offline unit tests (signing, telemetry decoding)
+```
 
-# Lock the vehicle (opcode 740100)
-python3 tools/cli.py send 740100
+## Development
 
-# Dealer service records (empty if your dealer does not log them in CarLinko)
-python3 tools/cli.py maintain
-
-# Run integration tests
-python3 -m pytest tests -q
+```bash
+pnpm install && pnpm build   # rebuilds custom_components/carlinko/www/carlinko-card.js from src/
+node --test src/logic.test.ts
 ```
 
 ## Credits
 
-- **API Reverse Engineering:**
-  - [GodrezJr2/j5-ev-dashboard](https://github.com/GodrezJr2/j5-ev-dashboard)
-  - [elad-bar/ha-carlinko](https://github.com/elad-bar/ha-carlinko)
+API reverse engineering by [GodrezJr2/j5-ev-dashboard](https://github.com/GodrezJr2/j5-ev-dashboard) and
+[elad-bar/ha-carlinko](https://github.com/elad-bar/ha-carlinko). Vehicle renders are served from CarLinko's own CDN.
