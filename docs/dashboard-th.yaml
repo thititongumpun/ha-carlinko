@@ -537,8 +537,7 @@ views:
         stroke_width: 2
         color: '#f59e0b'
         group_by:
-          func: avg
-          duration: 1h
+          func: raw
       yaxis:
       - decimals: 2
         min: auto
