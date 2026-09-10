@@ -47,13 +47,17 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 - High-voltage system active
 - Cable connected (plugged in)
 - Tailgate open
+- Online (car reachable by the cloud)
 
 ### Buttons
 - Stop charging
 - Vent windows
+- Find car (flash / horn)
 
 ### Cover
 - Windows (open / close)
+- Tailgate (open / close)
+- Sunroof (open / close / tilt) — disable if your car has no opening sunroof
 
 ### Device Tracker
 - Vehicle location
@@ -71,6 +75,9 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 - Range (km)
 - Speed (km/h)
 - 12V battery voltage (V)
+- A/C target temperature
+- Energy consumption (kWh/100 km)
+- Rated range (WLTC)
 
 ### Switches
 - Air conditioning
@@ -83,7 +90,7 @@ The integration forces IPv4 (AF_INET) for all connections because the CarLinko A
 
 **Polling:** Vehicle data is polled every 60 seconds; location is updated every 15 minutes.
 
-**A/C and window vent:** the A/C on/off and window vent opcodes are a static decode pending live confirmation (window open/close are runtime-confirmed on a Jaecoo J5).
+**A/C and window vent:** the A/C on/off, window vent, find-car, and sunroof opcodes are a static decode pending live confirmation (window open/close are runtime-confirmed on a Jaecoo J5).
 
 ## Testing
 

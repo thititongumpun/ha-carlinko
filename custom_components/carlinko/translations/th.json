@@ -71,6 +71,15 @@
       },
       "speed": {
         "name": "ความเร็ว"
+      },
+      "ac_temp": {
+        "name": "อุณหภูมิแอร์ที่ตั้งไว้"
+      },
+      "consumption": {
+        "name": "อัตราสิ้นเปลืองพลังงาน"
+      },
+      "wltc_range": {
+        "name": "ระยะทางมาตรฐาน (WLTC)"
       }
     },
     "binary_sensor": {
@@ -91,6 +100,9 @@
       },
       "hv_active": {
         "name": "ระบบไฟฟ้าแรงสูง"
+      },
+      "online": {
+        "name": "ออนไลน์"
       }
     },
     "lock": {
@@ -109,6 +121,9 @@
       },
       "vent_windows": {
         "name": "แง้มกระจก"
+      },
+      "find_car": {
+        "name": "ค้นหารถ"
       }
     },
     "device_tracker": {
@@ -119,6 +134,12 @@
     "cover": {
       "windows": {
         "name": "กระจกหน้าต่าง"
+      },
+      "trunk": {
+        "name": "ฝาท้าย"
+      },
+      "sunroof": {
+        "name": "ซันรูฟ"
       }
     }
   }

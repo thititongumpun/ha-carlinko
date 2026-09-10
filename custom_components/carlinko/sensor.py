@@ -15,6 +15,8 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfTemperature,
     UnitOfLength,
     UnitOfPower,
     UnitOfSpeed,
@@ -98,6 +100,25 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: d["speed"],
+    ),
+    CarlinkoSensorDescription(
+        key="ac_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        value_fn=lambda d: d["ac_temp"],
+    ),
+    CarlinkoSensorDescription(
+        key="consumption",
+        native_unit_of_measurement=f"{UnitOfEnergy.KILO_WATT_HOUR}/100km",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d["consumption"],
+    ),
+    CarlinkoSensorDescription(
+        key="wltc_range",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d["wltc_range"],
     ),
 )
 

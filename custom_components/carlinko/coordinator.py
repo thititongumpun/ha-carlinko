@@ -47,6 +47,11 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                     raise UpdateFailed("vehicle row without vehicleId")
                 vid = str(vid_raw)
                 state = await self.api.get_state(vid_raw)
+                try:
+                    state["online"] = await self.api.is_online(vid_raw)
+                except CarlinkoError as err:
+                    _LOGGER.debug("isOnline failed for %s: %s", vid, err)
+                    state["online"] = None
 
                 location = (self.data or {}).get(vid, {}).get("location")
                 if locate_now:

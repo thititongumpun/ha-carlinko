@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
-from .const import OP_STOP_CHARGING, OP_WINDOWS_VENT
+from .const import OP_FIND_CAR, OP_STOP_CHARGING, OP_WINDOWS_VENT
 from .entity import CarlinkoEntity
 
 
@@ -21,7 +21,7 @@ async def async_setup_entry(
     async_add_entities(
         cls(coordinator, vehicle_id)
         for vehicle_id in coordinator.data
-        for cls in (CarlinkoStopChargingButton, CarlinkoVentWindowsButton)
+        for cls in (CarlinkoStopChargingButton, CarlinkoVentWindowsButton, CarlinkoFindCarButton)
     )
 
 
@@ -52,3 +52,18 @@ class CarlinkoVentWindowsButton(CarlinkoEntity, ButtonEntity):
         """Vent windows."""
         # ponytail: 740E00 is a static decode (opcodes.md), not yet runtime-confirmed
         await self.coordinator.send(self.vehicle_id, OP_WINDOWS_VENT)
+
+
+class CarlinkoFindCarButton(CarlinkoEntity, ButtonEntity):
+    """Button to flash lights / horn so you can find the car."""
+
+    _attr_translation_key = "find_car"
+
+    def __init__(self, coordinator, vehicle_id: str) -> None:
+        super().__init__(coordinator, vehicle_id)
+        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
+
+    async def async_press(self) -> None:
+        """Find car."""
+        # ponytail: 740400 is a static decode (opcodes.md), not yet runtime-confirmed
+        await self.coordinator.send(self.vehicle_id, OP_FIND_CAR)

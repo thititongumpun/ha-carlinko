@@ -55,6 +55,11 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[CarlinkoBinarySensorDescription, ...] = (
         device_class=BinarySensorDeviceClass.POWER,
         is_on_fn=lambda d: None if d["hv_state"] is None else d["hv_state"] != 0,
     ),
+    CarlinkoBinarySensorDescription(
+        key="online",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        is_on_fn=lambda d: d.get("online"),
+    ),
 )
 
 

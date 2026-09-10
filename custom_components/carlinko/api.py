@@ -214,7 +214,7 @@ class CarlinkoApi:
                 headers=self._headers(sign_params, ts, auth=auth),
             ) as resp:
                 payload = await self._envelope(resp)
-        except aiohttp.ClientError as err:
+        except (aiohttp.ClientError, TimeoutError, OSError) as err:
             raise CarlinkoError(f"request to {path} failed: {err}") from err
 
         code = str(payload.get("code"))
@@ -239,7 +239,7 @@ class CarlinkoApi:
         try:
             async with self._session.get(self.base + "/pub/timestamp") as resp:
                 payload = await self._envelope(resp)
-        except aiohttp.ClientError as err:
+        except (aiohttp.ClientError, TimeoutError, OSError) as err:
             raise CarlinkoError(f"timestamp sync failed: {err}") from err
         try:
             self.skew_ms = int(payload["data"]) - int(time.time() * 1000)
@@ -277,7 +277,7 @@ class CarlinkoApi:
                 headers=self._headers(body, ts, auth=False),
             ) as resp:
                 payload = await self._envelope(resp)
-        except aiohttp.ClientError as err:
+        except (aiohttp.ClientError, TimeoutError, OSError) as err:
             raise CarlinkoError(f"login request failed: {err}") from err
 
         code = str(payload.get("code"))
@@ -304,6 +304,13 @@ class CarlinkoApi:
         state = parse_blob(data if isinstance(data, str) else "")
         state["raw"] = data
         return state
+
+    async def is_online(self, vehicle_id: str) -> bool | None:
+        vid = str(vehicle_id)
+        data = await self._request(
+            "GET", f"/user/vehicle/isOnline/{vid}", sign_params={"id": vid}
+        )
+        return data if isinstance(data, bool) else None
 
     async def locate(self, device_sn: str) -> dict[str, Any]:
         body = {"sn": str(device_sn), "showAddress": 1, "timestamp": self._ts()}

@@ -71,6 +71,15 @@
       },
       "speed": {
         "name": "Speed"
+      },
+      "ac_temp": {
+        "name": "A/C target temperature"
+      },
+      "consumption": {
+        "name": "Energy consumption"
+      },
+      "wltc_range": {
+        "name": "Rated range (WLTC)"
       }
     },
     "binary_sensor": {
@@ -91,6 +100,9 @@
       },
       "hv_active": {
         "name": "High-voltage system"
+      },
+      "online": {
+        "name": "Online"
       }
     },
     "lock": {
@@ -109,6 +121,9 @@
       },
       "vent_windows": {
         "name": "Vent windows"
+      },
+      "find_car": {
+        "name": "Find car"
       }
     },
     "device_tracker": {
@@ -119,6 +134,12 @@
     "cover": {
       "windows": {
         "name": "Windows"
+      },
+      "trunk": {
+        "name": "Tailgate"
+      },
+      "sunroof": {
+        "name": "Sunroof"
       }
     }
   }
