@@ -18,12 +18,13 @@ entities plus a ready-made Lovelace card. Developed on an **Omoda C5 EV** (Thail
 
 - **Telemetry** every 60 s: battery %, range, odometer, speed, 12 V battery, consumption, WLTC range
 - **Charging**: status, AC/DC mode, power, time remaining, plugged-in and charging flags
+- **Tyres**: pressure and temperature for all four corners, decoded from the telemetry blob
 - **Body**: door lock state, doors, tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
 - **Controls**: lock / unlock, A/C on / off, windows open / close / vent, tailgate, sunroof, find car, stop charging
 - **Location**: GPS device tracker every 15 min, with a street address (OpenStreetMap fallback when CarLinko has none)
 - **Vehicle image**: the CDN render of your exact car, as an `image` entity
 - **Service reminder**: last service odometer / date + intervals on the device page → km and days until service, overdue state
-- **Lovelace card** `custom:carlinko-card` (car image, battery ring, range, state, quick actions, driven today / week / month, efficiency), plus a full Thai dashboard example
+- **Lovelace card** `custom:carlinko-card` (car image, battery ring, range, state, quick actions, driven today / week / month, efficiency, tyre grid), plus a full Thai dashboard example
 - **English and Thai** translations for the setup flow, every entity, and enum states
 - Token persisted across restarts (CarLinko allows one session per account), automatic re-login, re-auth flow
 - No extra Python dependencies
@@ -104,12 +105,32 @@ actions:
       message: "{{ states('sensor.CAR_distance_until_service') }} km / {{ states('sensor.CAR_days_until_service') }} days left"
 ```
 
+## Tyres
+
+Pressure and temperature for all four corners come out of the same telemetry blob as everything
+else — no extra request. Both scalings were confirmed against the CarLinko app on an Omoda C5 EV:
+
+| Field | Bytes | Scaling |
+|---|---|---|
+| Pressure | 44–47 | `kPa = raw × 1.375` |
+| Temperature | 48–51 | `°C = raw × 0.5 − 25` |
+
+Order is front-left, front-right, rear-left, rear-right. `0x00` and `0xFF` mean "no reading" and
+surface as unknown rather than a bogus zero.
+
+Pressure is stored in kPa. To read it in psi, set the unit per entity in Settings → Devices &
+services → Entities → ⚙. The card and the dashboard example both follow whatever unit you pick —
+they rate each tyre against the average of the corners that are reporting (amber below 95%, red
+below 90%) rather than against a fixed target, so there is nothing to configure per car.
+
+Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
+
 ## Caveats
 
 - **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login.
 - **Static-decode commands.** A/C on/off, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
-- **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value and is best left off dashboards.
-- **Tyre pressure** is not available on cars with indirect TPMS (C5 EV / E5 / J5): the cloud always reports "no data".
+- **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
+- **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
 - **Sunroof** entity is always created; disable it if your car has no opening roof.
 - The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
 - Unofficial, reverse-engineered API. Use at your own risk; a CarLinko app update can break it.
