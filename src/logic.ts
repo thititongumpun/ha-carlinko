@@ -53,3 +53,20 @@ export function last7Days(rows: StatRow[], now: Date = new Date()): number[] {
   }
   return out
 }
+
+export type TyreLevel = 'ok' | 'warn' | 'low' | 'none'
+
+/**
+ * Rates each tyre against the average of the ones that are reporting.
+ *
+ * Relative, not absolute, so it needs no per-car target and works whatever
+ * unit the entities are displayed in. A tyre reading 0/null is 'none'.
+ */
+export function tyreLevels(values: (number | null)[]): TyreLevel[] {
+  const live = values.filter((v): v is number => v !== null && v > 0)
+  if (!live.length) return values.map(() => 'none')
+  const avg = live.reduce((a, b) => a + b, 0) / live.length
+  return values.map((v) =>
+    v === null || v <= 0 ? 'none' : v < avg * 0.9 ? 'low' : v < avg * 0.95 ? 'warn' : 'ok',
+  )
+}

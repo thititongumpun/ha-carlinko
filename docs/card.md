@@ -19,7 +19,7 @@ Then reload the browser (Ctrl+Shift+R).
 ### Cache busting
 
 Browsers cache Lovelace resources aggressively. After updating the integration, edit the
-resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.8`, and reload.
+resource URL to include the version, e.g. `/carlinko/carlinko-card.js?v=0.0.9`, and reload.
 
 ## YAML example
 
@@ -66,11 +66,15 @@ To change the accent colour, set the CSS variable in your theme: `carlinko-accen
 Model/plate header with mask + refresh buttons, the vehicle image, battery ring with range and
 state (Parked / Driving / Charging, plus kW and minutes left while charging), quick actions
 (lock/unlock, A/C, find car, vent windows, stop charging), driven today/week/month with a 7-day
-bar chart, and efficiency figures. Labels follow `hass.language` (Thai or English).
+bar chart, efficiency figures, and a 2x2 tyre grid. Labels follow `hass.language` (Thai or English).
+
+Tyres are rated against the average of the corners that are reporting — amber below 95% of it,
+red below 90% — so the card needs no per-car target pressure and works whether the entities are
+displayed in kPa or psi. A corner with no reading is dimmed.
 
 Anything missing or unavailable shows `—`; the driven/bar section hides itself if the recorder
-statistics call fails (recorder disabled). Tyre and cost/insight sections from the stock app are
-not included — the integration exposes no data for them.
+statistics call fails (recorder disabled), and the tyre grid hides itself when no corner reports.
+The cost/insight section from the stock app is not included — the integration exposes no data for it.
 
 ## Full dashboard example
 

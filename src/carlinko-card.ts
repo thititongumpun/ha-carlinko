@@ -1,7 +1,9 @@
-import { maskPlate, carState, drivenKm, last7Days, type StatRow } from './logic.ts'
+import { maskPlate, carState, drivenKm, last7Days, tyreLevels, type StatRow } from './logic.ts'
 
-// ponytail: no TYRES / INSIGHTS sections from the reference dashboard — the integration exposes
-// no tyre or cost entities, so they would be invented data. Add them when those entities exist.
+// ponytail: no INSIGHTS section from the reference dashboard — the integration exposes no cost
+// entities, so it would be invented data. Add it when those entities exist.
+
+const TYRES = ['fl', 'fr', 'rl', 'rr'] as const
 
 const DEFAULT_ACCENT = '#1f6f4a'
 const PENDING_MS = 6000 // backend refreshes ~5s after a command
@@ -14,12 +16,14 @@ const EN: Dict = {
   lock: 'Lock', unlock: 'Unlock', ac: 'A/C', find: 'Find car', vent: 'Vent windows', stop: 'Stop charging',
   today: 'Driven today', week: 'Week', month: 'Month', efficiency: 'Efficiency',
   used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', min_left: 'min left',
+  tyres: 'Tyres', fl: 'Front left', fr: 'Front right', rl: 'Rear left', rr: 'Rear right',
 }
 const TH: Dict = {
   range: 'ระยะทาง', state: 'สถานะ', parked: 'จอดอยู่', driving: 'กำลังขับ', charging: 'กำลังชาร์จ',
   lock: 'ล็อก', unlock: 'ปลดล็อก', ac: 'แอร์', find: 'ค้นหารถ', vent: 'แง้มกระจก', stop: 'หยุดชาร์จ',
   today: 'ขับวันนี้', week: 'สัปดาห์', month: 'เดือน', efficiency: 'ประสิทธิภาพ',
   used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', min_left: 'นาที',
+  tyres: 'ยาง', fl: 'ซ้ายหน้า', fr: 'ขวาหน้า', rl: 'ซ้ายหลัง', rr: 'ขวาหลัง',
 }
 
 const CSS = `
@@ -65,6 +69,19 @@ section { border-top: 1px solid var(--divider-color, #e6e6e6); padding: 18px 0; 
 .bars { display: flex; align-items: flex-end; gap: 8px; height: 56px; margin-top: 14px; }
 .bars i { flex: 1; background: var(--carlinko-accent, ${DEFAULT_ACCENT}); border-radius: 4px; min-height: 3px; }
 .bars i.zero { opacity: .18; }
+.tyres { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.tyre {
+  border: 1px solid var(--divider-color, #e6e6e6); border-radius: 10px; padding: 10px 12px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+.tyre .label { font-size: 10px; }
+.tyre .v { font-size: 18px; font-weight: 700; }
+.tyre .t { font-size: 12px; color: var(--secondary-text-color, #777); }
+.tyre.low { border-color: var(--error-color, #db4437); }
+.tyre.low .v { color: var(--error-color, #db4437); }
+.tyre.warn { border-color: var(--warning-color, #ffa600); }
+.tyre.warn .v { color: var(--warning-color, #ffa600); }
+.tyre.none { opacity: .45; }
 footer { padding-top: 14px; border-top: 1px solid var(--divider-color, #e6e6e6); text-align: center;
   font-size: 12px; color: var(--secondary-text-color, #777); }
 `
@@ -186,6 +203,22 @@ class CarlinkoCard extends HTMLElement {
     if (map.vent_windows) pills.push(this._pill('vent_windows', t.vent, false))
     if (charging && map.stop_charging) pills.push(this._pill('stop_charging', t.stop, false))
 
+    const tyrePress = TYRES.map((k) => num(st(`tyre_${k}_pressure`)))
+    const tyreLvl = tyreLevels(tyrePress)
+    const tyreUnit = st('tyre_fl_pressure')?.attributes?.unit_of_measurement ?? ''
+    const tyreCells = TYRES.map((k, i) => {
+      const temp = num(st(`tyre_${k}_temp`))
+      const tUnit = st(`tyre_${k}_temp`)?.attributes?.unit_of_measurement ?? '°C'
+      return `<div class="tyre ${tyreLvl[i]}">
+        <div>
+          <div class="label">${t[k]}</div>
+          <div class="v">${fmt(tyrePress[i])}<span class="unit">${esc(String(tyreUnit))}</span></div>
+        </div>
+        ${temp === null ? '' : `<div class="t">${fmt(temp, 1)}${esc(String(tUnit))}</div>`}
+      </div>`
+    })
+    const hasTyres = tyrePress.some((v) => v !== null)
+
     const driven = this._stats
     const maxBar = Math.max(1, ...this._bars)
     const usedToday = driven && consumption !== null ? (driven.today * consumption) / 100 : null
@@ -262,6 +295,13 @@ class CarlinkoCard extends HTMLElement {
       <div class="r"><div class="label">${t.left}</div><div class="big">${fmt(energyLeft, 1)}<span class="unit">kWh</span></div></div>
     </div>
   </section>
+
+  ${hasTyres
+    ? `<section>
+    <div class="label">${t.tyres}</div>
+    <div class="tyres">${tyreCells.join('')}</div>
+  </section>`
+    : ''}
 
   <footer>${t.updated} ${battStamp ? esc(new Date(battStamp).toLocaleString()) : '—'}</footer>
 </div>`
