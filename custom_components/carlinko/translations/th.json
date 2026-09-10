@@ -42,7 +42,7 @@
         "name": "เลขไมล์"
       },
       "charge_power": {
-        "name": "กำลังชาร์จ"
+        "name": "กำลังไฟชาร์จ"
       },
       "charge_remaining": {
         "name": "เวลาชาร์จที่เหลือ"
