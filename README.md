@@ -146,6 +146,22 @@ python3 tools/cli.py maintain    # dealer service records, if any
 python3 -m pytest tests -q       # offline unit tests (signing, telemetry decoding)
 ```
 
+### Decoding unknown telemetry bytes
+
+Roughly a third of the 73-byte blob is still unidentified. To chip away at it, capture blobs
+while the car actually does something — drive, charge, run the A/C, open a window:
+
+```bash
+python3 tools/cli.py log --every 60 --out blobs.tsv   # one login, appends only when bytes change
+python3 tools/blobdiff.py blobs.tsv                   # which undecoded bytes moved, and to what
+```
+
+`log` holds a single session on purpose: CarLinko allows one session per account, so a cron job
+that re-logs-in every run would keep signing the phone app out. Ctrl-C to stop.
+
+A byte that tracks something you did is worth decoding; one that never moves across a varied
+capture is not telemetry.
+
 ## Development
 
 ```bash

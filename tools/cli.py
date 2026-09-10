@@ -12,6 +12,7 @@ import asyncio
 import os
 import socket
 import sys
+from datetime import datetime
 
 import aiohttp
 
@@ -72,7 +73,39 @@ async def run(args: argparse.Namespace) -> int:
             elif args.cmd == "send":
                 await api.remote_control(vid, sn, args.opcode)
                 print(f"  sent {args.opcode}")
+            elif args.cmd == "log":
+                await log_blobs(api, vehicles, args)
     return 0
+
+
+async def log_blobs(api: CarlinkoApi, vehicles: list, args: argparse.Namespace) -> None:
+    """Append `timestamp<TAB>vehicleId<TAB>raw` for every change, until Ctrl-C.
+
+    Logs in once and keeps polling on one session: CarLinko allows a single
+    session per account, so a cron job that re-logs-in each run would fight the
+    phone app for it.
+
+    Only changed blobs are written — a parked car repeats the same bytes for
+    hours and those rows say nothing.
+    """
+    path = Path(args.out)
+    seen: dict[str, str] = {}
+    print(f"logging to {path} every {args.every}s, Ctrl-C to stop")
+    while True:
+        for v in vehicles:
+            vid = v.get("vehicleId")
+            try:
+                raw = (await api.get_state(vid)).get("raw") or ""
+            except CarlinkoError as err:
+                print(f"  {vid}: {err}", file=sys.stderr)
+                continue
+            if raw and raw != seen.get(str(vid)):
+                seen[str(vid)] = raw
+                stamp = datetime.now().isoformat(timespec="seconds")
+                with path.open("a") as fh:
+                    fh.write(f"{stamp}\t{vid}\t{raw}\n")
+                print(f"  {stamp} {vid} changed")
+        await asyncio.sleep(args.every)
 
 
 def main() -> int:
@@ -83,12 +116,17 @@ def main() -> int:
     sub.add_parser("maintain")
     send = sub.add_parser("send")
     send.add_argument("opcode")
+    log = sub.add_parser("log", help="poll and append changed telemetry blobs to a file")
+    log.add_argument("--out", default="blobs.tsv")
+    log.add_argument("--every", type=int, default=60, help="seconds between polls (default 60)")
     args = parser.parse_args()
     try:
         return asyncio.run(run(args))
     except CarlinkoError as err:
         print(f"error: {err} (code={err.code})", file=sys.stderr)
         return 1
+    except KeyboardInterrupt:
+        return 0
 
 
 if __name__ == "__main__":
