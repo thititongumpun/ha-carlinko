@@ -74,9 +74,9 @@ section { border-top: 1px solid var(--divider-color, #e6e6e6); padding: 18px 0; 
   border: 1px solid var(--divider-color, #e6e6e6); border-radius: 10px; padding: 10px 12px;
   display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
 }
-.tyre .label { font-size: 10px; }
+.tyre .label { font-size: 10px; white-space: nowrap; }
 .tyre .v { font-size: 18px; font-weight: 700; }
-.tyre .t { font-size: 12px; color: var(--secondary-text-color, #777); }
+.tyre .t { font-size: 12px; color: var(--secondary-text-color, #777); white-space: nowrap; }
 .tyre.low { border-color: var(--error-color, #db4437); }
 .tyre.low .v { color: var(--error-color, #db4437); }
 .tyre.warn { border-color: var(--warning-color, #ffa600); }
