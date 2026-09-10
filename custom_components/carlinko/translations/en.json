@@ -141,6 +141,11 @@
       "sunroof": {
         "name": "Sunroof"
       }
+    },
+    "image": {
+      "vehicle": {
+        "name": "Vehicle image"
+      }
     }
   }
 }

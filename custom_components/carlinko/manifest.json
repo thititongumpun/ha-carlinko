@@ -3,10 +3,10 @@
   "name": "CarLinko",
   "codeowners": ["@thititongumpun"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["http"],
   "documentation": "https://github.com/thititongumpun/ha-carlinko",
   "integration_type": "device",
   "iot_class": "cloud_polling",
   "requirements": [],
-  "version": "0.0.2"
+  "version": "0.0.3"
 }

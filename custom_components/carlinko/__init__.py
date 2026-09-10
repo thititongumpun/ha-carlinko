@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import socket
 
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_REGION, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.typing import ConfigType
 
 from .api import CarlinkoApi
-from .const import CONF_ACCOUNT, CONF_TOKEN, DEFAULT_REGION
+from .const import CONF_ACCOUNT, CONF_TOKEN, DEFAULT_REGION, DOMAIN
 from .coordinator import CarlinkoCoordinator
 
 PLATFORMS: list[Platform] = [
@@ -18,12 +20,27 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.COVER,
     Platform.DEVICE_TRACKER,
+    Platform.IMAGE,
     Platform.LOCK,
     Platform.SENSOR,
     Platform.SWITCH,
 ]
 
 type CarlinkoConfigEntry = ConfigEntry[CarlinkoCoordinator]
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Serve the Lovelace card's static assets from /carlinko."""
+    await hass.http.async_register_static_paths(
+        [
+            StaticPathConfig(
+                url_path=f"/{DOMAIN}",
+                path=hass.config.path(f"custom_components/{DOMAIN}/www"),
+                cache_headers=False,
+            )
+        ]
+    )
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: CarlinkoConfigEntry) -> bool:

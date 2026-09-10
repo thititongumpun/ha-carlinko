@@ -15,6 +15,9 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 1. Copy `custom_components/carlinko` to your Home Assistant `config/custom_components/carlinko`
 2. Restart Home Assistant
 
+### Lovelace card
+The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.3` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
+
 ## Configuration
 
 1. Go to Settings → Devices & Services
@@ -61,6 +64,9 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 
 ### Device Tracker
 - Vehicle location
+
+### Image
+- Vehicle image (from CarLinko CDN)
 
 ### Lock
 - Door lock
