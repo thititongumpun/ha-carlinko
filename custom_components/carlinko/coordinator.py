@@ -9,6 +9,7 @@ from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import CarlinkoApi, CarlinkoAuthError, CarlinkoError
@@ -30,6 +31,27 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
         )
         self.api = api
         self._tick = 0
+
+    async def _reverse_geocode(self, loc: dict, prev: dict) -> str | None:
+        """CarLinko returns no address in some regions (TH); fall back to Nominatim.
+
+        Only called when the position moved, so a parked car costs zero requests.
+        """
+        # ponytail: Nominatim public API (1 req/s policy); locate runs every 15 min at most
+        if loc.get("lat") == prev.get("lat") and loc.get("lng") == prev.get("lng"):
+            return prev.get("address")
+        try:
+            async with async_get_clientsession(self.hass).get(
+                "https://nominatim.openstreetmap.org/reverse",
+                params={"format": "jsonv2", "lat": str(loc["lat"]), "lon": str(loc["lng"]), "zoom": "17"},
+                headers={"User-Agent": f"ha-carlinko/{DOMAIN}", "Accept-Language": self.hass.config.language},
+                timeout=10,
+            ) as resp:
+                payload = await resp.json(content_type=None)
+            return payload.get("display_name") or None
+        except Exception as err:  # noqa: BLE001 - never let geocoding break a refresh
+            _LOGGER.debug("reverse geocode failed: %s", err)
+            return None
 
     def _device_sn(self, row: dict) -> str | None:
         return row.get("deviceId") or row.get("deviceSn")
@@ -61,6 +83,10 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                             location = await self.api.locate(sn)
                         except CarlinkoError as err:
                             _LOGGER.debug("locate failed for %s: %s", vid, err)
+                        else:
+                            if not location.get("address"):
+                                prev = (self.data or {}).get(vid, {}).get("location") or {}
+                                location["address"] = await self._reverse_geocode(location, prev)
 
                 data[vid] = {"vehicle": row, "state": state, "location": location}
         except CarlinkoAuthError as err:

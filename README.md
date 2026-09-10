@@ -16,7 +16,7 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 2. Restart Home Assistant
 
 ### Lovelace card
-The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.5` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
+The integration ships a Lovelace card for showing a vehicle at a glance; add the resource `/carlinko/carlinko-card.js?v=0.0.6` (type **JavaScript module**) in Settings → Dashboards → Resources. See [docs/card.md](docs/card.md).
 
 ## Configuration
 
@@ -111,7 +111,7 @@ Intervals default to 20,000 km / 365 days and are editable per vehicle; the serv
 
 The integration forces IPv4 (AF_INET) for all connections because the CarLinko API misbehaves over IPv6 on some ISPs.
 
-**Polling:** Vehicle data is polled every 60 seconds; location is updated every 15 minutes.
+**Polling:** Vehicle data is polled every 60 seconds; location is updated every 15 minutes. When CarLinko returns no street address (e.g. Thailand), the tracker's `address` attribute is filled from OpenStreetMap Nominatim, only when the car has moved.
 
 **A/C and window vent:** the A/C on/off, window vent, find-car, and sunroof opcodes are a static decode pending live confirmation (window open/close are runtime-confirmed on a Jaecoo J5).
 
