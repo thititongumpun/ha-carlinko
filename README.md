@@ -50,6 +50,10 @@ CarLinko cloud integration for Home Assistant that adds support for Omoda, Jaeco
 
 ### Buttons
 - Stop charging
+- Vent windows
+
+### Cover
+- Windows (open / close)
 
 ### Device Tracker
 - Vehicle location
@@ -79,7 +83,7 @@ The integration forces IPv4 (AF_INET) for all connections because the CarLinko A
 
 **Polling:** Vehicle data is polled every 60 seconds; location is updated every 15 minutes.
 
-**A/C Control:** Air conditioning on/off opcodes are currently a static decode pending live confirmation from CarLinko API responses.
+**A/C and window vent:** the A/C on/off and window vent opcodes are a static decode pending live confirmation (window open/close are runtime-confirmed on a Jaecoo J5).
 
 ## Testing
 

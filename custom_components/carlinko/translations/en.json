@@ -32,11 +32,21 @@
   },
   "entity": {
     "sensor": {
-      "battery": { "name": "Battery" },
-      "range": { "name": "Range" },
-      "odometer": { "name": "Odometer" },
-      "charge_power": { "name": "Charging power" },
-      "charge_remaining": { "name": "Charging time remaining" },
+      "battery": {
+        "name": "Battery"
+      },
+      "range": {
+        "name": "Range"
+      },
+      "odometer": {
+        "name": "Odometer"
+      },
+      "charge_power": {
+        "name": "Charging power"
+      },
+      "charge_remaining": {
+        "name": "Charging time remaining"
+      },
       "charge_state": {
         "name": "Charging status",
         "state": {
@@ -56,28 +66,60 @@
           "dc": "DC fast"
         }
       },
-      "volt12": { "name": "12V battery voltage" },
-      "speed": { "name": "Speed" }
+      "volt12": {
+        "name": "12V battery voltage"
+      },
+      "speed": {
+        "name": "Speed"
+      }
     },
     "binary_sensor": {
-      "door_open": { "name": "Door open" },
-      "trunk_open": { "name": "Tailgate open" },
-      "charging": { "name": "Charging" },
-      "plugged_in": { "name": "Cable connected" },
-      "ac_on": { "name": "Air conditioning" },
-      "hv_active": { "name": "High-voltage system" }
+      "door_open": {
+        "name": "Door open"
+      },
+      "trunk_open": {
+        "name": "Tailgate open"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "plugged_in": {
+        "name": "Cable connected"
+      },
+      "ac_on": {
+        "name": "Air conditioning"
+      },
+      "hv_active": {
+        "name": "High-voltage system"
+      }
     },
     "lock": {
-      "door_lock": { "name": "Door lock" }
+      "door_lock": {
+        "name": "Door lock"
+      }
     },
     "switch": {
-      "climate": { "name": "Air conditioning" }
+      "climate": {
+        "name": "Air conditioning"
+      }
     },
     "button": {
-      "stop_charging": { "name": "Stop charging" }
+      "stop_charging": {
+        "name": "Stop charging"
+      },
+      "vent_windows": {
+        "name": "Vent windows"
+      }
     },
     "device_tracker": {
-      "location": { "name": "Location" }
+      "location": {
+        "name": "Location"
+      }
+    },
+    "cover": {
+      "windows": {
+        "name": "Windows"
+      }
     }
   }
 }

@@ -32,11 +32,21 @@
   },
   "entity": {
     "sensor": {
-      "battery": { "name": "แบตเตอรี่" },
-      "range": { "name": "ระยะทางที่วิ่งได้" },
-      "odometer": { "name": "เลขไมล์" },
-      "charge_power": { "name": "กำลังชาร์จ" },
-      "charge_remaining": { "name": "เวลาชาร์จที่เหลือ" },
+      "battery": {
+        "name": "แบตเตอรี่"
+      },
+      "range": {
+        "name": "ระยะทางที่วิ่งได้"
+      },
+      "odometer": {
+        "name": "เลขไมล์"
+      },
+      "charge_power": {
+        "name": "กำลังชาร์จ"
+      },
+      "charge_remaining": {
+        "name": "เวลาชาร์จที่เหลือ"
+      },
       "charge_state": {
         "name": "สถานะการชาร์จ",
         "state": {
@@ -56,28 +66,60 @@
           "dc": "ชาร์จเร็ว (DC)"
         }
       },
-      "volt12": { "name": "แรงดันแบตเตอรี่ 12V" },
-      "speed": { "name": "ความเร็ว" }
+      "volt12": {
+        "name": "แรงดันแบตเตอรี่ 12V"
+      },
+      "speed": {
+        "name": "ความเร็ว"
+      }
     },
     "binary_sensor": {
-      "door_open": { "name": "ประตูเปิด" },
-      "trunk_open": { "name": "ฝาท้ายเปิด" },
-      "charging": { "name": "กำลังชาร์จอยู่" },
-      "plugged_in": { "name": "เสียบสายชาร์จ" },
-      "ac_on": { "name": "แอร์" },
-      "hv_active": { "name": "ระบบไฟฟ้าแรงสูง" }
+      "door_open": {
+        "name": "ประตูเปิด"
+      },
+      "trunk_open": {
+        "name": "ฝาท้ายเปิด"
+      },
+      "charging": {
+        "name": "กำลังชาร์จอยู่"
+      },
+      "plugged_in": {
+        "name": "เสียบสายชาร์จ"
+      },
+      "ac_on": {
+        "name": "แอร์"
+      },
+      "hv_active": {
+        "name": "ระบบไฟฟ้าแรงสูง"
+      }
     },
     "lock": {
-      "door_lock": { "name": "ล็อกประตู" }
+      "door_lock": {
+        "name": "ล็อกประตู"
+      }
     },
     "switch": {
-      "climate": { "name": "แอร์" }
+      "climate": {
+        "name": "แอร์"
+      }
     },
     "button": {
-      "stop_charging": { "name": "หยุดชาร์จ" }
+      "stop_charging": {
+        "name": "หยุดชาร์จ"
+      },
+      "vent_windows": {
+        "name": "แง้มกระจก"
+      }
     },
     "device_tracker": {
-      "location": { "name": "ตำแหน่งรถ" }
+      "location": {
+        "name": "ตำแหน่งรถ"
+      }
+    },
+    "cover": {
+      "windows": {
+        "name": "กระจกหน้าต่าง"
+      }
     }
   }
 }

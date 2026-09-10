@@ -16,6 +16,7 @@ from .coordinator import CarlinkoCoordinator
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
+    Platform.COVER,
     Platform.DEVICE_TRACKER,
     Platform.LOCK,
     Platform.SENSOR,

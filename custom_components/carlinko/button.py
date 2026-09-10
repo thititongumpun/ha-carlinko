@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
-from .const import OP_STOP_CHARGING
+from .const import OP_STOP_CHARGING, OP_WINDOWS_VENT
 from .entity import CarlinkoEntity
 
 
@@ -16,11 +16,12 @@ async def async_setup_entry(
     entry: CarlinkoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up one stop-charging button per vehicle."""
+    """Set up the buttons for each vehicle."""
     coordinator = entry.runtime_data
     async_add_entities(
-        CarlinkoStopChargingButton(coordinator, vehicle_id)
+        cls(coordinator, vehicle_id)
         for vehicle_id in coordinator.data
+        for cls in (CarlinkoStopChargingButton, CarlinkoVentWindowsButton)
     )
 
 
@@ -36,3 +37,18 @@ class CarlinkoStopChargingButton(CarlinkoEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Stop charging."""
         await self.coordinator.send(self.vehicle_id, OP_STOP_CHARGING)
+
+
+class CarlinkoVentWindowsButton(CarlinkoEntity, ButtonEntity):
+    """Button to crack all windows open (vent position)."""
+
+    _attr_translation_key = "vent_windows"
+
+    def __init__(self, coordinator, vehicle_id: str) -> None:
+        super().__init__(coordinator, vehicle_id)
+        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
+
+    async def async_press(self) -> None:
+        """Vent windows."""
+        # ponytail: 740E00 is a static decode (opcodes.md), not yet runtime-confirmed
+        await self.coordinator.send(self.vehicle_id, OP_WINDOWS_VENT)
