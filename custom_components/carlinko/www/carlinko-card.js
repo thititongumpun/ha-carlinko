@@ -160,7 +160,7 @@ class nt extends HTMLElement {
     return { device: e ? (r = (o = this._hass) == null ? void 0 : o.devices) == null ? void 0 : r[e] : void 0, map: i };
   }
   _render() {
-    var N, j, A, E, L, R, W, P, U;
+    var N, j, A, E, L, R, W, U, P;
     if (!this._hass) return;
     const t = String(this._hass.language || "en").startsWith("th") ? it : st, { device: e, map: i } = this._resolve(), s = (h) => {
       const _ = i[h], k = _ ? this._hass.states[_] : void 0;
@@ -170,9 +170,9 @@ class nt extends HTMLElement {
       return ((_ = s(h)) == null ? void 0 : _.state) === "on";
     };
     this._maybeFetchStats(i.odometer);
-    const r = u(s("battery")), n = u(s("range")), l = u(s("speed")) ?? 0, c = X((N = s("charge_state")) == null ? void 0 : N.state, l, o("hv_active")), v = c === "charging", $ = u(s("charge_power")), S = u(s("charge_remaining")), x = u(s("consumption")), B = Number(this._config.battery_kwh) || 61, H = ((A = (j = s("range")) == null ? void 0 : j.attributes) == null ? void 0 : A.unit_of_measurement) ?? "km", O = i.odometer && ((L = (E = this._hass.states[i.odometer]) == null ? void 0 : E.attributes) == null ? void 0 : L.unit_of_measurement) || "km", D = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), q = D ? Q(String(D), this._masked) : "—", C = [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ") || "CarLinko", b = i.battery ? (R = this._hass.states[i.battery]) == null ? void 0 : R.last_updated : void 0, M = b ? Math.max(0, Math.round((Date.now() - new Date(b).getTime()) / 6e4)) : null, z = i.vehicle ? (P = (W = this._hass.states[i.vehicle]) == null ? void 0 : W.attributes) == null ? void 0 : P.entity_picture : void 0, K = r === null ? 0 : Math.max(0, Math.min(100, r)), F = 2 * Math.PI * 34, T = (U = s("door_lock")) == null ? void 0 : U.state, g = [];
-    i.door_lock && g.push(this._pill("lock", T === "locked" ? t.unlock : t.lock, T === "locked")), i.climate && g.push(this._pill("climate", t.ac, o("climate"))), i.find_car && g.push(this._pill("find_car", t.find, !1)), i.vent_windows && g.push(this._pill("vent_windows", t.vent, !1)), v && i.stop_charging && g.push(this._pill("stop_charging", t.stop, !1));
-    const f = this._stats, V = Math.max(1, ...this._bars), G = f && x !== null ? f.today * x / 100 : null, J = r === null ? null : r * B / 100, y = `
+    const r = u(s("battery")), n = u(s("range")), l = u(s("speed")) ?? 0, c = X((N = s("charge_state")) == null ? void 0 : N.state, l, o("hv_active")), v = c === "charging", $ = u(s("charge_power")), S = u(s("charge_remaining")), x = u(s("consumption")), B = Number(this._config.battery_kwh) || 61, H = ((A = (j = s("range")) == null ? void 0 : j.attributes) == null ? void 0 : A.unit_of_measurement) ?? "km", O = i.odometer && ((L = (E = this._hass.states[i.odometer]) == null ? void 0 : E.attributes) == null ? void 0 : L.unit_of_measurement) || "km", D = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), q = D ? Q(String(D), this._masked) : "—", C = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", b = i.battery ? (R = this._hass.states[i.battery]) == null ? void 0 : R.last_updated : void 0, M = b ? Math.max(0, Math.round((Date.now() - new Date(b).getTime()) / 6e4)) : null, z = i.vehicle ? (U = (W = this._hass.states[i.vehicle]) == null ? void 0 : W.attributes) == null ? void 0 : U.entity_picture : void 0, K = r === null ? 0 : Math.max(0, Math.min(100, r)), F = 2 * Math.PI * 34, T = (P = s("door_lock")) == null ? void 0 : P.state, f = [];
+    i.door_lock && f.push(this._pill("lock", T === "locked" ? t.unlock : t.lock, T === "locked")), i.climate && f.push(this._pill("climate", t.ac, o("climate"))), i.find_car && f.push(this._pill("find_car", t.find, !1)), i.vent_windows && f.push(this._pill("vent_windows", t.vent, !1)), v && i.stop_charging && f.push(this._pill("stop_charging", t.stop, !1));
+    const g = this._stats, V = Math.max(1, ...this._bars), G = g && x !== null ? g.today * x / 100 : null, J = r === null ? null : r * B / 100, y = `
 <style>${at}</style>
 <div class="card">
   <div class="row">
@@ -212,16 +212,16 @@ class nt extends HTMLElement {
     </div>
   </section>
 
-  ${g.length ? `<section class="pills">${g.join("")}</section>` : ""}
+  ${f.length ? `<section class="pills">${f.join("")}</section>` : ""}
 
-  ${f ? `<section>
+  ${g ? `<section>
     <div class="three">
       <div>
         <div class="label">${t.today}</div>
-        <div class="big">${d(f.today)}<span class="unit">${p(String(O))}</span></div>
+        <div class="big">${d(g.today)}<span class="unit">${p(String(O))}</span></div>
       </div>
-      <div class="r"><div class="label">${t.week}</div><div class="big">${d(f.week)}</div></div>
-      <div class="r"><div class="label">${t.month}</div><div class="big">${d(f.month)}</div></div>
+      <div class="r"><div class="label">${t.week}</div><div class="big">${d(g.week)}</div></div>
+      <div class="r"><div class="label">${t.month}</div><div class="big">${d(g.month)}</div></div>
     </div>
     <div class="bars">${this._bars.map((h) => `<i class="${h ? "" : "zero"}" style="height:${Math.max(4, h / V * 100)}%"></i>`).join("")}</div>
   </section>` : ""}

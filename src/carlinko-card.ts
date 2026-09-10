@@ -170,7 +170,7 @@ class CarlinkoCard extends HTMLElement {
 
     const deviceName = device?.name_by_user || device?.name
     const name = deviceName ? maskPlate(String(deviceName), this._masked) : '—'
-    const model = [device?.manufacturer, device?.model].filter(Boolean).join(' ') || 'CarLinko'
+    const model = (device?.model && device?.manufacturer && device.model.toUpperCase().startsWith(device.manufacturer.toUpperCase()) ? device.model : [device?.manufacturer, device?.model].filter(Boolean).join(' ')) || 'CarLinko'
     const battStamp = map.battery ? this._hass.states[map.battery]?.last_updated : undefined
     const ago = battStamp ? Math.max(0, Math.round((Date.now() - new Date(battStamp).getTime()) / 60000)) : null
     const picture = map.vehicle ? this._hass.states[map.vehicle]?.attributes?.entity_picture : undefined
