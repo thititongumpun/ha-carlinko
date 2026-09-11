@@ -81,6 +81,27 @@ Settings → Devices & services → **Add integration** → *CarLinko*:
 
 Each vehicle on the account becomes a device named after its licence plate.
 
+### Use a second account, not your own
+
+CarLinko allows **one session per account**. If Home Assistant logs in as you, your phone gets
+signed out — and when you sign back in on the phone, Home Assistant is the one kicked out. The two
+keep evicting each other.
+
+Give Home Assistant an account of its own instead:
+
+1. Make a second e-mail address (a free one, or a `+ha` alias if your provider supports it).
+2. Register it in the CarLinko app as a new account.
+3. From your **main** account, share the car to that address — the app's vehicle sharing /
+   authorised-user feature.
+4. Accept the invitation on the second account, then use *those* credentials in the integration.
+
+Your phone stays signed in on your own account, Home Assistant holds its own session, and neither
+disturbs the other. Revoking access later is one tap in the app and does not touch your own login.
+
+The shared account sees the same telemetry and controls, so nothing in this README changes. If your
+app version has no sharing feature, the integration still works with your main account — just expect
+to be signed out of the phone app whenever Home Assistant re-authenticates.
+
 ## Lovelace card
 
 Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.11`, type **JavaScript module**. Then:
@@ -177,7 +198,7 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 
 ## Caveats
 
-- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login.
+- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. Best avoided entirely by giving Home Assistant [its own shared account](#use-a-second-account-not-your-own).
 - **Static-decode commands.** A/C on/off, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
 - **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
