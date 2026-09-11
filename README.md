@@ -50,8 +50,11 @@ tooling to pin it down.
 - **Telemetry** every 60 s: battery %, range, odometer, speed, 12 V battery, consumption, WLTC range
 - **Charging**: status, AC/DC mode, power, time remaining, plugged-in and charging flags
 - **Tyres**: pressure and temperature for all four corners, decoded from the telemetry blob
-- **Body**: door lock state, doors, tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
-- **Controls**: lock / unlock, A/C on / off, windows open / close / vent, tailgate, sunroof, find car, stop charging
+- **Body**: door lock state, doors (all four, individually), tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
+- **Controls**: lock / unlock, A/C on / off, defog, quick cool, seat ventilation, windows open / close / vent, tailgate, sunroof, find car, stop charging
+- **Only the entities your car has.** `/user/vehicle` publishes a per-model capability list, and
+  every optional entity is gated on it — no sunroof cover on a car without a sunroof, no seat vent
+  select on a car without ventilated seats
 - **Location**: GPS device tracker every 15 min, with a street address (OpenStreetMap fallback when
   CarLinko has none). Works even if your CarLinko app build has no map screen — the coordinates come
   from the account API, not the app's UI
@@ -122,11 +125,12 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 | Platform | Entities |
 |---|---|
 | Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4 |
-| Binary sensor | charging, cable connected, door open, tailgate open, air conditioning, high-voltage system (car on), online |
+| Binary sensor | charging, cable connected, door open (any), driver / passenger / rear-left / rear-right door, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
-| Switch | air conditioning |
+| Switch | air conditioning, defog |
+| Select | seat ventilation, per seat (off / level 1-3) |
 | Cover | windows, tailgate, sunroof (open / close / tilt) |
-| Button | find car, vent windows, stop charging |
+| Button | find car, vent windows, quick cool, stop charging |
 | Device tracker | location (+ `address` attribute) |
 | Image | vehicle image |
 | Number (config) | last service odometer, service interval km, service interval days, charge estimate calibration |
@@ -201,10 +205,15 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 ## Caveats
 
 - **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. Best avoided entirely by giving Home Assistant [its own shared account](#use-a-second-account-not-your-own).
-- **Static-decode commands.** A/C on/off, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
+- **Static-decode commands.** A/C on/off, defog, quick cool, seat vent, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
 - **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
-- **Sunroof** entity is always created; disable it if your car has no opening roof.
+- **Seat ventilation and quick cool** are gated on the car's own capability list but the blob byte
+  offsets behind the seat levels come from another project's capture and are not yet confirmed on an
+  Omoda C5. The command side should work; the reported level may be wrong. Reports welcome.
+- **No heating entities.** Seat heaters, windshield and steering-wheel heat and quick-heat are
+  decoded but not exposed — this is a Thailand-first integration. The opcodes are kept in `const.py`;
+  [open an issue](https://github.com/thititongumpun/ha-carlinko/issues) if you are somewhere cold.
 - The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
 - **Only the Omoda C5 EV (Thailand) is verified.** Other CarLinko cars are expected to work; see [Will it work with my car?](#will-it-work-with-my-car).
 - Unofficial, reverse-engineered API, not affiliated with CarLinko, Chery, Omoda or Jaecoo. Use at your own risk; a CarLinko app update can break it.

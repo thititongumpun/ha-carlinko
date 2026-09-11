@@ -56,6 +56,19 @@ def sign(params: dict, ts: str) -> str:
 
 _TYRES = ("fl", "fr", "rl", "rr")
 
+# Seat comfort levels, one byte each (0 = off, 1-3 = level). Offsets from the
+# ha-carlinko project's live capture; 35 and 40 are skipped there too.
+_SEATS = {
+    "seat_heat_l": 32,
+    "seat_heat_r": 33,
+    "seat_heat_lr": 34,
+    "seat_heat_rr": 36,
+    "seat_vent_l": 37,
+    "seat_vent_r": 38,
+    "seat_vent_lr": 39,
+    "seat_vent_rr": 41,
+}
+
 _BLOB_KEYS = (
     "doors",
     "unlocked",
@@ -76,7 +89,9 @@ _BLOB_KEYS = (
     "charge_remain_min",
     "charge_power_kw",
     "wltc_range",
-) + tuple(f"tyre_{pos}_{m}" for m in ("pressure", "temp") for pos in _TYRES)
+    "windshield_heat",
+    "steer_heat",
+) + tuple(f"tyre_{pos}_{m}" for m in ("pressure", "temp") for pos in _TYRES) + tuple(_SEATS)
 
 
 def parse_blob(hex_str: str) -> dict[str, Any]:
@@ -137,6 +152,15 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
 
     out["wltc_range"] = u16(68)
 
+    # ponytail: seat/heat offsets are another project's capture, not confirmed on
+    # this car. Gated on vehicleControlConfig, so an unequipped car shows nothing.
+    for key, off in _SEATS.items():
+        out[key] = u8(off)
+    ws = u8(64)
+    out["windshield_heat"] = None if ws is None else ws != 0
+    sh = u8(65)
+    out["steer_heat"] = None if sh is None else sh != 0
+
     # TPMS, order FL, FR, RL, RR: b44-47 pressure, b48-51 temperature.
     # kPa = raw * 1.375 (confirmed: 199/201 -> 39.7/40.1 psi, app shows 40).
     # degC = raw * 0.5 - 25 (confirmed: 109/107 -> 29.5/28.5, app shows 30/29).
@@ -147,6 +171,81 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
         temp = u8(48 + i)
         out[f"tyre_{pos}_temp"] = None if temp in (None, 0, 0xFF) else temp * 0.5 - 25
 
+    return out
+
+
+# vehicleControlConfig -> our capability names. The cloud publishes this per
+# model, so gating on it keeps a sunroof entity off a car with no sunroof.
+_CAP_FLAGS = {
+    "lock": "Lock",
+    "find": "Search",
+    "charging": "ChargingManagement",
+    "windshield_heat": "FrontWindshieldHeater",
+    "steer_heat": "SteeringWheelHeater",
+    "windows_open": "WindowsOpen",
+    "windows_close": "WindowsClose",
+    "windows_vent": "WindowsVent",
+    "sunroof": "Sunroof",
+    "sunroof_tilt": "SunroofTilting",
+}
+
+_CAP_AC_FLAGS = {
+    "ac": "Switch",
+    "quick_cool": "RapidCool",
+    "quick_heat": "RapidHeat",
+    "defog": "Defogging",
+    "purify": "AirPurification",
+}
+
+# Seat key -> (enable flag, per-level list). Rear left and right share a flag.
+_CAP_SEATS = {
+    "seat_heat_l": ("DriverHeater", "LeftHeaterList"),
+    "seat_vent_l": ("DriverVent", "LeftVentList"),
+    "seat_heat_r": ("AssistantHeater", "RightHeaterList"),
+    "seat_vent_r": ("AssistantVent", "RightVentList"),
+    "seat_heat_lr": ("RearHeater", "RearHeaterList"),
+    "seat_vent_lr": ("RearVent", "RearVentList"),
+    "seat_heat_rr": ("RearHeater", "RearHeaterList"),
+    "seat_vent_rr": ("RearVent", "RearVentList"),
+}
+
+
+def _seat_levels(ac: dict[str, Any], flag: str, list_key: str) -> int:
+    """Highest enabled seat level, 0 when the car does not have that seat."""
+    if not ac.get(flag):
+        return 0
+    levels = ac.get(list_key)
+    if levels is None:
+        return 3  # flag set but no list: the usual off/L1/L2/L3
+    if not isinstance(levels, list):
+        return 0
+    return max((i + 1 for i, on in enumerate(levels[:3]) if on), default=0)
+
+
+def caps(row: dict[str, Any]) -> dict[str, Any]:
+    """What this model supports, from /user/vehicle's vehicleControlConfig.
+
+    Booleans for on/off features; seat keys hold the number of levels, 0 when
+    absent. A missing or unparseable config yields all-false, which hides the
+    optional entities rather than creating dead ones.
+    """
+    cfg = row.get("vehicleControlConfig")
+    if isinstance(cfg, str):
+        try:
+            cfg = json.loads(cfg)
+        except ValueError:
+            cfg = None
+    if not isinstance(cfg, dict):
+        cfg = {}
+    ac = cfg.get("A/C")
+    if not isinstance(ac, dict):
+        ac = {}
+
+    out: dict[str, Any] = {k: bool(cfg.get(src)) for k, src in _CAP_FLAGS.items()}
+    out.update({k: bool(ac.get(src)) for k, src in _CAP_AC_FLAGS.items()})
+    out.update({k: _seat_levels(ac, *v) for k, v in _CAP_SEATS.items()})
+    # An OMODA C5 reports PowerLiftgate but not Trunk; either means "it opens".
+    out["liftgate"] = bool(cfg.get("PowerLiftgate") or cfg.get("Trunk"))
     return out
 
 

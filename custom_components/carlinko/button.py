@@ -2,13 +2,45 @@
 
 from __future__ import annotations
 
-from homeassistant.components.button import ButtonEntity
+from dataclasses import dataclass
+
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
-from .const import OP_FIND_CAR, OP_STOP_CHARGING, OP_WINDOWS_VENT
+from .api import caps
+from .const import (
+    OP_FIND_CAR,
+    OP_QUICK_COOL,
+    OP_STOP_CHARGING,
+    OP_WINDOWS_VENT,
+)
 from .entity import CarlinkoEntity
+
+
+@dataclass(frozen=True, kw_only=True)
+class CarlinkoButtonDescription(ButtonEntityDescription):
+    """Describes a CarLinko button entity."""
+
+    cap: str
+    opcode: str
+
+
+# ponytail: every opcode here except stop-charging is a static decode
+# (opcodes.md), not yet runtime-confirmed.
+BUTTON_DESCRIPTIONS: tuple[CarlinkoButtonDescription, ...] = (
+    CarlinkoButtonDescription(
+        key="stop_charging", cap="charging", opcode=OP_STOP_CHARGING
+    ),
+    CarlinkoButtonDescription(
+        key="vent_windows", cap="windows_vent", opcode=OP_WINDOWS_VENT
+    ),
+    CarlinkoButtonDescription(key="find_car", cap="find", opcode=OP_FIND_CAR),
+    CarlinkoButtonDescription(
+        key="quick_cool", cap="quick_cool", icon="mdi:snowflake", opcode=OP_QUICK_COOL
+    ),
+)
 
 
 async def async_setup_entry(
@@ -16,54 +48,28 @@ async def async_setup_entry(
     entry: CarlinkoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the buttons for each vehicle."""
+    """Set up the buttons each vehicle actually supports."""
     coordinator = entry.runtime_data
     async_add_entities(
-        cls(coordinator, vehicle_id)
-        for vehicle_id in coordinator.data
-        for cls in (CarlinkoStopChargingButton, CarlinkoVentWindowsButton, CarlinkoFindCarButton)
+        CarlinkoButton(coordinator, vehicle_id, description)
+        for vehicle_id, data in coordinator.data.items()
+        for description in BUTTON_DESCRIPTIONS
+        if caps(data["vehicle"]).get(description.cap)
     )
 
 
-class CarlinkoStopChargingButton(CarlinkoEntity, ButtonEntity):
-    """Button to stop an in-progress charge session."""
+class CarlinkoButton(CarlinkoEntity, ButtonEntity):
+    """A button that fires one remote-control opcode."""
 
-    _attr_translation_key = "stop_charging"
+    entity_description: CarlinkoButtonDescription
 
-    def __init__(self, coordinator, vehicle_id: str) -> None:
+    def __init__(
+        self, coordinator, vehicle_id: str, description: CarlinkoButtonDescription
+    ) -> None:
         super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
+        self.entity_description = description
+        self._attr_translation_key = description.key
+        self._attr_unique_id = f"{self.vin}_{description.key}"
 
     async def async_press(self) -> None:
-        """Stop charging."""
-        await self.coordinator.send(self.vehicle_id, OP_STOP_CHARGING)
-
-
-class CarlinkoVentWindowsButton(CarlinkoEntity, ButtonEntity):
-    """Button to crack all windows open (vent position)."""
-
-    _attr_translation_key = "vent_windows"
-
-    def __init__(self, coordinator, vehicle_id: str) -> None:
-        super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
-
-    async def async_press(self) -> None:
-        """Vent windows."""
-        # ponytail: 740E00 is a static decode (opcodes.md), not yet runtime-confirmed
-        await self.coordinator.send(self.vehicle_id, OP_WINDOWS_VENT)
-
-
-class CarlinkoFindCarButton(CarlinkoEntity, ButtonEntity):
-    """Button to flash lights / horn so you can find the car."""
-
-    _attr_translation_key = "find_car"
-
-    def __init__(self, coordinator, vehicle_id: str) -> None:
-        super().__init__(coordinator, vehicle_id)
-        self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
-
-    async def async_press(self) -> None:
-        """Find car."""
-        # ponytail: 740400 is a static decode (opcodes.md), not yet runtime-confirmed
-        await self.coordinator.send(self.vehicle_id, OP_FIND_CAR)
+        await self.coordinator.send(self.vehicle_id, self.entity_description.opcode)

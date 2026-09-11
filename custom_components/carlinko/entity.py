@@ -5,6 +5,7 @@ from __future__ import annotations
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .api import caps
 from .const import DOMAIN
 from .coordinator import CarlinkoCoordinator
 
@@ -34,6 +35,11 @@ class CarlinkoEntity(CoordinatorEntity[CarlinkoCoordinator]):
     def vehicle(self) -> dict:
         """Raw /user/vehicle row for this vehicle."""
         return self.coordinator.data[self.vehicle_id]["vehicle"]
+
+    @property
+    def caps(self) -> dict:
+        """What this model supports, per the cloud's vehicleControlConfig."""
+        return caps(self.vehicle)
 
     @property
     def state_data(self) -> dict:

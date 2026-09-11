@@ -145,6 +145,18 @@
       },
       "online": {
         "name": "Online"
+      },
+      "door_driver": {
+        "name": "Driver door"
+      },
+      "door_passenger": {
+        "name": "Passenger door"
+      },
+      "door_rear_left": {
+        "name": "Rear left door"
+      },
+      "door_rear_right": {
+        "name": "Rear right door"
       }
     },
     "lock": {
@@ -155,6 +167,9 @@
     "switch": {
       "climate": {
         "name": "Air conditioning"
+      },
+      "defog": {
+        "name": "Defog"
       }
     },
     "button": {
@@ -166,6 +181,9 @@
       },
       "find_car": {
         "name": "Find car"
+      },
+      "quick_cool": {
+        "name": "Quick cool"
       }
     },
     "device_tracker": {
@@ -206,6 +224,44 @@
     "date": {
       "last_service_date": {
         "name": "Last service date"
+      }
+    },
+    "select": {
+      "seat_vent_l": {
+        "name": "Driver seat ventilation",
+        "state": {
+          "off": "Off",
+          "l1": "Level 1",
+          "l2": "Level 2",
+          "l3": "Level 3"
+        }
+      },
+      "seat_vent_r": {
+        "name": "Passenger seat ventilation",
+        "state": {
+          "off": "Off",
+          "l1": "Level 1",
+          "l2": "Level 2",
+          "l3": "Level 3"
+        }
+      },
+      "seat_vent_lr": {
+        "name": "Rear left seat ventilation",
+        "state": {
+          "off": "Off",
+          "l1": "Level 1",
+          "l2": "Level 2",
+          "l3": "Level 3"
+        }
+      },
+      "seat_vent_rr": {
+        "name": "Rear right seat ventilation",
+        "state": {
+          "off": "Off",
+          "l1": "Level 1",
+          "l2": "Level 2",
+          "l3": "Level 3"
+        }
       }
     }
   }

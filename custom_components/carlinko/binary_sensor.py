@@ -30,6 +30,22 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[CarlinkoBinarySensorDescription, ...] = (
         device_class=BinarySensorDeviceClass.DOOR,
         is_on_fn=lambda d: None if d["doors"] is None else d["doors"] != 0,
     ),
+    # ponytail: bit order is another project's capture, unconfirmed on this car.
+    *(
+        CarlinkoBinarySensorDescription(
+            key=key,
+            device_class=BinarySensorDeviceClass.DOOR,
+            is_on_fn=(
+                lambda d, bit=bit: None if d["doors"] is None else bool(d["doors"] & bit)
+            ),
+        )
+        for key, bit in (
+            ("door_driver", 1),
+            ("door_passenger", 2),
+            ("door_rear_left", 4),
+            ("door_rear_right", 8),
+        )
+    ),
     CarlinkoBinarySensorDescription(
         key="trunk_open",
         device_class=BinarySensorDeviceClass.OPENING,

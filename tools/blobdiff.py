@@ -21,9 +21,12 @@ DECODED: dict[int, str] = {
     12: "volt12", 13: "volt12", 14: "speed", 15: "speed",
     18: "odometer", 19: "odometer", 20: "odometer",
     23: "ac_on", 24: "ac_temp", 28: "battery_pct", 29: "range_km", 30: "range_km",
+    32: "seat_heat_l", 33: "seat_heat_r", 34: "seat_heat_lr", 36: "seat_heat_rr",
+    37: "seat_vent_l", 38: "seat_vent_r", 39: "seat_vent_lr", 41: "seat_vent_rr",
     55: "consumption", 56: "charge_mode", 57: "charge_state",
     58: "charge_remain_min", 59: "charge_remain_min",
-    62: "charge_power_kw", 63: "charge_power_kw", 68: "wltc_range", 69: "wltc_range",
+    62: "charge_power_kw", 63: "charge_power_kw",
+    64: "windshield_heat", 65: "steer_heat", 68: "wltc_range", 69: "wltc_range",
 }
 DECODED.update({44 + i: f"tyre_{p}_pressure" for i, p in enumerate(("fl", "fr", "rl", "rr"))})
 DECODED.update({48 + i: f"tyre_{p}_temp" for i, p in enumerate(("fl", "fr", "rl", "rr"))})

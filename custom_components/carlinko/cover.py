@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
+from .api import caps
 from .const import (
     OP_SUNROOF_CLOSE,
     OP_SUNROOF_OPEN,
@@ -26,12 +27,17 @@ async def async_setup_entry(
     entry: CarlinkoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the covers (windows, trunk, sunroof) for each vehicle."""
+    """Set up the covers (windows, trunk, sunroof) each vehicle supports."""
     coordinator = entry.runtime_data
     async_add_entities(
         cls(coordinator, vehicle_id)
-        for vehicle_id in coordinator.data
-        for cls in (CarlinkoWindows, CarlinkoTrunk, CarlinkoSunroof)
+        for vehicle_id, data in coordinator.data.items()
+        for cls, cap in (
+            (CarlinkoWindows, "windows_open"),
+            (CarlinkoTrunk, "liftgate"),
+            (CarlinkoSunroof, "sunroof"),
+        )
+        if caps(data["vehicle"]).get(cap)
     )
 
 
@@ -87,17 +93,21 @@ class CarlinkoSunroof(CarlinkoEntity, CoverEntity):
 
     _attr_translation_key = "sunroof"
     _attr_device_class = CoverDeviceClass.WINDOW
-    _attr_supported_features = (
-        CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE | CoverEntityFeature.OPEN_TILT
-    )
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
         super().__init__(coordinator, vehicle_id)
         self._attr_unique_id = f"{self.vin}_{self._attr_translation_key}"
 
     @property
+    def supported_features(self) -> CoverEntityFeature:
+        """Drop the tilt button on a sunroof that only opens and closes."""
+        features = CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
+        if self.caps.get("sunroof_tilt"):
+            features |= CoverEntityFeature.OPEN_TILT
+        return features
+
+    @property
     def is_closed(self) -> bool | None:
-        # ponytail: always created; disable it in HA if the car has no opening sunroof
         v = self.state_data["sunroof"]
         return None if v is None else v == 0
 

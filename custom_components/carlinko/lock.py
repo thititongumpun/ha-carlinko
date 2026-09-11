@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
+from .api import caps
 from .const import OP_LOCK, OP_UNLOCK
 from .entity import CarlinkoEntity
 
@@ -18,10 +19,12 @@ async def async_setup_entry(
     entry: CarlinkoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up one lock per vehicle."""
+    """Set up one lock per vehicle that supports remote locking."""
     coordinator = entry.runtime_data
     async_add_entities(
-        CarlinkoLock(coordinator, vehicle_id) for vehicle_id in coordinator.data
+        CarlinkoLock(coordinator, vehicle_id)
+        for vehicle_id, data in coordinator.data.items()
+        if caps(data["vehicle"]).get("lock")
     )
 
 

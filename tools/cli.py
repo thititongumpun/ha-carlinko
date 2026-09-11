@@ -26,7 +26,7 @@ _p = importlib.util.module_from_spec(ModuleSpec("carlinko", None, is_package=Tru
 _p.__path__ = [str(Path(__file__).resolve().parents[1] / "custom_components" / "carlinko")]
 sys.modules["carlinko"] = _p
 
-from carlinko.api import CarlinkoApi, CarlinkoError  # noqa: E402
+from carlinko.api import CarlinkoApi, CarlinkoError, caps  # noqa: E402
 from carlinko.const import DEFAULT_REGION  # noqa: E402
 
 
@@ -68,6 +68,10 @@ async def run(args: argparse.Namespace) -> int:
                 if records and records[0].get("maintainId"):
                     details = await api.get_maintain_details(records[0]["maintainId"])
                     print(f"  details(newest): {json.dumps(details, ensure_ascii=False)}")
+            elif args.cmd == "caps":
+                print(f"  raw: {v.get('vehicleControlConfig')}")
+                for k, val in caps(v).items():
+                    print(f"  {k}: {val}")
             elif args.cmd == "locate":
                 print(f"  {await api.locate(sn)}")
             elif args.cmd == "send":
@@ -113,6 +117,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("status")
     sub.add_parser("locate")
+    sub.add_parser("caps", help="what this model says it supports (vehicleControlConfig)")
     sub.add_parser("maintain")
     send = sub.add_parser("send")
     send.add_argument("opcode")
