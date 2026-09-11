@@ -5,26 +5,31 @@ function ft(a, t, e) {
   return a === "charging" ? "charging" : t > 0 || e ? "driving" : "parked";
 }
 const Q = 864e5, $ = (a) => new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
-function gt(a, t = /* @__PURE__ */ new Date()) {
+function ut(a, t = /* @__PURE__ */ new Date()) {
   const e = $(t), s = e - 6 * Q, i = new Date(t.getFullYear(), t.getMonth(), 1).getTime();
-  let r = 0, o = 0, n = 0;
+  let n = 0, o = 0, r = 0;
   for (const p of a) {
     const d = Number(p.change);
-    !Number.isFinite(d) || d < 0 || (p.start >= e && (r += d), p.start >= s && (o += d), p.start >= i && (n += d));
+    !Number.isFinite(d) || d < 0 || (p.start >= e && (n += d), p.start >= s && (o += d), p.start >= i && (r += d));
   }
-  return { today: r, week: o, month: n };
+  return { today: n, week: o, month: r };
 }
-function ut(a, t = /* @__PURE__ */ new Date()) {
+function gt(a, t = /* @__PURE__ */ new Date()) {
   const e = $(t), s = [0, 0, 0, 0, 0, 0, 0];
   for (const i of a) {
-    const r = Number(i.change);
-    if (!Number.isFinite(r) || r < 0) continue;
+    const n = Number(i.change);
+    if (!Number.isFinite(n) || n < 0) continue;
     const o = 6 - Math.round((e - $(new Date(i.start))) / Q);
-    o >= 0 && o < 7 && (s[o] += r);
+    o >= 0 && o < 7 && (s[o] += n);
   }
   return s;
 }
-function vt(a) {
+function vt(a, t, e) {
+  if (a === null || !Number.isFinite(a) || a < 0) return "—";
+  const s = Math.floor(a / 60), i = Math.round(a % 60);
+  return s ? i ? `${s} ${t} ${i} ${e}` : `${s} ${t}` : `${i} ${e}`;
+}
+function _t(a) {
   const t = a.filter((s) => s !== null && s > 0);
   if (!t.length) return a.map(() => "none");
   const e = t.reduce((s, i) => s + i, 0) / t.length;
@@ -32,7 +37,7 @@ function vt(a) {
     (s) => s === null || s <= 0 ? "none" : s < e * 0.9 ? "low" : s < e * 0.95 ? "warn" : "ok"
   );
 }
-const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, _t = {
+const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, bt = {
   range: "Range",
   state: "State",
   parked: "Parked",
@@ -52,14 +57,17 @@ const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, _t =
   left: "Energy left",
   updated: "Updated",
   live: "live",
-  min_left: "min left",
+  hr: "hr",
+  min: "min",
+  left_pre: "",
+  left_post: " left",
   tyres: "Tyres",
   fl: "Front left",
   fr: "Front right",
   rl: "Rear left",
   rr: "Rear right",
   ac_temp: "A/C set to"
-}, bt = {
+}, yt = {
   range: "ระยะทาง",
   state: "สถานะ",
   parked: "จอดอยู่",
@@ -79,14 +87,17 @@ const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, _t =
   left: "พลังงานคงเหลือ",
   updated: "อัปเดต",
   live: "ออนไลน์",
-  min_left: "นาที",
+  hr: "ชม.",
+  min: "นาที",
+  left_pre: "เหลือ ",
+  left_post: "",
   tyres: "ยาง",
   fl: "ซ้ายหน้า",
   fr: "ขวาหน้า",
   rl: "ซ้ายหลัง",
   rr: "ขวาหลัง",
   ac_temp: "แอร์ตั้งไว้"
-}, yt = `
+}, xt = `
 :host { display: block; }
 .card {
   background: var(--card-background-color, #fff);
@@ -148,7 +159,7 @@ footer { padding-top: 14px; border-top: 1px solid var(--divider-color, #e6e6e6);
   const t = Number(a == null ? void 0 : a.state);
   return a && Number.isFinite(t) ? t : null;
 }, l = (a, t = 0) => a === null ? "—" : a.toFixed(t), h = (a) => a.replace(/[&<>"]/g, (t) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[t]);
-class xt extends HTMLElement {
+class kt extends HTMLElement {
   constructor() {
     super(...arguments), this._config = {}, this._root = this.attachShadow({ mode: "open" }), this._html = "", this._masked = !0, this._pending = /* @__PURE__ */ new Set(), this._stats = null, this._bars = [], this._statsAt = 0, this._odo = "";
   }
@@ -176,47 +187,47 @@ class xt extends HTMLElement {
   }
   /** entity registry -> { device, translation_key: entity_id } for the chosen car. */
   _resolve() {
-    var i, r, o;
+    var i, n, o;
     const t = ((i = this._hass) == null ? void 0 : i.entities) || {};
     let e = this._config.device_id;
     const s = {};
     if (!e) {
-      for (const n of Object.values(t))
-        if ((n == null ? void 0 : n.platform) === "carlinko" && n.translation_key === "battery") {
-          e = n.device_id;
+      for (const r of Object.values(t))
+        if ((r == null ? void 0 : r.platform) === "carlinko" && r.translation_key === "battery") {
+          e = r.device_id;
           break;
         }
     }
     if (e)
-      for (const n of Object.values(t))
-        (n == null ? void 0 : n.platform) === "carlinko" && n.device_id === e && n.translation_key && (s[n.translation_key] = n.entity_id);
-    return { device: e ? (o = (r = this._hass) == null ? void 0 : r.devices) == null ? void 0 : o[e] : void 0, map: s };
+      for (const r of Object.values(t))
+        (r == null ? void 0 : r.platform) === "carlinko" && r.device_id === e && r.translation_key && (s[r.translation_key] = r.entity_id);
+    return { device: e ? (o = (n = this._hass) == null ? void 0 : n.devices) == null ? void 0 : o[e] : void 0, map: s };
   }
   _render() {
-    var L, N, A, E, U, W, P, Y, I, B, H, O, q;
+    var j, L, A, E, U, W, P, Y, I, B, H, O, q;
     if (!this._hass) return;
-    const t = String(this._hass.language || "en").startsWith("th") ? bt : _t, { device: e, map: s } = this._resolve(), i = (c) => {
-      const g = s[c], v = g ? this._hass.states[g] : void 0;
+    const t = String(this._hass.language || "en").startsWith("th") ? yt : bt, { device: e, map: s } = this._resolve(), i = (c) => {
+      const u = s[c], v = u ? this._hass.states[u] : void 0;
       return v && v.state !== "unavailable" && v.state !== "unknown" ? v : void 0;
-    }, r = (c) => {
-      var g;
-      return ((g = i(c)) == null ? void 0 : g.state) === "on";
+    }, n = (c) => {
+      var u;
+      return ((u = i(c)) == null ? void 0 : u.state) === "on";
     };
     this._maybeFetchStats(s.odometer);
-    const o = f(i("battery")), n = f(i("range")), p = f(i("speed")) ?? 0, d = ft((L = i("charge_state")) == null ? void 0 : L.state, p, r("hv_active")), _ = d === "charging", S = f(i("charge_power")), C = f(i("charge_remaining")), x = f(i("consumption")), X = Number(this._config.battery_kwh) || 61, Z = ((A = (N = i("range")) == null ? void 0 : N.attributes) == null ? void 0 : A.unit_of_measurement) ?? "km", tt = s.odometer && ((U = (E = this._hass.states[s.odometer]) == null ? void 0 : E.attributes) == null ? void 0 : U.unit_of_measurement) || "km", D = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), et = D ? pt(String(D), this._masked) : "—", z = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", y = s.battery ? (W = this._hass.states[s.battery]) == null ? void 0 : W.last_updated : void 0, M = y ? Math.max(0, Math.round((Date.now() - new Date(y).getTime()) / 6e4)) : null, T = s.vehicle ? (Y = (P = this._hass.states[s.vehicle]) == null ? void 0 : P.attributes) == null ? void 0 : Y.entity_picture : void 0, st = o === null ? 0 : Math.max(0, Math.min(100, o)), F = 2 * Math.PI * 34, R = (I = i("door_lock")) == null ? void 0 : I.state, u = [];
-    s.door_lock && u.push(this._pill("lock", R === "locked" ? t.unlock : t.lock, R === "locked")), s.climate && u.push(this._pill("climate", t.ac, r("climate"))), s.find_car && u.push(this._pill("find_car", t.find, !1)), s.vent_windows && u.push(this._pill("vent_windows", t.vent, !1)), _ && s.stop_charging && u.push(this._pill("stop_charging", t.stop, !1));
-    const j = f(i("ac_temp")), it = ((H = (B = i("ac_temp")) == null ? void 0 : B.attributes) == null ? void 0 : H.unit_of_measurement) ?? "°C", k = G.map((c) => f(i(`tyre_${c}_pressure`))), at = vt(k), nt = ((q = (O = i("tyre_fl_pressure")) == null ? void 0 : O.attributes) == null ? void 0 : q.unit_of_measurement) ?? "", rt = G.map((c, g) => {
+    const o = f(i("battery")), r = f(i("range")), p = f(i("speed")) ?? 0, d = ft((j = i("charge_state")) == null ? void 0 : j.state, p, n("hv_active")), m = d === "charging", S = f(i("charge_power")), D = f(i("charge_remaining")), x = f(i("consumption")), X = Number(this._config.battery_kwh) || 61, Z = ((A = (L = i("range")) == null ? void 0 : L.attributes) == null ? void 0 : A.unit_of_measurement) ?? "km", tt = s.odometer && ((U = (E = this._hass.states[s.odometer]) == null ? void 0 : E.attributes) == null ? void 0 : U.unit_of_measurement) || "km", C = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), et = C ? pt(String(C), this._masked) : "—", z = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", y = s.battery ? (W = this._hass.states[s.battery]) == null ? void 0 : W.last_updated : void 0, M = y ? Math.max(0, Math.round((Date.now() - new Date(y).getTime()) / 6e4)) : null, T = s.vehicle ? (Y = (P = this._hass.states[s.vehicle]) == null ? void 0 : P.attributes) == null ? void 0 : Y.entity_picture : void 0, st = o === null ? 0 : Math.max(0, Math.min(100, o)), F = 2 * Math.PI * 34, N = (I = i("door_lock")) == null ? void 0 : I.state, g = [];
+    s.door_lock && g.push(this._pill("lock", N === "locked" ? t.unlock : t.lock, N === "locked")), s.climate && g.push(this._pill("climate", t.ac, n("climate"))), s.find_car && g.push(this._pill("find_car", t.find, !1)), s.vent_windows && g.push(this._pill("vent_windows", t.vent, !1)), m && s.stop_charging && g.push(this._pill("stop_charging", t.stop, !1));
+    const R = f(i("ac_temp")), it = ((H = (B = i("ac_temp")) == null ? void 0 : B.attributes) == null ? void 0 : H.unit_of_measurement) ?? "°C", k = G.map((c) => f(i(`tyre_${c}_pressure`))), at = _t(k), rt = ((q = (O = i("tyre_fl_pressure")) == null ? void 0 : O.attributes) == null ? void 0 : q.unit_of_measurement) ?? "", nt = G.map((c, u) => {
       var K, V;
       const v = f(i(`tyre_${c}_temp`)), ht = ((V = (K = i(`tyre_${c}_temp`)) == null ? void 0 : K.attributes) == null ? void 0 : V.unit_of_measurement) ?? "°C";
-      return `<div class="tyre ${at[g]}">
+      return `<div class="tyre ${at[u]}">
         <div>
           <div class="label">${t[c]}</div>
-          <div class="v">${l(k[g], 2)}<span class="unit">${h(String(nt))}</span></div>
+          <div class="v">${l(k[u], 2)}<span class="unit">${h(String(rt))}</span></div>
         </div>
         ${v === null ? "" : `<div class="t">${l(v, 1)}${h(String(ht))}</div>`}
       </div>`;
-    }), ot = k.some((c) => c !== null), m = this._stats, ct = Math.max(1, ...this._bars), lt = m && x !== null ? m.today * x / 100 : null, dt = o === null ? null : o * X / 100, w = `
-<style>${yt}</style>
+    }), ot = k.some((c) => c !== null), _ = this._stats, ct = Math.max(1, ...this._bars), lt = _ && x !== null ? _.today * x / 100 : null, dt = o === null ? null : o * X / 100, w = `
+<style>${xt}</style>
 <div class="card">
   <div class="row">
     <div>
@@ -245,31 +256,31 @@ class xt extends HTMLElement {
     <div>
       <div class="stat">
         <div class="label">${t.range}</div>
-        <div class="big">${l(n)}<span class="unit">${h(String(Z))}</span></div>
+        <div class="big">${l(r)}<span class="unit">${h(String(Z))}</span></div>
       </div>
       <div class="stat">
         <div class="label">${t.state}</div>
         <div class="statev">${t[d]}</div>
-        ${_ && (S !== null || C !== null) ? `<div class="sub">${l(S, 1)} kW &middot; ${l(C)} ${t.min_left}</div>` : ""}
+        ${m && (S !== null || D !== null) ? `<div class="sub">${l(S, 1)} kW &middot; ${t.left_pre}${vt(D, t.hr, t.min)}${t.left_post}</div>` : ""}
       </div>
     </div>
   </section>
 
-  ${u.length ? `<section class="pills">${u.join("")}</section>` : ""}
+  ${g.length ? `<section class="pills">${g.join("")}</section>` : ""}
 
-  ${j === null ? "" : `<section>
+  ${R === null ? "" : `<section>
     <div class="label">${t.ac_temp}</div>
-    <div class="big">${l(j)}<span class="unit">${h(String(it))}</span></div>
+    <div class="big">${l(R)}<span class="unit">${h(String(it))}</span></div>
   </section>`}
 
-  ${m ? `<section>
+  ${_ ? `<section>
     <div class="three">
       <div>
         <div class="label">${t.today}</div>
-        <div class="big">${l(m.today)}<span class="unit">${h(String(tt))}</span></div>
+        <div class="big">${l(_.today)}<span class="unit">${h(String(tt))}</span></div>
       </div>
-      <div class="r"><div class="label">${t.week}</div><div class="big">${l(m.week)}</div></div>
-      <div class="r"><div class="label">${t.month}</div><div class="big">${l(m.month)}</div></div>
+      <div class="r"><div class="label">${t.week}</div><div class="big">${l(_.week)}</div></div>
+      <div class="r"><div class="label">${t.month}</div><div class="big">${l(_.month)}</div></div>
     </div>
     <div class="bars">${this._bars.map((c) => `<i class="${c ? "" : "zero"}" style="height:${Math.max(4, c / ct * 100)}%"></i>`).join("")}</div>
   </section>` : ""}
@@ -288,7 +299,7 @@ class xt extends HTMLElement {
 
   ${ot ? `<section>
     <div class="label">${t.tyres}</div>
-    <div class="tyres">${rt.join("")}</div>
+    <div class="tyres">${nt.join("")}</div>
   </section>` : ""}
 
   <footer>${t.updated} ${y ? h(new Date(y).toLocaleString()) : "—"}</footer>
@@ -302,7 +313,7 @@ class xt extends HTMLElement {
     return `<button class="pill${s ? " on" : ""}" data-act="${t}"${i ? " disabled" : ""}>${i ? "…" : h(e)}</button>`;
   }
   _act(t, e) {
-    var r;
+    var n;
     if (t === "mask")
       return this._masked = !this._masked, this._html = "", this._safeRender();
     if (t === "refresh") {
@@ -310,7 +321,7 @@ class xt extends HTMLElement {
       return;
     }
     const i = {
-      lock: ["lock", ((r = this._hass.states[e.door_lock]) == null ? void 0 : r.state) === "locked" ? "unlock" : "lock", e.door_lock],
+      lock: ["lock", ((n = this._hass.states[e.door_lock]) == null ? void 0 : n.state) === "locked" ? "unlock" : "lock", e.door_lock],
       climate: ["switch", "toggle", e.climate],
       find_car: ["button", "press", e.find_car],
       vent_windows: ["button", "press", e.vent_windows],
@@ -332,11 +343,11 @@ class xt extends HTMLElement {
     (e !== this._odo || Date.now() - this._statsAt > J) && (this._odo = e, this._fetchStats());
   }
   _fetchStats(t = !1) {
-    var n;
+    var r;
     const { map: e } = this._resolve(), s = e.odometer;
-    if (!s || !((n = this._hass) != null && n.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
+    if (!s || !((r = this._hass) != null && r.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
     this._statsAt = Date.now();
-    const i = /* @__PURE__ */ new Date(), r = new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime(), o = Math.min(r - 6 * 864e5, new Date(i.getFullYear(), i.getMonth(), 1).getTime());
+    const i = /* @__PURE__ */ new Date(), n = new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime(), o = Math.min(n - 6 * 864e5, new Date(i.getFullYear(), i.getMonth(), 1).getTime());
     Promise.resolve(
       this._hass.callWS({
         type: "recorder/statistics_during_period",
@@ -346,14 +357,14 @@ class xt extends HTMLElement {
         types: ["change"]
       })
     ).then((p) => {
-      const d = ((p == null ? void 0 : p[s]) || []).map((_) => ({ start: +new Date(_.start), change: _.change }));
-      this._stats = gt(d, i), this._bars = ut(d, i), this._html = "", this._safeRender();
+      const d = ((p == null ? void 0 : p[s]) || []).map((m) => ({ start: +new Date(m.start), change: m.change }));
+      this._stats = ut(d, i), this._bars = gt(d, i), this._html = "", this._safeRender();
     }).catch(() => {
       this._stats = null, this._bars = [], this._html = "", this._safeRender();
     });
   }
 }
-customElements.define("carlinko-card", xt);
+customElements.define("carlinko-card", kt);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "carlinko-card",

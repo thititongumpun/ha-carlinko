@@ -1,4 +1,4 @@
-import { maskPlate, carState, drivenKm, last7Days, tyreLevels, type StatRow } from './logic.ts'
+import { maskPlate, carState, drivenKm, last7Days, tyreLevels, fmtDuration, type StatRow } from './logic.ts'
 
 // ponytail: no INSIGHTS section from the reference dashboard — the integration exposes no cost
 // entities, so it would be invented data. Add it when those entities exist.
@@ -15,7 +15,7 @@ const EN: Dict = {
   range: 'Range', state: 'State', parked: 'Parked', driving: 'Driving', charging: 'Charging',
   lock: 'Lock', unlock: 'Unlock', ac: 'A/C', find: 'Find car', vent: 'Vent windows', stop: 'Stop charging',
   today: 'Driven today', week: 'Week', month: 'Month', efficiency: 'Efficiency',
-  used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', min_left: 'min left',
+  used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', hr: 'hr', min: 'min', left_pre: '', left_post: ' left',
   tyres: 'Tyres', fl: 'Front left', fr: 'Front right', rl: 'Rear left', rr: 'Rear right',
   ac_temp: 'A/C set to',
 }
@@ -23,7 +23,7 @@ const TH: Dict = {
   range: 'ระยะทาง', state: 'สถานะ', parked: 'จอดอยู่', driving: 'กำลังขับ', charging: 'กำลังชาร์จ',
   lock: 'ล็อก', unlock: 'ปลดล็อก', ac: 'แอร์', find: 'ค้นหารถ', vent: 'แง้มกระจก', stop: 'หยุดชาร์จ',
   today: 'ขับวันนี้', week: 'สัปดาห์', month: 'เดือน', efficiency: 'ประสิทธิภาพ',
-  used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', min_left: 'นาที',
+  used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', hr: 'ชม.', min: 'นาที', left_pre: 'เหลือ ', left_post: '',
   tyres: 'ยาง', fl: 'ซ้ายหน้า', fr: 'ขวาหน้า', rl: 'ซ้ายหลัง', rr: 'ขวาหลัง',
   ac_temp: 'แอร์ตั้งไว้',
 }
@@ -265,7 +265,7 @@ class CarlinkoCard extends HTMLElement {
         <div class="label">${t.state}</div>
         <div class="statev">${t[state]}</div>
         ${charging && (kw !== null || mins !== null)
-          ? `<div class="sub">${fmt(kw, 1)} kW &middot; ${fmt(mins)} ${t.min_left}</div>`
+          ? `<div class="sub">${fmt(kw, 1)} kW &middot; ${t.left_pre}${fmtDuration(mins, t.hr, t.min)}${t.left_post}</div>`
           : ''}
       </div>
     </div>

@@ -54,6 +54,15 @@ export function last7Days(rows: StatRow[], now: Date = new Date()): number[] {
   return out
 }
 
+/** 200 -> "3 hr 20 min"; under an hour stays "45 min"; a whole hour drops the minutes. */
+export function fmtDuration(mins: number | null, hr: string, min: string): string {
+  if (mins === null || !Number.isFinite(mins) || mins < 0) return '\u2014'
+  const h = Math.floor(mins / 60)
+  const m = Math.round(mins % 60)
+  if (!h) return `${m} ${min}`
+  return m ? `${h} ${hr} ${m} ${min}` : `${h} ${hr}`
+}
+
 export type TyreLevel = 'ok' | 'warn' | 'low' | 'none'
 
 /**

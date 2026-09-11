@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { maskPlate, carState, drivenKm, last7Days, tyreLevels } from './logic.ts'
+import { maskPlate, carState, drivenKm, last7Days, tyreLevels, fmtDuration } from './logic.ts'
 
 test('maskPlate', () => {
   assert.equal(maskPlate('B 1234 PGB'), 'B •••• PGB')
@@ -38,4 +38,12 @@ test('tyreLevels', () => {
   assert.deepEqual(tyreLevels([40, 40, null, 0]), ['ok', 'ok', 'none', 'none'])
   // nothing reporting at all
   assert.deepEqual(tyreLevels([null, null, null, null]), ['none', 'none', 'none', 'none'])
+})
+
+test('fmtDuration', () => {
+  assert.equal(fmtDuration(200, 'hr', 'min'), '3 hr 20 min')
+  assert.equal(fmtDuration(45, 'hr', 'min'), '45 min')
+  assert.equal(fmtDuration(120, 'hr', 'min'), '2 hr')
+  assert.equal(fmtDuration(0, 'hr', 'min'), '0 min')
+  assert.equal(fmtDuration(null, 'hr', 'min'), '\u2014')
 })

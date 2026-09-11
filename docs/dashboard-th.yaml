@@ -203,7 +203,7 @@ views:
       icon_color: '{% set b = states(''sensor.CAR_battery'')|int(0) %}{{ ''green'' if b > 50 else ''orange'' if b > 20 else ''red'' }}'
       primary: '{{ states(''sensor.CAR_battery'') }}% · วิ่งได้อีก {{ states(''sensor.CAR_range'')|int }} กม.'
       secondary: '{% set s = states(''sensor.CAR_charging_status'') %}{% set m = states(''sensor.CAR_charging_mode'') %}{% set p = states(''sensor.CAR_charging_power'') %}{% set t = states(''sensor.CAR_charging_time_remaining'')
-        %}{% if s == ''charging'' %}กำลังชาร์จ {{ ''DC'' if m == ''dc'' else ''AC'' }} {{ p }} kW · เหลือ {{ t }} นาที{% elif s == ''complete'' %}ชาร์จเสร็จแล้ว{% elif m != ''none'' %}เสียบสายอยู่ ยังไม่ชาร์จ{%
+        %}{% if s == ''charging'' %}กำลังชาร์จ {{ ''DC'' if m == ''dc'' else ''AC'' }} {{ p }} kW · เหลือ {% set t = t|int(0) %}{% if t >= 60 %}{{ t // 60 }} ชม. {% if t % 60 %}{{ t % 60 }} นาที{% endif %}{% else %}{{ t }} นาที{% endif %}{% elif s == ''complete'' %}ชาร์จเสร็จแล้ว{% elif m != ''none'' %}เสียบสายอยู่ ยังไม่ชาร์จ{%
         else %}ไม่ได้เสียบสาย{% endif %}'
       fill_container: true
       multiline_secondary: true
@@ -269,14 +269,15 @@ views:
       grid_options:
         columns: 6
       name: กำลังไฟชาร์จ
-    - type: tile
+    - type: custom:mushroom-template-card
       entity: sensor.CAR_charging_time_remaining
-      vertical: false
       icon: mdi:timer-sand
-      color: blue
+      icon_color: blue
+      primary: '{% set t = states(''sensor.CAR_charging_time_remaining'')|int(-1) %}{% if t < 0 %}—{% elif t >= 60 %}{{ t // 60 }} ชม.{% if t % 60 %} {{ t % 60 }} นาที{% endif %}{% else %}{{ t }} นาที{% endif %}'
+      secondary: เวลาชาร์จที่เหลือ
+      fill_container: true
       grid_options:
         columns: 6
-      name: เวลาชาร์จที่เหลือ
     - type: tile
       entity: sensor.CAR_charge_target_estimated
       vertical: false
