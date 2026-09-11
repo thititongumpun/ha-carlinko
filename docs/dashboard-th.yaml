@@ -163,28 +163,9 @@ views:
       vertical: false
       icon: mdi:car-door
       color: teal
+      features:
+      - type: cover-open-close
       name: กระจกหน้าต่าง
-    - type: custom:mushroom-chips-card
-      alignment: center
-      chips:
-      - type: template
-        icon: mdi:window-open-variant
-        content: เปิดกระจก
-        icon_color: teal
-        tap_action:
-          action: perform-action
-          perform_action: cover.open_cover
-          target:
-            entity_id: cover.CAR_windows
-      - type: template
-        icon: mdi:window-closed-variant
-        content: ปิดกระจก
-        icon_color: blue-grey
-        tap_action:
-          action: perform-action
-          perform_action: cover.close_cover
-          target:
-            entity_id: cover.CAR_windows
     - type: custom:mushroom-template-card
       icon: mdi:window-open-variant
       icon_color: teal
@@ -201,68 +182,21 @@ views:
       vertical: false
       icon: mdi:car-back
       color: teal
+      features:
+      - type: cover-open-close
       grid_options:
         columns: 6
       name: ฝาท้าย
-    - type: custom:mushroom-chips-card
-      alignment: center
-      chips:
-      - type: template
-        icon: mdi:boom-gate-up
-        content: เปิดฝาท้าย
-        icon_color: teal
-        tap_action:
-          action: perform-action
-          perform_action: cover.open_cover
-          target:
-            entity_id: cover.CAR_tailgate
-      - type: template
-        icon: mdi:boom-gate-down
-        content: ปิดฝาท้าย
-        icon_color: blue-grey
-        tap_action:
-          action: perform-action
-          perform_action: cover.close_cover
-          target:
-            entity_id: cover.CAR_tailgate
     - type: tile
       entity: cover.CAR_sunroof
       vertical: false
       icon: mdi:car-select
       color: teal
+      features:
+      - type: cover-open-close
       grid_options:
         columns: 6
       name: ซันรูฟ
-    - type: custom:mushroom-chips-card
-      alignment: center
-      chips:
-      - type: template
-        icon: mdi:window-shutter-open
-        content: เปิดซันรูฟ
-        icon_color: teal
-        tap_action:
-          action: perform-action
-          perform_action: cover.open_cover
-          target:
-            entity_id: cover.CAR_sunroof
-      - type: template
-        icon: mdi:angle-obtuse
-        content: เอียงซันรูฟ
-        icon_color: amber
-        tap_action:
-          action: perform-action
-          perform_action: cover.open_cover_tilt
-          target:
-            entity_id: cover.CAR_sunroof
-      - type: template
-        icon: mdi:window-shutter
-        content: ปิดซันรูฟ
-        icon_color: blue-grey
-        tap_action:
-          action: perform-action
-          perform_action: cover.close_cover
-          target:
-            entity_id: cover.CAR_sunroof
     - type: custom:mushroom-chips-card
       alignment: center
       chips:
