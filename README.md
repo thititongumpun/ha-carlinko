@@ -69,7 +69,7 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 
 | Platform | Entities |
 |---|---|
-| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4 |
+| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4 |
 | Binary sensor | charging, cable connected, door open, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
 | Switch | air conditioning |
@@ -77,8 +77,22 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 | Button | find car, vent windows, stop charging |
 | Device tracker | location (+ `address` attribute) |
 | Image | vehicle image |
-| Number (config) | last service odometer, service interval km, service interval days |
+| Number (config) | last service odometer, service interval km, service interval days, battery capacity (usable) |
 | Date (config) | last service date |
+
+## Charge target
+
+The car does not report the SoC limit you set on its charging screen, and there is
+no command to change it. **Charge target (estimated)** infers it while charging:
+the car's own remaining-time estimate already accounts for the limit, so the
+target is the current charge plus the energy still to be delivered.
+
+Set **Battery capacity (usable)** to your pack size if the estimate reads high or
+low — 55 kWh by default, back-solved from an Omoda C5 EV session. The reading is
+deliberately not clamped to 100 %: a target that settles above or below your real
+limit is the signal to adjust the capacity. Above roughly 90 % the car tapers and
+pads its estimate, so a true 100 % shows as 95-105 %. The sensor is unavailable
+whenever the car is not charging.
 
 ## Service reminder
 

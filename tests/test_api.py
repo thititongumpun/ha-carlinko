@@ -7,7 +7,7 @@ import json
 
 import pytest
 
-from carlinko.api import CarlinkoError, parse_blob, sign
+from carlinko.api import CarlinkoError, charge_target, parse_blob, sign
 
 # Sample from api-map.md: J5 EV parked/asleep, 73 bytes.
 SAMPLE = (
@@ -85,3 +85,13 @@ def test_parse_blob_tyres():
     assert s["tyre_fl_temp"] == 29.5  # app shows 30
     assert s["tyre_rr_temp"] == 28.5  # app shows 29
     assert s["ac_on"] is True  # b23 == 1, nonzero means on
+
+
+def test_charge_target_infers_the_soc_limit():
+    # 82 %, 2.8 kW, 218 min on a car set to 100 %: 10.2 kWh to go over a 55 kWh pack.
+    charging = {"charge_state": 1, "battery_pct": 82, "charge_power_kw": 2.8, "charge_remain_min": 218}
+    assert charge_target(charging, 55) == 100.5
+    assert charge_target({**charging, "charge_state": 2}, 55) is None
+    assert charge_target({**charging, "charge_remain_min": None}, 55) is None
+    assert charge_target({**charging, "charge_power_kw": 0}, 55) is None
+    assert charge_target(parse_blob(SAMPLE), 55) is None  # idle blob, real key shape

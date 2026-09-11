@@ -10,7 +10,7 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import EntityCategory, UnitOfLength, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfEnergy, UnitOfLength, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -50,6 +50,15 @@ NUMBER_DESCRIPTIONS: tuple[CarlinkoNumberDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.DAYS,
         native_min_value=30,
         native_max_value=1095,
+        native_step=1,
+    ),
+    CarlinkoNumberDescription(
+        key="battery_capacity",
+        option="battery_kwh",
+        device_class=NumberDeviceClass.ENERGY_STORAGE,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_min_value=10,
+        native_max_value=200,
         native_step=1,
     ),
 )

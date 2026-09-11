@@ -8,7 +8,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .coordinator import CarlinkoCoordinator
 
-SERVICE_DEFAULTS = {"interval_km": 20000, "interval_days": 365}
+# battery_kwh: usable pack, back-solved from one Omoda C5 charging session; tune per car
+SERVICE_DEFAULTS = {"interval_km": 20000, "interval_days": 365, "battery_kwh": 55}
 
 
 class CarlinkoEntity(CoordinatorEntity[CarlinkoCoordinator]):

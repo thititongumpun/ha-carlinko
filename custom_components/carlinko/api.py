@@ -150,6 +150,22 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
     return out
 
 
+def charge_target(state: dict[str, Any], battery_kwh: float) -> float | None:
+    """Infer the SoC limit set in the car from its own remaining-time estimate.
+
+    ``charge_remain_min`` is the BMS figure and already accounts for the target,
+    so target = now + the energy still to be delivered. None unless charging.
+    """
+    pct = state["battery_pct"]
+    kw = state["charge_power_kw"]
+    mins = state["charge_remain_min"]
+    if state["charge_state"] != 1 or not kw or pct is None or mins is None or not battery_kwh:
+        return None
+    # ponytail: linear pack model; the car tapers and pads above ~90 %, so a true
+    # 100 % reads 95-105. Fit a taper curve from logged sessions if it ever matters.
+    return round(pct + kw * mins / 60 / battery_kwh * 100, 1)
+
+
 class CarlinkoApi:
     """Minimal async client for the endpoints this integration needs."""
 

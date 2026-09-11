@@ -66,6 +66,9 @@
           "dc": "DC fast"
         }
       },
+      "charge_target": {
+        "name": "Charge target (estimated)"
+      },
       "volt12": {
         "name": "12V battery voltage"
       },
@@ -195,6 +198,9 @@
       },
       "service_interval_days": {
         "name": "Service interval (days)"
+      },
+      "battery_capacity": {
+        "name": "Battery capacity (usable)"
       }
     },
     "date": {

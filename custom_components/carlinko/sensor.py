@@ -28,6 +28,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
+from .api import charge_target
 from .entity import CarlinkoEntity
 
 _CHARGE_STATE = {0: "idle", 1: "charging", 2: "complete", 3: "canceled", 4: "hot", 5: "stopped"}
@@ -119,6 +120,12 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         device_class=SensorDeviceClass.ENUM,
         options=list(_CHARGE_MODE.values()),
         value_fn=lambda d: _CHARGE_MODE.get(d["charge_mode"]),
+    ),
+    CarlinkoSensorDescription(
+        key="charge_target",
+        native_unit_of_measurement=PERCENTAGE,
+        suggested_display_precision=0,
+        icon="mdi:battery-charging-high",
     ),
     CarlinkoSensorDescription(
         key="volt12",
@@ -276,6 +283,8 @@ class CarlinkoSensor(CarlinkoEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         """Return the state of the sensor."""
+        if self.entity_description.key == "charge_target":
+            return charge_target(self.state_data, self.service["battery_kwh"])
         if self.entity_description.service_fn:
             return self.entity_description.service_fn(*self._service_left)
         return self.entity_description.value_fn(self.state_data)
