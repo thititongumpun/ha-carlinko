@@ -277,6 +277,33 @@ views:
       grid_options:
         columns: 6
       name: เวลาชาร์จที่เหลือ
+    - type: tile
+      entity: sensor.CAR_charge_target_estimated
+      vertical: false
+      icon: mdi:battery-charging-high
+      color: blue
+      grid_options:
+        columns: 6
+      name: เป้าหมายการชาร์จ
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
+    - type: tile
+      entity: number.CAR_battery_capacity_usable
+      vertical: false
+      icon: mdi:car-battery
+      color: grey
+      features:
+      - type: numeric-input
+        style: buttons
+      grid_options:
+        columns: 6
+      name: ความจุแบต (ปรับค่า)
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
     - type: custom:mushroom-template-card
       icon: mdi:stop-circle
       icon_color: red
