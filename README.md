@@ -52,7 +52,9 @@ tooling to pin it down.
 - **Tyres**: pressure and temperature for all four corners, decoded from the telemetry blob
 - **Body**: door lock state, doors, tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
 - **Controls**: lock / unlock, A/C on / off, windows open / close / vent, tailgate, sunroof, find car, stop charging
-- **Location**: GPS device tracker every 15 min, with a street address (OpenStreetMap fallback when CarLinko has none)
+- **Location**: GPS device tracker every 15 min, with a street address (OpenStreetMap fallback when
+  CarLinko has none). Works even if your CarLinko app build has no map screen — the coordinates come
+  from the account API, not the app's UI
 - **Vehicle image**: the CDN render of your exact car, as an `image` entity
 - **Service reminder**: last service odometer / date + intervals on the device page → km and days until service, overdue state
 - **Lovelace card** `custom:carlinko-card` (car image, battery ring, range, state, quick actions, driven today / week / month, efficiency, tyre grid), plus a full Thai dashboard example
