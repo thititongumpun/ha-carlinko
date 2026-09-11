@@ -12,6 +12,8 @@ entities plus a ready-made Lovelace card. Developed on an **Omoda C5 EV** (Thail
 <p align="center">
   <img src="docs/screenshots/card.png" width="360" alt="carlinko-card">
   <img src="docs/screenshots/dashboard.png" width="360" alt="Thai dashboard">
+  <img src="docs/screenshots/charging.png" width="360" alt="Charging view">
+  <img src="docs/screenshots/12vandspeed.png" width="360" alt="12 V battery and speed history">
 </p>
 
 ## Features
