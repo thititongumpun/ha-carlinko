@@ -299,7 +299,7 @@ views:
         style: buttons
       grid_options:
         columns: 6
-      name: ความจุแบต (ปรับค่า)
+      name: ค่าปรับเทียบการชาร์จ
       visibility:
       - condition: state
         entity: binary_sensor.CAR_charging

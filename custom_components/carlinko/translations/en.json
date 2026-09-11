@@ -200,7 +200,7 @@
         "name": "Service interval (days)"
       },
       "battery_capacity": {
-        "name": "Battery capacity (usable)"
+        "name": "Charge estimate calibration"
       }
     },
     "date": {

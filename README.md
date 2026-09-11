@@ -77,7 +77,7 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 | Button | find car, vent windows, stop charging |
 | Device tracker | location (+ `address` attribute) |
 | Image | vehicle image |
-| Number (config) | last service odometer, service interval km, service interval days, battery capacity (usable) |
+| Number (config) | last service odometer, service interval km, service interval days, charge estimate calibration |
 | Date (config) | last service date |
 
 ## Charge target
@@ -87,8 +87,13 @@ no command to change it. **Charge target (estimated)** infers it while charging:
 the car's own remaining-time estimate already accounts for the limit, so the
 target is the current charge plus the energy still to be delivered.
 
-Set **Battery capacity (usable)** to your pack size if the estimate reads high or
-low — 55 kWh by default, back-solved from an Omoda C5 EV session. The reading is
+**Charge estimate calibration** is a fitted constant in kWh, *not* your pack's
+rated capacity — adjust it until the estimate matches a target you know you set.
+It reads low because it absorbs charging losses and the top-end taper: an Omoda
+C5 EV with a 61 kWh LFP pack fits at ~55 kWh (the default), and entering 61
+makes a true 100 % read 98. LFP packs need a lower value than their rating
+because the flat voltage curve gives them a long balancing phase at the top.
+The reading is
 deliberately not clamped to 100 %: a target that settles above or below your real
 limit is the signal to adjust the capacity. Above roughly 90 % the car tapers and
 pads its estimate, so a true 100 % shows as 95-105 %. The sensor is unavailable
