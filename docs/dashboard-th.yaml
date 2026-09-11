@@ -96,6 +96,16 @@ views:
       grid_options:
         columns: 6
       name: แอร์
+    - type: tile
+      entity: sensor.CAR_a_c_target_temperature
+      vertical: true
+      icon: mdi:thermostat
+      color: cyan
+      tap_action:
+        action: more-info
+      grid_options:
+        columns: 6
+      name: อุณหภูมิแอร์
     - type: custom:mushroom-template-card
       icon: mdi:car-search
       icon_color: amber

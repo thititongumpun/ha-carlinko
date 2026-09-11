@@ -49,7 +49,7 @@ def test_parse_blob_sample():
     assert s["hv_state"] == 2
     assert s["doors"] == 0
     assert s["unlocked"] == 0
-    assert s["ac_on"] is False  # b23 == 1 means off
+    assert s["ac_on"] is True  # b23 == 1, nonzero means on
     assert s["charge_remain_min"] is None  # 0x3FF sentinel
     assert s["charge_power_kw"] is None  # idle
     assert s["tyre_fl_pressure"] is None  # 0xFF = no TPMS reading
@@ -84,4 +84,4 @@ def test_parse_blob_tyres():
     assert s["tyre_rr_pressure"] == 276.4
     assert s["tyre_fl_temp"] == 29.5  # app shows 30
     assert s["tyre_rr_temp"] == 28.5  # app shows 29
-    assert s["ac_on"] is False  # b23 == 1, A/C was off
+    assert s["ac_on"] is True  # b23 == 1, nonzero means on

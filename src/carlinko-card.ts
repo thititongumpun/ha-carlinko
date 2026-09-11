@@ -17,6 +17,7 @@ const EN: Dict = {
   today: 'Driven today', week: 'Week', month: 'Month', efficiency: 'Efficiency',
   used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', min_left: 'min left',
   tyres: 'Tyres', fl: 'Front left', fr: 'Front right', rl: 'Rear left', rr: 'Rear right',
+  ac_temp: 'A/C set to',
 }
 const TH: Dict = {
   range: 'ระยะทาง', state: 'สถานะ', parked: 'จอดอยู่', driving: 'กำลังขับ', charging: 'กำลังชาร์จ',
@@ -24,6 +25,7 @@ const TH: Dict = {
   today: 'ขับวันนี้', week: 'สัปดาห์', month: 'เดือน', efficiency: 'ประสิทธิภาพ',
   used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', min_left: 'นาที',
   tyres: 'ยาง', fl: 'ซ้ายหน้า', fr: 'ขวาหน้า', rl: 'ซ้ายหลัง', rr: 'ขวาหลัง',
+  ac_temp: 'แอร์ตั้งไว้',
 }
 
 const CSS = `
@@ -203,6 +205,9 @@ class CarlinkoCard extends HTMLElement {
     if (map.vent_windows) pills.push(this._pill('vent_windows', t.vent, false))
     if (charging && map.stop_charging) pills.push(this._pill('stop_charging', t.stop, false))
 
+    const acTemp = num(st('ac_temp'))
+    const acUnit = st('ac_temp')?.attributes?.unit_of_measurement ?? '\u00b0C'
+
     const tyrePress = TYRES.map((k) => num(st(`tyre_${k}_pressure`)))
     const tyreLvl = tyreLevels(tyrePress)
     const tyreUnit = st('tyre_fl_pressure')?.attributes?.unit_of_measurement ?? ''
@@ -267,6 +272,13 @@ class CarlinkoCard extends HTMLElement {
   </section>
 
   ${pills.length ? `<section class="pills">${pills.join('')}</section>` : ''}
+
+  ${acTemp === null
+    ? ''
+    : `<section>
+    <div class="label">${t.ac_temp}</div>
+    <div class="big">${fmt(acTemp)}<span class="unit">${esc(String(acUnit))}</span></div>
+  </section>`}
 
   ${driven
     ? `<section>

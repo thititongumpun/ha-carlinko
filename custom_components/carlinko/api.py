@@ -115,9 +115,10 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
     out["volt12"] = scale(u16(12), 0.01, 2)
     out["speed"] = scale(u16(14), 1 / 16, 1)
     out["odometer"] = u24(18)
-    # b23 is inverted: 1 = A/C off, 0 = A/C on (confirmed against the app)
+    # b23: 0 = A/C off. Observed 2026-09-11: b23 == 0 while the app showed off,
+    # so the earlier "inverted" reading was wrong. Values above 1 are unconfirmed.
     ac = u8(23)
-    out["ac_on"] = None if ac is None else ac == 0
+    out["ac_on"] = None if ac is None else ac != 0
     out["ac_temp"] = u8(24)
     out["battery_pct"] = u8(28)
     out["range_km"] = u16(29)
