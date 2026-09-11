@@ -106,6 +106,44 @@ views:
       grid_options:
         columns: 6
       name: อุณหภูมิแอร์
+    - type: tile
+      entity: switch.CAR_defog
+      vertical: true
+      icon: mdi:car-defrost-front
+      color: cyan
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 6
+      name: ไล่ฝ้า
+    - type: custom:mushroom-template-card
+      icon: mdi:snowflake
+      icon_color: cyan
+      primary: ทำความเย็นเร็ว
+      secondary: เปิดแอร์แรงสุด
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_quick_cool
+    - type: tile
+      entity: select.CAR_driver_seat_ventilation
+      icon: mdi:car-seat-cooler
+      color: cyan
+      features:
+      - type: select-options
+      name: ระบายอากาศเบาะคนขับ
+    - type: tile
+      entity: select.CAR_passenger_seat_ventilation
+      icon: mdi:car-seat-cooler
+      color: cyan
+      features:
+      - type: select-options
+      name: ระบายอากาศเบาะผู้โดยสาร
     - type: custom:mushroom-template-card
       icon: mdi:car-search
       icon_color: amber
@@ -163,10 +201,31 @@ views:
       alignment: center
       chips:
       - type: template
-        entity: binary_sensor.CAR_door_open
+        entity: binary_sensor.CAR_driver_door
         icon: mdi:car-door
-        content: ประตูเปิด
-        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_door_open'',''on'') else ''disabled'' }}'
+        content: คนขับ
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_driver_door'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_passenger_door
+        icon: mdi:car-door
+        content: ผู้โดยสาร
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_passenger_door'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_rear_left_door
+        icon: mdi:car-door
+        content: หลังซ้าย
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_rear_left_door'',''on'') else ''disabled'' }}'
+        tap_action:
+          action: more-info
+      - type: template
+        entity: binary_sensor.CAR_rear_right_door
+        icon: mdi:car-door
+        content: หลังขวา
+        icon_color: '{{ ''red'' if is_state(''binary_sensor.CAR_rear_right_door'',''on'') else ''disabled'' }}'
         tap_action:
           action: more-info
       - type: template
