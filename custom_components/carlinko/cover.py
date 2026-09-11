@@ -69,7 +69,9 @@ class CarlinkoTrunk(CarlinkoEntity, CoverEntity):
     """Tailgate: open / close. State from telemetry byte 4."""
 
     _attr_translation_key = "trunk"
-    _attr_device_class = CoverDeviceClass.DOOR
+    # Not DOOR: a tailgate lifts, and only the non-door classes get HA's up/down
+    # arrows on the open/close buttons. See cover_icon.ts in the frontend.
+    _attr_device_class = CoverDeviceClass.SHUTTER
     _attr_supported_features = CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
@@ -92,7 +94,8 @@ class CarlinkoSunroof(CarlinkoEntity, CoverEntity):
     """Sunroof: open / close / tilt. State from telemetry byte 9 (0 = closed)."""
 
     _attr_translation_key = "sunroof"
-    _attr_device_class = CoverDeviceClass.WINDOW
+    # Not WINDOW: the panel slides rearward, so the horizontal arrows read right.
+    _attr_device_class = CoverDeviceClass.CURTAIN
 
     def __init__(self, coordinator, vehicle_id: str) -> None:
         super().__init__(coordinator, vehicle_id)

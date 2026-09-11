@@ -4,6 +4,8 @@ import base64
 import hashlib
 import hmac
 import json
+import re
+from pathlib import Path
 
 import pytest
 
@@ -188,3 +190,27 @@ def test_caps_omoda_c5():
     assert c["purify"] is c["windshield_heat"] is c["steer_heat"] is False
     assert c["seat_vent_l"] == c["seat_vent_r"] == 3
     assert all(c[k] == 0 for k in ("seat_heat_l", "seat_heat_r", "seat_vent_lr", "seat_vent_rr"))
+
+
+# HA picks the cover open/close button icons from device_class alone
+# (frontend src/common/entity/cover_icon.ts): awning/door/gate/curtain get the
+# horizontal pair, everything else gets up/down. Keep each cover on the side
+# that matches how it actually moves.
+HORIZONTAL_ARROW_CLASSES = {"awning", "door", "gate", "curtain"}
+
+
+def test_cover_device_classes_match_their_motion():
+    source = Path("custom_components/carlinko/cover.py").read_text()
+    found = dict(
+        re.findall(
+            r'_attr_translation_key = "(\w+)"(?:\s*#[^\n]*\n)*\s*'
+            r"_attr_device_class = CoverDeviceClass\.(\w+)",
+            source,
+        )
+    )
+    assert found == {"windows": "WINDOW", "trunk": "SHUTTER", "sunroof": "CURTAIN"}
+    # Windows roll down and the tailgate lifts: both want up/down arrows.
+    assert found["windows"].lower() not in HORIZONTAL_ARROW_CLASSES
+    assert found["trunk"].lower() not in HORIZONTAL_ARROW_CLASSES
+    # The sunroof panel slides rearward: horizontal arrows.
+    assert found["sunroof"].lower() in HORIZONTAL_ARROW_CLASSES
