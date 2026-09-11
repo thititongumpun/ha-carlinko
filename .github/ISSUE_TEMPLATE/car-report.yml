@@ -1,0 +1,48 @@
+name: Car compatibility report
+description: Tell us how the integration went on your car — including if it just worked
+title: "[car] "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Only the Omoda C5 EV (Thailand) is verified by the author. Every report grows the
+        list, so a plain "it worked" is genuinely useful.
+  - type: input
+    id: model
+    attributes:
+      label: Car
+      description: Model and year as the CarLinko app shows it.
+      placeholder: Omoda C5 EV 2024 / Jaecoo J7 / Chery Tiggo 8
+    validations:
+      required: true
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      placeholder: Thailand
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Overall
+      options:
+        - Worked
+        - Worked, but some entities are wrong or missing
+        - Did not work
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What was wrong
+      description: |
+        Which entities read nonsense, stayed unknown, or which controls did nothing.
+        Skip if everything worked.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Home Assistant logs for `custom_components.carlinko`, if there were errors.
+      render: shell

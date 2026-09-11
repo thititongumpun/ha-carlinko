@@ -1,13 +1,18 @@
-# CarLinko for Home Assistant
+# CarLinko for Home Assistant — unofficial integration
 
 [![Version](https://img.shields.io/github/v/release/thititongumpun/ha-carlinko?label=version)](https://github.com/thititongumpun/ha-carlinko/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
 ![HA 2025.1+](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue)
 
-Home Assistant integration for **Omoda, Jaecoo and Chery EVs** that use the **CarLinko** app
-(Thailand, Malaysia, Indonesia, Uzbekistan, UAE, South Africa, Vietnam …). Logs in with your CarLinko
-account, polls the car over the same cloud API the app uses, and exposes it as normal Home Assistant
-entities plus a ready-made Lovelace card. Developed on an **Omoda C5 EV** (Thailand).
+Bring your **Omoda**, **Jaecoo** or **Chery** car into Home Assistant — battery, charging, tyres,
+door lock, A/C and remote controls — if it is one of the cars managed by the **CarLinko** app.
+
+Sign in with your CarLinko account and the integration polls the same cloud API the phone app uses,
+exposing the car as normal Home Assistant entities plus a ready-made Lovelace card.
+
+> **Unofficial and unaffiliated.** This project is not made, endorsed or supported by CarLinko,
+> Chery, Omoda or Jaecoo. It talks to a reverse-engineered private API; an app update can break it
+> at any time. Use at your own risk.
 
 <p align="center">
   <img src="docs/screenshots/card.png" width="360" alt="carlinko-card">
@@ -15,6 +20,30 @@ entities plus a ready-made Lovelace card. Developed on an **Omoda C5 EV** (Thail
   <img src="docs/screenshots/charging.png" width="360" alt="Charging view">
   <img src="docs/screenshots/12vandspeed.png" width="360" alt="12 V battery and speed history">
 </p>
+
+## Will it work with my car?
+
+If your car is managed through the **CarLinko** app, it is worth trying. The integration talks to
+the app's account API, not to any one model, so the cars it supports are whatever CarLinko supports —
+sold as Omoda, Jaecoo or Chery across Thailand, Malaysia, Indonesia, Vietnam, UAE, Uzbekistan,
+South Africa and elsewhere.
+
+| Car | Status |
+|---|---|
+| **Omoda C5 EV** (Thailand) | Developed and tested against daily. Everything in this README is confirmed here. |
+| **Jaecoo J5** | Lock/unlock, windows, tailgate and stop-charging confirmed by an upstream contributor. |
+| Chery, Omoda and Jaecoo models on CarLinko generally | Expected to work. Untested — reports welcome. |
+
+Only the C5 EV is verified by the author. On another model expect the core telemetry to work and
+some decoded fields to be wrong or missing: the 73-byte telemetry blob is reverse-engineered and
+roughly a third of it is still unidentified, so model-specific fields (A/C temperature, tyre
+pressure on cars with indirect TPMS) may read nonsense or stay unknown.
+
+**If you try it on another car**, please
+[open an issue](https://github.com/thititongumpun/ha-carlinko/issues) saying which model and what
+did or did not work — including "it just worked". That is the only way this list grows. If something
+decodes wrong, [Decoding unknown telemetry bytes](#decoding-unknown-telemetry-bytes) has the capture
+tooling to pin it down.
 
 ## Features
 
@@ -154,7 +183,8 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
 - **Sunroof** entity is always created; disable it if your car has no opening roof.
 - The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
-- Unofficial, reverse-engineered API. Use at your own risk; a CarLinko app update can break it.
+- **Only the Omoda C5 EV (Thailand) is verified.** Other CarLinko cars are expected to work; see [Will it work with my car?](#will-it-work-with-my-car).
+- Unofficial, reverse-engineered API, not affiliated with CarLinko, Chery, Omoda or Jaecoo. Use at your own risk; a CarLinko app update can break it.
 
 ## Command-line testing
 
