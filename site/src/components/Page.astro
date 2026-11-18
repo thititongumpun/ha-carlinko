@@ -1,0 +1,255 @@
+---
+import '@fontsource/ibm-plex-sans-thai/400.css';
+import '@fontsource/ibm-plex-sans-thai/500.css';
+import '@fontsource/ibm-plex-sans-thai/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import Hud from './Hud.astro';
+import CodeBlock from './CodeBlock.astro';
+import type en from '../content/en';
+import * as s from '../content/snippets';
+
+interface Props { t: typeof en }
+const { t } = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const self = t.lang === 'en' ? base : `${base}th/`;
+const other = t.lang === 'en' ? `${base}th/` : base;
+const site = Astro.site!.origin;
+const shot = (f: string) => `${base}screens/${f}`;
+const snippet = (k: string) => (s as Record<string, string>)[k];
+const statusKey = ['verified', 'partial', 'expected'];
+const cp = { label: t.copy, done: t.copied };
+---
+<!doctype html>
+<html lang={t.lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{t.title}</title>
+  <meta name="description" content={t.description} />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#1c1e22" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+  <link rel="canonical" href={site + self} />
+  <link rel="alternate" hreflang="en" href={site + base} />
+  <link rel="alternate" hreflang="th" href={`${site}${base}th/`} />
+  <link rel="alternate" hreflang="x-default" href={site + base} />
+  <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+  <meta property="og:title" content={t.title} />
+  <meta property="og:description" content={t.description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={site + self} />
+  <meta property="og:image" content={`${site}${base}screens/charging.png`} />
+</head>
+<body>
+  <a class="skip" href="#main">{t.skip}</a>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="brand" href={self}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 9 9" class="arc" /></svg>
+        ha-carlinko
+      </a>
+      <a class="lang" href={other} hreflang={t.toggle.lang} lang={t.toggle.lang} title={t.toggle.title}>
+        <span class="lang-cur" aria-hidden="true">{t.lang === 'en' ? 'EN' : 'TH'}</span>
+        <span class="lang-sep" aria-hidden="true">/</span>
+        {t.toggle.label}
+      </a>
+    </div>
+    <nav class="wrap sections" aria-label={t.navLabel}>
+      <ul>{t.nav.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}</ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">{t.hero.title}</h1>
+        <p class="lede" set:html={t.hero.lede} />
+        <div class="cta">
+          <a class="btn primary" href="#install">{t.hero.primary}</a>
+          <a class="btn" href={s.repo}>{t.hero.secondary}</a>
+        </div>
+        <ul class="facts">{t.hero.facts.map((f) => <li>{f}</li>)}</ul>
+        <p class="unofficial">{t.hero.unofficial}</p>
+      </div>
+      <Hud h={t.hud} />
+    </section>
+
+    <section id="compat" class="block wrap" aria-labelledby="compat-h">
+      <h2 id="compat-h">{t.compat.title}</h2>
+      <div class="body">
+        <p set:html={t.compat.intro} />
+        <div class="table-wrap">
+          <table class="stack">
+            <thead><tr>{t.compat.head.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+            <tbody>
+              {t.compat.rows.map(([car, status, note], i) => (
+                <tr>
+                  <th scope="row">{car}</th>
+                  <td class="status"><span class={`mark ${statusKey[i]}`} aria-hidden="true"></span>{status}</td>
+                  <td>{note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" set:html={t.compat.caveat} />
+        <p set:html={t.compat.ask} />
+      </div>
+    </section>
+
+    <section id="features" class="block wrap" aria-labelledby="features-h">
+      <h2 id="features-h">{t.features.title}</h2>
+      <div class="body">
+        <p set:html={t.features.intro} />
+        <dl class="features">
+          {t.features.items.map(([term, desc]) => <div><dt>{term}</dt><dd set:html={desc} /></div>)}
+        </dl>
+      </div>
+      <div class="shots wide">
+        {t.features.shots.map(([f, w, h, alt, cap]) => (
+          <figure>
+            <img src={shot(f as string)} width={w} height={h} alt={alt} loading="lazy" decoding="async" />
+            <figcaption>{cap}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+
+    <section id="automations" class="block wrap" aria-labelledby="automations-h">
+      <h2 id="automations-h">{t.automations.title}</h2>
+      <div class="body">
+        <p set:html={t.automations.intro} />
+        {t.automations.items.map(([title, tag, desc, key], i) => (
+          <article class="auto">
+            <h3>{title} <span class={`tag${i ? '' : ' src'}`}>{tag}</span></h3>
+            <p set:html={desc} />
+            <CodeBlock code={snippet(key)} lang="yaml" {...cp} />
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="install" class="block wrap" aria-labelledby="install-h">
+      <h2 id="install-h">{t.install.title}</h2>
+      <div class="body two">
+        <div>
+          <h3>{t.install.hacs}</h3>
+          <ol class="steps">
+            {t.install.hacsSteps.map((step, i) => (
+              <li>
+                <span set:html={step} />
+                {i === 1 && <CodeBlock code={s.hacsUrl} {...cp} />}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <h3>{t.install.manual}</h3>
+          <ol class="steps">{t.install.manualSteps.map((step) => <li set:html={step} />)}</ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="configure" class="block wrap" aria-labelledby="configure-h">
+      <h2 id="configure-h">{t.configure.title}</h2>
+      <div class="body">
+        <p set:html={t.configure.intro} />
+        <div class="table-wrap">
+          <table>
+            <thead><tr>{t.configure.head.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+            <tbody>{t.configure.fields.map(([f, v]) => <tr><th scope="row">{f}</th><td set:html={v} /></tr>)}</tbody>
+          </table>
+        </div>
+        <p class="regions">
+          <span>{t.configure.regionsLabel}</span>
+          {t.configure.regions.map((r) => <code>{r}</code>)}
+        </p>
+
+        <h3 id="account">{t.configure.accountTitle}</h3>
+        <p set:html={t.configure.accountIntro} />
+        <p><strong>{t.configure.accountStepsTitle}</strong></p>
+        <ol class="steps">{t.configure.accountSteps.map((step) => <li set:html={step} />)}</ol>
+        <p class="muted" set:html={t.configure.accountOutro} />
+
+        <h3>{t.configure.reconfTitle}</h3>
+        <p set:html={t.configure.reconf} />
+      </div>
+    </section>
+
+    <section id="card" class="block wrap" aria-labelledby="card-h">
+      <h2 id="card-h">{t.card.title}</h2>
+      <div class="body card-body">
+        <div>
+          <p set:html={t.card.intro} />
+          <ol class="steps">
+            <li><span set:html={t.card.steps[0]} /><CodeBlock code={s.resourceUrl} {...cp} /></li>
+            <li><span set:html={t.card.steps[1]} /><CodeBlock code={s.card} lang="yaml" {...cp} /></li>
+          </ol>
+          <p class="muted" set:html={t.card.more} />
+        </div>
+        <div class="shots tall">
+          {t.card.shots.map(([f, w, h, alt, cap]) => (
+            <figure>
+              <img src={shot(f as string)} width={w} height={h} alt={alt} loading="lazy" decoding="async" />
+              <figcaption>{cap}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="entities" class="block wrap" aria-labelledby="entities-h">
+      <h2 id="entities-h">{t.entities.title}</h2>
+      <div class="body">
+        <p set:html={t.entities.intro} />
+        <div class="table-wrap">
+          <table class="ent">
+            <thead><tr>{t.entities.head.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+            <tbody>{t.entities.rows.map(([p, list]) => <tr><th scope="row">{p}</th><td set:html={list} /></tr>)}</tbody>
+          </table>
+        </div>
+        <p class="muted" set:html={t.entities.tyres} />
+      </div>
+    </section>
+
+    <section id="help" class="block wrap" aria-labelledby="help-h">
+      <h2 id="help-h">{t.help.title}</h2>
+      <div class="body two">
+        <ul class="caveats">{t.help.caveats.map((c) => <li set:html={c} />)}</ul>
+        <div>
+          <h3>{t.help.troubleTitle}</h3>
+          {t.help.trouble.map((p) => <p set:html={p} />)}
+          <CodeBlock code={s.debugLog} lang="yaml" {...cp} />
+          <p class="muted" set:html={t.help.logNote} />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-grid">
+      <p set:html={t.footer.disclaimer} />
+      <p class="muted" set:html={t.footer.credits} />
+      <ul class="links">{t.footer.links.map(([l, href]) => <li><a href={href}>{l}</a></li>)}</ul>
+    </div>
+  </footer>
+
+  <script is:inline>
+    // Progressive enhancement: copy buttons stay hidden without JS or clipboard access.
+    if (navigator.clipboard) document.querySelectorAll('[data-copy]').forEach((b) => {
+      b.hidden = false;
+      b.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(b.parentElement.querySelector('pre').innerText.trimEnd());
+          b.textContent = b.dataset.done;
+          setTimeout(() => (b.textContent = b.dataset.label), 1600);
+        } catch {}
+      });
+    });
+  </script>
+</body>
+</html>

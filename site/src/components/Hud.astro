@@ -1,0 +1,203 @@
+---
+// Hero readout. Values are demo (labelled as such); entity IDs are the real ones the integration creates.
+import type en from '../content/en';
+interface Props { h: typeof en.hud }
+const { h } = Astro.props;
+
+const pct = 76;
+const r = 50;
+const c = 2 * Math.PI * r;
+const ticks = Array.from({ length: 40 }, (_, i) => i * 9); // every 2.5 %, major every 25 %
+const segs = Array.from({ length: 20 }, (_, i) => (i < Math.floor(pct / 5) ? 'lit' : i === Math.floor(pct / 5) ? 'next' : ''));
+const tyres = [
+  ['fl', h.fl, '273.6', '29.5'],
+  ['fr', h.fr, '276.4', '29.5'],
+  ['rl', h.rl, '273.6', '28.5'],
+  ['rr', h.rr, '276.4', '28.5'],
+] as const;
+const reads = [
+  [h.range, '326', 'km', 'sensor.CAR_range', ''],
+  [h.power, '2.8', 'kW', 'sensor.CAR_charging_power', 'on'],
+  [h.remaining, '87', 'min', 'sensor.CAR_charging_time_remaining', ''],
+] as const;
+---
+<figure class="hud" aria-labelledby="hud-cap">
+  <span class="c tl" aria-hidden="true"></span><span class="c tr" aria-hidden="true"></span>
+  <span class="c bl" aria-hidden="true"></span><span class="c br" aria-hidden="true"></span>
+
+  <div class="hud-top">
+    <span class="hud-state"><span class="live" aria-hidden="true"></span>{h.charging}</span>
+    <span class="hud-demo">{h.demo}</span>
+  </div>
+
+  <div class="hud-main">
+    <div class="ring">
+      <div class="dial">
+        <svg viewBox="0 0 140 140" aria-hidden="true">
+          <g class="ticks">
+            {ticks.map((a) => (
+              <line x1="70" y1={a % 90 === 0 ? 2 : 4} x2="70" y2="9" transform={`rotate(${a} 70 70)`} class={a % 90 === 0 ? 'major' : ''} />
+            ))}
+          </g>
+          <g transform="rotate(-90 70 70)">
+            <circle class="ring-track" cx="70" cy="70" r={r} />
+            <circle class="ring-fill" cx="70" cy="70" r={r} stroke-dasharray={`${(c * pct) / 100} ${c}`} />
+            <circle class="ring-flow" cx="70" cy="70" r={r} stroke-dasharray={`10 ${c}`} style={`--len:${(c * pct) / 100}px`} />
+          </g>
+        </svg>
+        <div class="ring-val">
+          <span class="big">{pct}<small>%</small></span>
+          <span class="lbl">{h.battery}</span>
+        </div>
+      </div>
+      <code class="eid">sensor.CAR_battery</code>
+    </div>
+
+    <dl class="reads">
+      {reads.map(([label, val, unit, id, on]) => (
+        <div>
+          <dt>{label}</dt>
+          <dd>
+            <span class={`val ${on}`}><span class="num">{val}</span> {unit}</span>
+            <code class="eid">{id}</code>
+          </dd>
+        </div>
+      ))}
+      <div>
+        <dt>{h.lock}</dt>
+        <dd>
+          <span class="val state">
+            <svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
+            {h.locked}
+          </span>
+          <code class="eid">lock.CAR_door_lock</code>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="bar" aria-hidden="true">
+    <div class="segs">{segs.map((s) => <span class={s}></span>)}</div>
+    <div class="scale"><span>0</span><span>50</span><span>100</span></div>
+  </div>
+
+  <div class="tyres">
+    <span class="tyres-lbl">{h.tyres} <span class="unit">kPa · °C</span></span>
+    <div class="tyre-grid">
+      <svg class="car" viewBox="0 0 60 120" aria-hidden="true">
+        <rect x="8" y="4" width="44" height="112" rx="18" />
+        <path d="M14 34 Q30 26 46 34 M14 88 Q30 95 46 88" />
+      </svg>
+      {tyres.map(([k, label, kpa, temp]) => (
+        <div class={`tyre ${k}`}>
+          <span class="lbl">{label}</span>
+          <span class="num">{kpa}</span>
+          <span class="t">{temp} °C</span>
+        </div>
+      ))}
+    </div>
+    <p class="eids"><code class="eid">sensor.CAR_*_tyre_pressure</code><code class="eid">sensor.CAR_*_tyre_temperature</code></p>
+  </div>
+
+  <figcaption id="hud-cap">{h.caption}</figcaption>
+</figure>
+
+<style>
+  .hud {
+    position: relative;
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--bg-2);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    min-width: 0;
+  }
+  .c { position: absolute; width: 10px; height: 10px; border: 0 solid var(--line-strong); }
+  .tl { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+  .tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+  .bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+  .br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .hud-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+  .hud-state { display: inline-flex; gap: 0.5rem; align-items: center; color: var(--accent-text); text-transform: uppercase; letter-spacing: 0.08em; }
+  .hud-demo {
+    border: 1px dashed var(--line-strong); border-radius: 2px; padding: 0.1rem 0.45rem;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  :lang(th) .hud-state, :lang(th) .hud-demo { letter-spacing: 0; text-transform: none; font-family: var(--sans); }
+  .live { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+  .hud-main { display: grid; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); gap: 1.25rem 1.75rem; align-items: center; margin-top: 1rem; }
+  .ring { display: grid; justify-items: center; gap: 0.4rem; min-width: 0; }
+  .dial { position: relative; width: 100%; max-width: 12rem; }
+  .dial svg { display: block; width: 100%; }
+  .ticks line { stroke: var(--line-strong); stroke-width: 1; }
+  .ticks line.major { stroke: var(--muted); stroke-width: 1.5; }
+  .dial circle { fill: none; stroke-width: 6; }
+  .ring-track { stroke: var(--line); }
+  .ring-fill { stroke: var(--accent); stroke-linecap: butt; }
+  .ring-flow { stroke: var(--flow); opacity: 0; }
+  .ring-val { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .big { font-size: clamp(2rem, 6vw, 2.75rem); font-weight: 500; line-height: 1; color: var(--text); }
+  .big small { font-size: 0.45em; color: var(--muted); margin-left: 0.1em; }
+
+  .reads { margin: 0; }
+  .reads > div { padding: 0.5rem 0; border-top: 1px solid var(--line); }
+  .reads > div:first-child { border-top: 0; padding-top: 0; }
+  dt { color: var(--muted); font-size: 0.8rem; font-family: var(--sans); line-height: 1.3; }
+  dd { margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 1rem; }
+  .val { color: var(--muted); font-size: 0.85rem; }
+  .val .num { color: var(--text); font-size: 1.35rem; font-weight: 500; }
+  .val.on .num { color: var(--accent-text); }
+  .val.state { display: inline-flex; gap: 0.4rem; align-items: center; color: var(--text); font-size: 1.05rem; font-family: var(--sans); }
+  .lock { width: 0.95rem; height: 0.95rem; fill: none; stroke: var(--text); stroke-width: 1.4; }
+  .eid { font-size: 0.75rem; line-height: 1.4; color: var(--faint); background: none; border: 0; padding: 0; overflow-wrap: anywhere; }
+  .lbl { font-family: var(--sans); font-size: 0.75rem; color: var(--muted); }
+
+  .bar { margin-top: 1.25rem; }
+  .segs { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; height: 10px; }
+  .segs span { background: var(--line); }
+  .segs .lit { background: var(--accent); }
+  .segs .next { background: color-mix(in oklch, var(--accent) 40%, var(--line)); }
+  .scale { display: flex; justify-content: space-between; margin-top: 0.3rem; font-size: 0.75rem; color: var(--faint); }
+
+  .tyres { margin-top: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+  .tyres-lbl { font-family: var(--sans); font-size: 0.8rem; color: var(--muted); }
+  .unit { font-family: var(--mono); color: var(--faint); margin-left: 0.4rem; }
+  .tyre-grid {
+    display: grid; grid-template-columns: 1fr 3.25rem 1fr; grid-template-rows: auto auto;
+    gap: 0.75rem 1rem; align-items: center; margin-top: 0.75rem;
+  }
+  .car { grid-column: 2; grid-row: 1 / 3; width: 100%; fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+  .tyre { display: grid; gap: 0.1rem; }
+  .tyre .num { font-size: 1.15rem; color: var(--text); font-weight: 500; }
+  .tyre .t { font-size: 0.78rem; color: var(--muted); }
+  .fl, .rl { grid-column: 1; text-align: right; justify-items: end; }
+  .fr, .rr { grid-column: 3; }
+  .fl, .fr { grid-row: 1; }
+  .rl, .rr { grid-row: 2; }
+  .eids { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.1rem 1.25rem; margin: 0.9rem 0 0; max-width: none; }
+
+  figcaption { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .live { animation: pulse 2.4s ease-in-out 4; }
+    .ring-flow { animation: flow 3.2s cubic-bezier(0.16, 1, 0.3, 1) 3; }
+    @keyframes pulse { 50% { opacity: 0.35; } }
+    @keyframes flow {
+      0% { stroke-dashoffset: 0; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { stroke-dashoffset: calc(-1 * var(--len) + 10px); opacity: 0; }
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .hud-main { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+    .dial { max-width: 9.5rem; }
+    .reads > div { padding: 0.4rem 0; }
+    .reads > div:first-child { border-top: 1px solid var(--line); padding-top: 0.4rem; }
+  }
+</style>

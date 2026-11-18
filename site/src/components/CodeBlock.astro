@@ -1,0 +1,11 @@
+---
+import { Code } from 'astro:components';
+interface Props { code: string; lang?: 'yaml' | 'text'; label: string; done: string }
+const { code, lang = 'text', label, done } = Astro.props;
+---
+<div class="code">
+  {lang === 'yaml'
+    ? <Code code={code} lang="yaml" themes={{ light: 'github-light', dark: 'github-dark' }} defaultColor={false} />
+    : <pre class="plain"><code>{code}</code></pre>}
+  <button type="button" class="copy" data-copy data-label={label} data-done={done} aria-live="polite" hidden>{label}</button>
+</div>

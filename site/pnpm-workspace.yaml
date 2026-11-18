@@ -1,0 +1,4 @@
+# Standalone: keeps the site out of the root workspace.
+packages: []
+allowBuilds:
+  esbuild: true
