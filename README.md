@@ -1,7 +1,7 @@
 # CarLinko for Home Assistant — unofficial integration
 
 [![Version](https://img.shields.io/github/v/release/thititongumpun/ha-carlinko?label=version)](https://github.com/thititongumpun/ha-carlinko/releases)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
+[![HA Marketplace](https://img.shields.io/badge/HA%20Marketplace-custom%20repository-41BDF5.svg)](https://www.hacs.xyz/docs/marketplace/)
 ![HA 2025.1+](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue)
 
 Bring your **Omoda**, **Jaecoo** or **Chery** car into Home Assistant — battery, charging, tyres,
@@ -67,7 +67,18 @@ tooling to pin it down.
 
 ## Installation
 
-### HACS (recommended)
+### Marketplace (Home Assistant 2026.11+, recommended)
+Since 2026.11, HACS is built into Home Assistant as the **Marketplace**.
+
+1. **Settings → Marketplace → Add from link**, enter `https://github.com/thititongumpun/ha-carlinko`
+   (custom repositories need the one-time GitHub sign-in the Marketplace asks for)
+2. Open **CarLinko** and select **Install**. The setup flow opens straight away, no restart needed.
+   Updates still ask for a restart.
+
+Already had it through HACS? The Marketplace takes over your HACS repositories on the first start after
+updating Home Assistant, so there is nothing to reinstall.
+
+### HACS (Home Assistant before 2026.11)
 1. HACS → Integrations → ⋮ → **Custom repositories** → add `https://github.com/thititongumpun/ha-carlinko` as *Integration*
 2. Install **CarLinko**, restart Home Assistant
 

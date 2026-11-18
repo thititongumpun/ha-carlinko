@@ -28,7 +28,7 @@ const th: typeof en = {
     title: 'ดูและสั่งงานรถ CarLinko ได้จาก Home Assistant',
     lede:
       'แบตเตอรี่ การชาร์จ ลมยาง ล็อกประตู แอร์ และปุ่มสั่งงานต่าง ๆ สำหรับรถ <strong>Omoda</strong>, <strong>Jaecoo</strong> และ <strong>Chery</strong> ที่ใช้แอป CarLinko แค่ล็อกอินด้วยบัญชี CarLinko รถจะขึ้นเป็นอุปกรณ์ใน Home Assistant พร้อมการ์ด Lovelace ที่ทำไว้ให้แล้ว',
-    primary: 'ติดตั้งผ่าน HACS',
+    primary: 'ติดตั้งจาก Marketplace',
     secondary: 'ดูบน GitHub',
     facts: ['Home Assistant 2025.1 ขึ้นไป', 'ไม่ต้องลงไลบรารี Python เพิ่ม', 'มีภาษาไทยทั้งหน้าตั้งค่าและเอนทิตี'],
     unofficial: 'โปรเจกต์ไม่เป็นทางการ ไม่ได้จัดทำหรือรับรองโดย CarLinko, Chery, Omoda หรือ Jaecoo',
@@ -96,12 +96,13 @@ const th: typeof en = {
 
   install: {
     title: 'ติดตั้ง',
-    hacs: 'ผ่าน HACS (แนะนำ)',
+    hacs: 'ผ่าน Marketplace (Home Assistant 2026.11 ขึ้นไป)',
     hacsSteps: [
-      'ใน HACS ไปที่ <strong>Integrations → ⋮ → Custom repositories</strong>',
-      'เพิ่ม repository นี้ เลือกประเภทเป็น <strong>Integration</strong>',
-      'ติดตั้ง <strong>CarLinko</strong> แล้วรีสตาร์ต Home Assistant',
+      'ไปที่ <strong>Settings → Marketplace → Add from link</strong> ครั้งแรกจะให้ล็อกอิน GitHub หนึ่งครั้ง',
+      'ใส่ repository นี้',
+      'เปิด <strong>CarLinko</strong> แล้วกด <strong>Install</strong> หน้าตั้งค่าจะเปิดขึ้นทันที ไม่ต้องรีสตาร์ต',
     ],
+    hacsLegacy: 'ถ้าใช้ Home Assistant ก่อน 2026.11 ให้ติดตั้งผ่าน HACS แทน: <strong>Integrations → ⋮ → Custom repositories</strong> ใส่ URL เดียวกัน เลือก <strong>Integration</strong> แล้วรีสตาร์ต',
     manual: 'ติดตั้งเอง',
     manualSteps: [
       'คัดลอกโฟลเดอร์ <code>custom_components/carlinko</code> จาก repository ไปไว้ใน <code>config/custom_components/</code>',

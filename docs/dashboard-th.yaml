@@ -1,5 +1,5 @@
 # ตัวอย่างแดชบอร์ด (Thai) — replace every `CAR` with your car's entity prefix, e.g. 6khkh5101.
-# Needs HACS: Mushroom, ApexCharts card. Paste via Edit dashboard → ⋮ → Raw configuration editor.
+# Needs Mushroom and ApexCharts card (from the Marketplace, or HACS before HA 2026.11). Paste via Edit dashboard → ⋮ → Raw configuration editor.
 title: OMODA C5 EV
 views:
 - title: รถของฉัน

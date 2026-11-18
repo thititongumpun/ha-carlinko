@@ -27,7 +27,7 @@ export default {
     title: 'Your CarLinko car, as Home Assistant entities.',
     lede:
       'Battery, charging, tyres, door lock, A/C and remote controls for <strong>Omoda</strong>, <strong>Jaecoo</strong> and <strong>Chery</strong> cars managed by the CarLinko app. Sign in with your CarLinko account; the car shows up as a normal device with a ready-made Lovelace card.',
-    primary: 'Install with HACS',
+    primary: 'Install from Marketplace',
     secondary: 'View on GitHub',
     facts: ['Home Assistant 2025.1+', 'No extra Python dependencies', 'English and Thai'],
     unofficial: 'Unofficial. Not made, endorsed or supported by CarLinko, Chery, Omoda or Jaecoo.',
@@ -95,12 +95,13 @@ export default {
 
   install: {
     title: 'Install',
-    hacs: 'HACS (recommended)',
+    hacs: 'Marketplace (Home Assistant 2026.11+)',
     hacsSteps: [
-      'In HACS, open <strong>Integrations → ⋮ → Custom repositories</strong>.',
-      'Add this repository with the category <strong>Integration</strong>:',
-      'Install <strong>CarLinko</strong>, then restart Home Assistant.',
+      'Open <strong>Settings → Marketplace → Add from link</strong>. Custom repositories ask for a one-time GitHub sign-in.',
+      'Enter this repository:',
+      'Open <strong>CarLinko</strong> and select <strong>Install</strong>. The setup flow opens straight away, no restart.',
     ],
+    hacsLegacy: 'On Home Assistant before 2026.11, use HACS instead: <strong>Integrations → ⋮ → Custom repositories</strong>, same URL, category <strong>Integration</strong>, then restart.',
     manual: 'Manual',
     manualSteps: [
       'Copy <code>custom_components/carlinko</code> from the repository into <code>config/custom_components/</code>.',
