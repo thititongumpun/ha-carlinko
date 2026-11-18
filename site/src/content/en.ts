@@ -77,7 +77,7 @@ export default {
       ['Vehicle image', 'The CDN render of your exact car, as an <code>image</code> entity.'],
     ],
     shots: [
-      ['charging.png', 1402, 919, 'A Home Assistant dashboard in Thai with the CarLinko card, door, A/C and window controls, and a 24-hour battery and charging power chart.', 'Thai dashboard while charging: card, controls and a 24-hour battery chart.'],
+      ['charging.png', 1440, 1000, 'A Home Assistant dashboard in Thai with the CarLinko card, door, A/C and window controls, and a 24-hour battery and charging power chart.', 'Thai dashboard: card, controls and a 24-hour battery chart.'],
       ['12vandspeed.png', 542, 470, 'History charts of 12 V battery voltage and speed.', '12 V battery and speed history.'],
     ],
   },
@@ -146,7 +146,7 @@ export default {
     more:
       'Options, a sections-view example and a full Thai dashboard (Mushroom + ApexCharts) are in <a href="https://github.com/thititongumpun/ha-carlinko/blob/main/docs/card.md">docs/card.md</a> and <a href="https://github.com/thititongumpun/ha-carlinko/blob/main/docs/dashboard-th.yaml">docs/dashboard-th.yaml</a>.',
     shots: [
-      ['card.png', 800, 2105, 'The carlinko-card: car image, 75 % battery ring, 320 km range, Parked, quick action buttons, distance driven, efficiency and four tyre readings.', 'The card in light mode.'],
+      ['card.mp4', 460, 1080, 'The carlinko-card loading: car image, 78 % battery ring and charge bar, 327 km range, Parked, quick action buttons, distance driven, efficiency and four tyre readings.', 'The card on a real Omoda C5 EV.'],
       ['dashboard.png', 860, 2600, 'The full Thai dashboard example with charging, controls and history charts.', 'The Thai dashboard example.'],
     ],
   },

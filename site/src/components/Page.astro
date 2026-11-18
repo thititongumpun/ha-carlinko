@@ -195,7 +195,9 @@ const cp = { label: t.copy, done: t.copied };
         <div class="shots tall">
           {t.card.shots.map(([f, w, h, alt, cap]) => (
             <figure>
-              <img src={shot(f as string)} width={w} height={h} alt={alt} loading="lazy" decoding="async" />
+              {(f as string).endsWith('.mp4')
+                ? <video src={shot(f as string)} poster={shot('card.png')} width={w} height={h} aria-label={alt as string} autoplay muted loop playsinline preload="metadata" />
+                : <img src={shot(f as string)} width={w} height={h} alt={alt} loading="lazy" decoding="async" />}
               <figcaption>{cap}</figcaption>
             </figure>
           ))}
@@ -240,6 +242,7 @@ const cp = { label: t.copy, done: t.copied };
   </footer>
 
   <script is:inline>
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('video[autoplay]').forEach((v) => { v.removeAttribute('autoplay'); v.pause(); });
     // Progressive enhancement: copy buttons stay hidden without JS or clipboard access.
     if (navigator.clipboard) document.querySelectorAll('[data-copy]').forEach((b) => {
       b.hidden = false;

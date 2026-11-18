@@ -157,7 +157,7 @@ td.status { white-space: nowrap; }
 .shots { display: grid; gap: 1.5rem; margin-top: 2.5rem; }
 .shots.wide { grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); align-items: start; }
 figure { margin: 0; }
-figure img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-2); }
+figure img, figure video { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-2); }
 figcaption { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); }
 
 /* Automations */
