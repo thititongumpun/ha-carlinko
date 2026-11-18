@@ -2,7 +2,7 @@
 export const repo = 'https://github.com/thititongumpun/ha-carlinko';
 
 export const hacsUrl = repo;
-export const resourceUrl = '/carlinko/carlinko-card.js?v=0.0.21';
+export const resourceUrl = '/carlinko/carlinko-card.js?v=0.0.22';
 
 export const card = `type: custom:carlinko-card
 battery_kwh: 61      # usable pack size, for "energy left"

@@ -175,7 +175,8 @@ section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
 }
 .pill:hover { border-color: var(--cl-text); }
 .pill[disabled] { opacity: .5; cursor: progress; }
-.pill.on { background: var(--cl-text); border-color: var(--cl-text); color: var(--cl-bg); }
+/* card bg can be translucent in some themes, so the label uses the solid page colour */
+.pill.on { background: var(--cl-text); border-color: var(--cl-text); color: var(--primary-background-color, #111418); }
 .three { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; align-items: end; }
 .three .r { text-align: right; }
 .three .r .num { font-size: 18px; }
