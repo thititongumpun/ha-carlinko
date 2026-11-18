@@ -1,6 +1,6 @@
 """CarLinko cloud API client.
 
-HA-free (stdlib + aiohttp only) so the tests and ``tools/cli.py`` run without
+HA-free (stdlib + aiohttp + cryptography, all shipped with HA core) so the tests and ``tools/cli.py`` run without
 Home Assistant installed.
 """
 
@@ -11,10 +11,12 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import time
 from typing import Any
 
 import aiohttp
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from .const import (
     API_HOST,
@@ -265,6 +267,65 @@ def charge_target(state: dict[str, Any], battery_kwh: float) -> float | None:
     return round(pct + kw * mins / 60 / battery_kwh * 100, 1)
 
 
+_CONTROL_KEY_PREFIX = bytes.fromhex("A0F47CB6677BE6A3")
+
+# Car-side refusal codes for A/C (RESULT byte), from the app's module_en.json via openlinko.
+_AC_REFUSALS = {
+    "2A": "vehicle in motion",
+    "93": "vehicle not in remote mode",
+    "23": "vehicle is started",
+    "94": "high-voltage fault",
+    "95": "battery too low",
+    "96": "key detected inside the car",
+    "22": "a door is unlocked",
+    "99": "T-Box authentication failed",
+    "9A": "not in P",
+    "9B": "hazard lights are on",
+}
+
+
+def encrypt_control(opcode: str, vin: str, user_id: str, rand: bytes | None = None) -> str:
+    """AES-wrap a 74xxyy opcode the way app 1.14.10 does; T-Box fw >= 2.3.1_051A01R
+    rejects plain frames with ``__7404``. Scheme reversed by GodrezJr2/openlinko:
+    data = "66" + rnd + AES-128-ECB(key=A0F47CB6677BE6A3+rnd, zero-pad(op+VIN+uid)).
+    """
+    frame = bytes.fromhex(opcode) + vin.encode() + user_id.encode()
+    frame += b"\x00" * (-len(frame) % 16)
+    rnd = rand if rand is not None else os.urandom(8)
+    enc = Cipher(algorithms.AES(_CONTROL_KEY_PREFIX + rnd), modes.ECB()).encryptor()  # noqa: S305 - the T-Box's protocol, not our choice
+    return "66" + rnd.hex() + (enc.update(frame) + enc.finalize()).hex()
+
+
+def _reply_tail(reply: str) -> str:
+    """The car's part of a control reply, without the ``<deviceSn>__`` prefix."""
+    return reply.split("__")[-1].upper()
+
+
+def _frame_rejected(opcode: str, reply: str) -> bool:
+    """Bare ``74RR`` reply: the T-Box could not read the frame, nothing actuated."""
+    tail = _reply_tail(reply)
+    return opcode.upper().startswith("74") and tail.startswith("74") and len(tail) == 4
+
+
+def control_verdict(opcode: str, reply: str) -> tuple[bool, str | None]:
+    """(done, reason) from a ``<deviceSn>__74<CMD><STATE><RESULT>`` reply; RESULT 00 = done.
+
+    HTTP code 0000 only means the cloud reached the T-Box; this is the car's answer.
+    """
+    op, tail = opcode.upper(), _reply_tail(reply)
+    if _frame_rejected(op, reply):
+        return False, f"car control system error (0x{tail[2:]}), command frame rejected"
+    if len(op) != 6 or not tail.startswith(op) or len(tail) < 8:
+        return True, None  # no verdict in the reply; nothing to judge
+    res = tail[6:8]
+    if res == "00":
+        return True, None
+    if res == "44":
+        return False, "no operation permission: this account is not authorised on the car's T-Box"
+    reason = _AC_REFUSALS.get(res) if op[2:4] == "10" else None
+    return False, reason or f"car refused (code 0x{res})"
+
+
 class CarlinkoApi:
     """Minimal async client for the endpoints this integration needs."""
 
@@ -284,6 +345,7 @@ class CarlinkoApi:
         self.token = token
         self.skew_ms = 0
         self._synced = False
+        self._user_id = ""
 
     # --- plumbing -----------------------------------------------------
 
@@ -348,6 +410,7 @@ class CarlinkoApi:
             raise CarlinkoError(f"request to {path} failed: {err}") from err
 
         code = str(payload.get("code"))
+        _LOGGER.debug("%s %s -> %s %s", method, path, code, payload.get("msg") or "")
         if code != CODE_OK:
             msg = str(payload.get("msg") or code)
             if auth and retry and code in STALE_TOKEN_CODES:
@@ -467,20 +530,57 @@ class CarlinkoApi:
             "address": data.get("address"),
         }
 
-    async def remote_control(self, vehicle_id: str, device_sn: str, opcode: str) -> None:
-        # ponytail: init "77" mirrors the app; drop if live testing shows it is not required
-        if opcode != OP_INIT:
-            try:
-                await self.remote_control(vehicle_id, device_sn, OP_INIT)
-            except CarlinkoError:
-                pass
+    async def user_id(self) -> str:
+        """Numeric account id; the encrypted control frame embeds it."""
+        if not self._user_id:
+            data = await self._request("GET", "/user/info", sign_params={})
+            self._user_id = str((data or {}).get("id") or "") if isinstance(data, dict) else ""
+        return self._user_id
+
+    async def _post_control(self, vehicle_id: str, device_sn: str, data: str) -> str:
         body = {
             "vehicleId": str(vehicle_id),
             "deviceSn": str(device_sn),
-            "data": opcode,
+            "data": data,
             "timeOut": 20,
             "timestamp": self._ts(),
         }
-        await self._request(
+        reply = await self._request(
             "POST", "/user/vehicle/remoteControl", body=body, sign_params=body
         )
+        return str(reply or "")
+
+    async def remote_control(
+        self, vehicle_id: str, device_sn: str, opcode: str, vin: str | None = None
+    ) -> None:
+        """Send one command and raise CarlinkoError unless the car reports it done."""
+        if opcode == OP_INIT or not opcode.upper().startswith("74"):
+            reply = await self._post_control(vehicle_id, device_sn, opcode)
+            _LOGGER.debug("control %s -> %s", opcode, _reply_tail(reply))
+            return
+        # ponytail: init "77" mirrors the app; drop if live testing shows it is not required
+        try:
+            await self._post_control(vehicle_id, device_sn, OP_INIT)
+        except CarlinkoError as err:
+            _LOGGER.debug("control init 77 failed: %s", err)
+
+        tries = [("plain", opcode)]
+        try:
+            uid = await self.user_id()
+        except CarlinkoError as err:
+            _LOGGER.debug("user id lookup failed, sending plain: %s", err)
+            uid = ""
+        if vin and uid:
+            tries.insert(0, ("encrypted", encrypt_control(opcode, vin, uid)))
+        else:
+            _LOGGER.debug("no VIN (%s) or user id (%s), sending plain", bool(vin), bool(uid))
+
+        for mode, data in tries:
+            reply = await self._post_control(vehicle_id, device_sn, data)
+            ok, reason = control_verdict(opcode, reply)
+            _LOGGER.debug("control %s (%s) -> %s", opcode, mode, _reply_tail(reply))
+            if ok:
+                return
+            if not _frame_rejected(opcode, reply):
+                break  # the car read the frame and refused: resending could double it
+        raise CarlinkoError(f"{opcode}: {reason}")

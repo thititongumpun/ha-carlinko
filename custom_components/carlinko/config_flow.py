@@ -72,6 +72,37 @@ class CarlinkoConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=STEP_SCHEMA, errors=errors
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Switch account (e.g. shared -> owner); entities are keyed by VIN so they stay."""
+        errors: dict[str, str] = {}
+        entry = self._get_reconfigure_entry()
+        if user_input is not None:
+            token, errors = await self._validate(user_input)
+            if not errors:
+                uid = user_input[CONF_ACCOUNT].lower()
+                if uid != entry.unique_id:
+                    await self.async_set_unique_id(uid)
+                    self._abort_if_unique_id_configured()
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=uid,
+                    title=user_input[CONF_ACCOUNT],
+                    data_updates={**user_input, CONF_TOKEN: token},
+                )
+
+        schema = self.add_suggested_values_to_schema(
+            STEP_SCHEMA,
+            {
+                CONF_ACCOUNT: entry.data.get(CONF_ACCOUNT),
+                CONF_REGION: entry.data.get(CONF_REGION, DEFAULT_REGION),
+            },
+        )
+        return self.async_show_form(
+            step_id="reconfigure", data_schema=schema, errors=errors
+        )
+
     async def async_step_reauth(
         self, entry_data: Mapping[str, Any]
     ) -> ConfigFlowResult:

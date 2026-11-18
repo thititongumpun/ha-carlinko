@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import asyncio
 import os
 import socket
@@ -75,7 +76,7 @@ async def run(args: argparse.Namespace) -> int:
             elif args.cmd == "locate":
                 print(f"  {await api.locate(sn)}")
             elif args.cmd == "send":
-                await api.remote_control(vid, sn, args.opcode)
+                await api.remote_control(vid, sn, args.opcode, v.get("vin"))
                 print(f"  sent {args.opcode}")
             elif args.cmd == "log":
                 await log_blobs(api, vehicles, args)
@@ -124,7 +125,10 @@ def main() -> int:
     log = sub.add_parser("log", help="poll and append changed telemetry blobs to a file")
     log.add_argument("--out", default="blobs.tsv")
     log.add_argument("--every", type=int, default=60, help="seconds between polls (default 60)")
+    parser.add_argument("-v", "--verbose", action="store_true", help="print every API call and control reply")
     args = parser.parse_args()
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG, format="%(name)s: %(message)s")
     try:
         return asyncio.run(run(args))
     except CarlinkoError as err:

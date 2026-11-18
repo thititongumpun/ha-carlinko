@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from carlinko.api import CarlinkoError, caps, charge_target, parse_blob, sign
+from carlinko.api import CarlinkoError, caps, charge_target, control_verdict, encrypt_control, parse_blob, sign
 
 # Sample from api-map.md: J5 EV parked/asleep, 73 bytes.
 SAMPLE = (
@@ -214,3 +214,22 @@ def test_cover_device_classes_match_their_motion():
     assert found["trunk"].lower() not in HORIZONTAL_ARROW_CLASSES
     # The sunroof panel slides rearward: horizontal arrows.
     assert found["sunroof"].lower() in HORIZONTAL_ARROW_CLASSES
+
+
+def test_encrypt_control_matches_app_captures():
+    # plaintext<->ciphertext pairs captured from app 1.14.10 (GodrezJr2/openlinko)
+    vin, uid = "MF7HD27B8TJ014064", "88504"
+    for op, cap in [
+        ("741001", "665b860f36237770bc9e20d41399792a5cfd304f234dbd081a007dc9cef3b81634465e4e5d2e470785"),
+        ("741000", "66d605e8d5dfef0987565af8d5caf3d921d37a1d6be606fcb6400a930baa03acbf56180cf760cf2f26"),
+    ]:
+        assert encrypt_control(op, vin, uid, rand=bytes.fromhex(cap)[1:9]) == cap
+
+
+def test_control_verdict():
+    assert control_verdict("740100", "SN123__7404") == (False, "car control system error (0x04), command frame rejected")
+    assert control_verdict("740100", "SN123__74010000") == (True, None)
+    assert control_verdict("741001", "SN123__74100196")[1] == "key detected inside the car"
+    assert "not authorised" in control_verdict("740100", "SN123__74010044")[1]
+    assert control_verdict("740100", "SN123__740100AB") == (False, "car refused (code 0xAB)")
+    assert control_verdict("740100", "") == (True, None)  # no verdict to judge

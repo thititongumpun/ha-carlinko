@@ -17,6 +17,15 @@
           "password": "Password",
           "region": "Region"
         }
+      },
+      "reconfigure": {
+        "title": "Change CarLinko account",
+        "description": "Sign in with another account, e.g. the owner account: since the November 2026 car update only the owner account can send commands. Your entities and dashboards are kept.",
+        "data": {
+          "account": "Account (email or phone)",
+          "password": "Password",
+          "region": "Region"
+        }
       }
     },
     "error": {
@@ -27,7 +36,8 @@
     "abort": {
       "already_configured": "Account is already configured",
       "reauth_successful": "Re-authentication was successful",
-      "wrong_account": "Please sign in with the same account"
+      "wrong_account": "Please sign in with the same account",
+      "reconfigure_successful": "Account updated"
     }
   },
   "entity": {

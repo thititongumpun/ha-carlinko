@@ -109,7 +109,7 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
         if not sn:
             raise HomeAssistantError(f"vehicle {vehicle_id} has no deviceId/deviceSn")
         try:
-            await self.api.remote_control(vehicle_id, sn, opcode)
+            await self.api.remote_control(vehicle_id, sn, opcode, row.get("vin"))
         except CarlinkoError as err:
             raise HomeAssistantError(str(err)) from err
         await asyncio.sleep(5)

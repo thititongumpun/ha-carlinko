@@ -86,26 +86,23 @@ Settings → Devices & services → **Add integration** → *CarLinko*:
 
 Each vehicle on the account becomes a device named after its licence plate.
 
-### Use a second account, not your own
+### Owner account or shared account
 
-CarLinko allows **one session per account**. If Home Assistant logs in as you, your phone gets
-signed out — and when you sign back in on the phone, Home Assistant is the one kicked out. The two
-keep evicting each other.
+Since the November 2026 T-Box firmware update, **remote controls only work from an account the car's
+T-Box trusts**, which in practice is the owner account. A shared account sees all telemetry, but every
+command comes back as *No operation permission*. Removing and re-sharing the car does not fix it
+(tested on an Omoda C5 EV).
 
-Give Home Assistant an account of its own instead:
+Pick one:
 
-1. Make a second e-mail address (a free one, or a `+ha` alias if your provider supports it).
-2. Register it in the CarLinko app as a new account.
-3. From your **main** account, share the car to that address — the app's vehicle sharing /
-   authorised-user feature.
-4. Accept the invitation on the second account, then use *those* credentials in the integration.
+- **Owner account** (controls work). CarLinko allows **one session per account**, so Home Assistant and
+  your phone app sign each other out. Home Assistant logs back in on its own; the phone asks you to.
+- **Shared account** (status only). Share the car from the owner's app to a second CarLinko account
+  and use that in the integration. Your phone stays signed in; lock, windows, A/C and the other
+  controls fail with *No operation permission*.
 
-Your phone stays signed in on your own account, Home Assistant holds its own session, and neither
-disturbs the other. Revoking access later is one tap in the app and does not touch your own login.
-
-The shared account sees the same telemetry and controls, so nothing in this README changes. If your
-app version has no sharing feature, the integration still works with your main account — just expect
-to be signed out of the phone app whenever Home Assistant re-authenticates.
+To switch an existing setup: **Settings → Devices & services → CarLinko → ⋮ → Reconfigure** (v0.0.18+)
+and sign in with the other account. Entities, history and dashboards are kept.
 
 ## Lovelace card
 
@@ -204,7 +201,7 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 
 ## Caveats
 
-- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. Best avoided entirely by giving Home Assistant [its own shared account](#use-a-second-account-not-your-own).
+- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. A [shared account](#owner-account-or-shared-account) avoids this but can't send commands.
 - **Static-decode commands.** A/C on/off, defog, quick cool, seat vent, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
 - **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
@@ -214,9 +211,26 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 - **No heating entities.** Seat heaters, windshield and steering-wheel heat and quick-heat are
   decoded but not exposed — this is a Thailand-first integration. The opcodes are kept in `const.py`;
   [open an issue](https://github.com/thititongumpun/ha-carlinko/issues) if you are somewhere cold.
+- **T-Box firmware 2.3.1_051A01R+ (Nov 2026)** rejects plain commands; since v0.0.18 they are AES-encrypted like app 1.14.10 does (scheme from [openlinko](https://github.com/GodrezJr2/openlinko)), falling back to plain for older firmware.
 - The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
 - **Only the Omoda C5 EV (Thailand) is verified.** Other CarLinko cars are expected to work; see [Will it work with my car?](#will-it-work-with-my-car).
 - Unofficial, reverse-engineered API, not affiliated with CarLinko, Chery, Omoda or Jaecoo. Use at your own risk; a CarLinko app update can break it.
+
+## Troubleshooting
+
+A command the car refuses now fails in Home Assistant with the car's reason (e.g. *key detected inside the car*, *no operation permission*) instead of silently doing nothing.
+
+For more detail, turn on debug logging: **Settings → Devices & services → CarLinko → ⋮ → Enable debug logging**, press the control, then **Disable debug logging** to download the log. Or in `configuration.yaml`:
+
+```yaml
+logger:
+  logs:
+    custom_components.carlinko: debug
+```
+
+**"No operation permission" (reply ends in `44`)** means the car's T-Box does not trust the account Home Assistant is logged into. The T-Box keeps its own list of allowed accounts, separate from CarLinko's cloud, so a shared account that can see the car may still be refused. Re-sharing the car does not add it. Use the owner account; see [Owner account or shared account](#owner-account-or-shared-account).
+
+Each command logs a line like `control 740100 (encrypted) -> 74010000`. The part after `->` is the car's reply: `74<cmd><state><result>`, where result `00` means done. A bare `7404` means the T-Box could not read the command frame. Every API call also logs its path and response code. Logs never contain your password or VIN; review them before posting anyway.
 
 ## Command-line testing
 
@@ -224,7 +238,7 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 export CARLINKO_ACCOUNT=you@example.com CARLINKO_PASSWORD=secret CARLINKO_REGION=sea
 python3 tools/cli.py status      # login, list vehicles, decoded telemetry + raw hex
 python3 tools/cli.py locate      # GPS position
-python3 tools/cli.py send 740100 # raw opcode (740100 = lock)
+python3 tools/cli.py -v send 740100 # raw opcode (740100 = lock), -v prints the car's reply
 python3 tools/cli.py maintain    # dealer service records, if any
 python3 -m pytest tests -q       # offline unit tests (signing, telemetry decoding)
 ```
