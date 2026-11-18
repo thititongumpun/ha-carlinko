@@ -10,11 +10,19 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import EntityCategory, UnitOfEnergy, UnitOfLength, UnitOfTime
+from homeassistant.const import (
+    EntityCategory,
+    UnitOfEnergy,
+    UnitOfLength,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
+from .api import caps
+from .const import OP_AC_TEMP
 from .entity import CarlinkoEntity
 
 
@@ -76,6 +84,11 @@ async def async_setup_entry(
         for vehicle_id in coordinator.data
         for description in NUMBER_DESCRIPTIONS
     )
+    async_add_entities(
+        CarlinkoAcTemp(coordinator, vehicle_id)
+        for vehicle_id, data in coordinator.data.items()
+        if caps(data["vehicle"]).get("set_temp")
+    )
 
 
 class CarlinkoServiceNumber(CarlinkoEntity, NumberEntity):
@@ -99,3 +112,28 @@ class CarlinkoServiceNumber(CarlinkoEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Store the setting in the config entry options."""
         self.set_service(self.entity_description.option, int(value))
+
+
+class CarlinkoAcTemp(CarlinkoEntity, NumberEntity):
+    """A/C target temperature: reads blob byte 24, writes 7411 + plain °C."""
+
+    _attr_translation_key = "ac_temp_set"
+    _attr_device_class = NumberDeviceClass.TEMPERATURE
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    # shortcut: fixed C5 range and plain-°C byte; read SetTemperature's range and
+    # the half-degree encoding if a J5/Tiggo owner reports a refusal.
+    _attr_native_min_value = 15
+    _attr_native_max_value = 31
+    _attr_native_step = 1
+    _attr_mode = NumberMode.SLIDER
+
+    def __init__(self, coordinator, vehicle_id: str) -> None:
+        super().__init__(coordinator, vehicle_id)
+        self._attr_unique_id = f"{self.vin}_ac_temp_set"
+
+    @property
+    def native_value(self) -> float | None:
+        return self.state_data["ac_temp"]
+
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.send(self.vehicle_id, f"{OP_AC_TEMP}{int(value):02X}")

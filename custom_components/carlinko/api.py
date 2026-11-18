@@ -193,6 +193,7 @@ _CAP_FLAGS = {
 
 _CAP_AC_FLAGS = {
     "ac": "Switch",
+    "set_temp": "SetTemperature",
     "quick_cool": "RapidCool",
     "quick_heat": "RapidHeat",
     "defog": "Defogging",

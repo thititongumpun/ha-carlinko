@@ -218,6 +218,9 @@
       }
     },
     "number": {
+      "ac_temp_set": {
+        "name": "อุณหภูมิแอร์"
+      },
       "last_service_odometer": {
         "name": "เลขไมล์เข้าศูนย์ล่าสุด"
       },

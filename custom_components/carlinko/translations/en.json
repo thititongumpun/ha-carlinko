@@ -218,6 +218,9 @@
       }
     },
     "number": {
+      "ac_temp_set": {
+        "name": "A/C temperature"
+      },
       "last_service_odometer": {
         "name": "Last service odometer"
       },

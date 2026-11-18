@@ -51,7 +51,7 @@ tooling to pin it down.
 - **Charging**: status, AC/DC mode, power, time remaining, plugged-in and charging flags
 - **Tyres**: pressure and temperature for all four corners, decoded from the telemetry blob
 - **Body**: door lock state, doors (all four, individually), tailgate, windows, sunroof, A/C, high-voltage (car on) state, cloud online
-- **Controls**: lock / unlock, A/C on / off, defog, quick cool, seat ventilation, windows open / close / vent, tailgate, sunroof, find car, stop charging
+- **Controls**: lock / unlock, A/C on / off, A/C temperature, defog, quick cool, seat ventilation, windows open / close / vent, tailgate, sunroof, find car, stop charging
 - **Only the entities your car has.** `/user/vehicle` publishes a per-model capability list, and
   every optional entity is gated on it — no sunroof cover on a car without a sunroof, no seat vent
   select on a car without ventilated seats
@@ -130,6 +130,7 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 | Binary sensor | charging, cable connected, door open (any), driver / passenger / rear-left / rear-right door, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
 | Switch | air conditioning, defog |
+| Number | A/C temperature (15–31 °C, cars that report `SetTemperature`), service settings |
 | Select | seat ventilation, per seat (off / level 1-3) |
 | Cover | windows, tailgate, sunroof (open / close / tilt) |
 | Button | find car, vent windows, quick cool, stop charging |
@@ -208,7 +209,7 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 
 - **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. A [shared account](#owner-account-or-shared-account) avoids this.
 - **Static-decode commands.** A/C on/off, defog, quick cool, seat vent, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
-- **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
+- **A/C temperature** sends `7411` + the plain °C value (`741118` = 24 °C), runtime-confirmed on the Omoda C5 EV, where the target-temperature sensor reads the same plain °C. The Jaecoo J5 and Tiggo 7 encode it as `0x80 + 2 × °C`, so on those cars the slider is likely refused or shows the wrong value; please open an issue if you have one.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
 - **Seat ventilation and quick cool** are gated on the car's own capability list but the blob byte
   offsets behind the seat levels come from another project's capture and are not yet confirmed on an
