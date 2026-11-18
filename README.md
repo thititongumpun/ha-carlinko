@@ -88,18 +88,23 @@ Each vehicle on the account becomes a device named after its licence plate.
 
 ### Owner account or shared account
 
-Since the November 2026 T-Box firmware update, **remote controls only work from an account the car's
-T-Box trusts**, which in practice is the owner account. A shared account sees all telemetry, but every
-command comes back as *No operation permission*. Removing and re-sharing the car does not fix it
-(tested on an Omoda C5 EV).
+CarLinko allows **one session per account**, so if Home Assistant uses your own account, it and your
+phone app keep signing each other out. A shared account avoids that, with one catch since the
+November 2026 T-Box firmware update: **the car keeps its own list of accounts allowed to send
+commands**, and an older share may not be on it. Commands from such an account fail with
+*No operation permission* while all status still works.
 
-Pick one:
+To get a shared account onto the car's list (worked on an Omoda C5 EV):
 
-- **Owner account** (controls work). CarLinko allows **one session per account**, so Home Assistant and
-  your phone app sign each other out. Home Assistant logs back in on its own; the phone asks you to.
-- **Shared account** (status only). Share the car from the owner's app to a second CarLinko account
-  and use that in the integration. Your phone stays signed in; lock, windows, A/C and the other
-  controls fail with *No operation permission*.
+1. **Sign in to the CarLinko app once with the shared account**, open the car, wait a few minutes,
+   then try a control from Home Assistant.
+2. **Still refused?** In the owner's app, remove the shared account from the car and share the car
+   with it again while the car is awake and online. Accept the share in the shared account's app,
+   wait a few minutes, and try again.
+
+We don't yet know which of these is the real trigger; on our car it worked after doing both. If it
+still says *No operation permission*, use the owner account in Home Assistant and accept the
+sign-outs.
 
 To switch an existing setup: **Settings → Devices & services → CarLinko → ⋮ → Reconfigure** (v0.0.18+)
 and sign in with the other account. Entities, history and dashboards are kept.
@@ -201,7 +206,7 @@ Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
 
 ## Caveats
 
-- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. A [shared account](#owner-account-or-shared-account) avoids this but can't send commands.
+- **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. A [shared account](#owner-account-or-shared-account) avoids this.
 - **Static-decode commands.** A/C on/off, defog, quick cool, seat vent, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
 - **A/C target temperature** is model-specific; on the C5 EV it reads an implausible value. This is an upstream CarLinko bug — the app shows the same number — so it is passed through unchanged and is best left off dashboards.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
@@ -228,7 +233,7 @@ logger:
     custom_components.carlinko: debug
 ```
 
-**"No operation permission" (reply ends in `44`)** means the car's T-Box does not trust the account Home Assistant is logged into. The T-Box keeps its own list of allowed accounts, separate from CarLinko's cloud, so a shared account that can see the car may still be refused. Re-sharing the car does not add it. Use the owner account; see [Owner account or shared account](#owner-account-or-shared-account).
+**"No operation permission" (reply ends in `44`)** means the car's T-Box does not trust the account Home Assistant is logged into. The T-Box keeps its own list of allowed accounts, separate from CarLinko's cloud, so a shared account that can see the car may still be refused. Re-share the car to add it; see [Owner account or shared account](#owner-account-or-shared-account).
 
 Each command logs a line like `control 740100 (encrypted) -> 74010000`. The part after `->` is the car's reply: `74<cmd><state><result>`, where result `00` means done. A bare `7404` means the T-Box could not read the command frame. Every API call also logs its path and response code. Logs never contain your password or VIN; review them before posting anyway.
 

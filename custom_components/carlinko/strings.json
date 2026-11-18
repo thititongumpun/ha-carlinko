@@ -20,7 +20,7 @@
       },
       "reconfigure": {
         "title": "Change CarLinko account",
-        "description": "Sign in with another account, e.g. the owner account: since the November 2026 car update only the owner account can send commands. Your entities and dashboards are kept.",
+        "description": "Sign in with another account. Since the November 2026 car update, commands only work from an account on the car's own list: the owner account, or a shared account the car has accepted (see the README). Your entities and dashboards are kept.",
         "data": {
           "account": "Account (email or phone)",
           "password": "Password",
