@@ -5,7 +5,10 @@ import { maskPlate, carState, drivenKm, last7Days, tyreLevels, fmtDuration, type
 
 const TYRES = ['fl', 'fr', 'rl', 'rr'] as const
 
-const DEFAULT_ACCENT = '#1f6f4a'
+// Instrument-cluster look, shared with the project site's hero readout. Base colours come from the
+// HA theme; graphite and the electric accent are only fallbacks. Override with `--carlinko-accent`.
+const ACCENT_DARK = '#3ddfc4'
+const ACCENT_LIGHT = '#0d7d70'
 const PENDING_MS = 6000 // backend refreshes ~5s after a command
 const STATS_MS = 5 * 60 * 1000
 
@@ -15,78 +18,132 @@ const EN: Dict = {
   range: 'Range', state: 'State', parked: 'Parked', driving: 'Driving', charging: 'Charging',
   lock: 'Lock', unlock: 'Unlock', ac: 'A/C', find: 'Find car', vent: 'Vent windows', stop: 'Stop charging',
   today: 'Driven today', week: 'Week', month: 'Month', efficiency: 'Efficiency',
-  used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', hr: 'hr', min: 'min', left_pre: '', left_post: ' left',
+  used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', ago: 'ago', hr: 'hr', min: 'min',
+  power: 'Charging power', remaining: 'Time left', battery: 'battery',
   tyres: 'Tyres', fl: 'Front left', fr: 'Front right', rl: 'Rear left', rr: 'Rear right',
-  ac_temp: 'A/C set to',
+  ac_temp: 'A/C set to', mask: 'Show or hide plate', refresh: 'Refresh',
 }
 const TH: Dict = {
   range: 'ระยะทาง', state: 'สถานะ', parked: 'จอดอยู่', driving: 'กำลังขับ', charging: 'กำลังชาร์จ',
   lock: 'ล็อก', unlock: 'ปลดล็อก', ac: 'แอร์', find: 'ค้นหารถ', vent: 'แง้มกระจก', stop: 'หยุดชาร์จ',
   today: 'ขับวันนี้', week: 'สัปดาห์', month: 'เดือน', efficiency: 'ประสิทธิภาพ',
-  used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', hr: 'ชม.', min: 'นาที', left_pre: 'เหลือ ', left_post: '',
+  used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', ago: 'ที่แล้ว', hr: 'ชม.', min: 'นาที',
+  power: 'กำลังไฟชาร์จ', remaining: 'ชาร์จเสร็จใน', battery: 'แบตเตอรี่',
   tyres: 'ยาง', fl: 'ซ้ายหน้า', fr: 'ขวาหน้า', rl: 'ซ้ายหลัง', rr: 'ขวาหลัง',
-  ac_temp: 'แอร์ตั้งไว้',
+  ac_temp: 'แอร์ตั้งไว้', mask: 'แสดงหรือซ่อนทะเบียน', refresh: 'รีเฟรช',
 }
 
 const CSS = `
-:host { display: block; }
+:host {
+  display: block;
+  --cl-bg: var(--ha-card-background, var(--card-background-color, #1f2125));
+  --cl-text: var(--primary-text-color, #eceef1);
+  --cl-muted: var(--secondary-text-color, #a9aeb6);
+  --cl-line: var(--divider-color, rgba(127, 127, 127, .28));
+  --cl-strong: color-mix(in srgb, var(--cl-muted) 55%, transparent);
+  --cl-mono: ui-monospace, 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
 .card {
-  background: var(--card-background-color, #fff);
-  color: var(--primary-text-color, #111);
-  border-radius: var(--ha-card-border-radius, 12px);
+  position: relative; background: var(--cl-bg); color: var(--cl-text);
+  border: 1px solid var(--cl-line); border-radius: 2px;
   padding: 16px; box-sizing: border-box;
   font-family: var(--paper-font-body1_-_font-family, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums; line-height: 1.45;
 }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.model { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--secondary-text-color, #777); }
-.name { font-size: 26px; font-weight: 700; letter-spacing: .04em; margin-top: 4px; }
+.c { position: absolute; width: 10px; height: 10px; border: 0 solid var(--cl-strong); }
+.tl { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+.tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+.bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+.br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+.row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.model, .label { font-size: 12px; color: var(--cl-muted); }
+.name { font: 600 22px/1.2 var(--cl-mono); letter-spacing: .02em; margin-top: 2px; }
+.btns { display: flex; gap: 6px; }
 .iconbtn {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--divider-color, #e0e0e0);
-  background: none; color: var(--secondary-text-color, #777); cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1;
+  width: 34px; height: 34px; border-radius: 2px; border: 1px solid var(--cl-line);
+  background: none; color: var(--cl-muted); cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.live { margin-top: 8px; text-align: right; font-size: 12px; color: var(--secondary-text-color, #777); }
-.dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--carlinko-accent, ${DEFAULT_ACCENT}); margin-right: 6px; }
-section { border-top: 1px solid var(--divider-color, #e6e6e6); padding: 18px 0; }
-.label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--secondary-text-color, #777); }
-.big { font-size: 32px; font-weight: 700; line-height: 1.1; }
-.unit { font-size: 13px; font-weight: 500; color: var(--secondary-text-color, #777); margin-left: 3px; }
-.carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; object-fit: contain; }
-.hero { display: flex; align-items: center; gap: 22px; }
-.ring { flex: 0 0 auto; position: relative; }
-.ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; }
-.hero .stat + .stat { margin-top: 14px; }
-.statev { font-size: 17px; color: var(--carlinko-accent, ${DEFAULT_ACCENT}); font-weight: 600; margin-top: 2px; }
-.sub { font-size: 12px; color: var(--secondary-text-color, #777); margin-top: 2px; }
+.iconbtn:hover { color: var(--cl-text); border-color: var(--cl-strong); }
+.iconbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+button:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px; }
+.live { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--cl-muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cl-accent); }
+section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
+.num { font: 500 22px/1.15 var(--cl-mono); }
+.unit { font: 400 12px var(--cl-mono); color: var(--cl-muted); margin-left: 4px; font-style: normal; }
+.carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 180px; object-fit: contain; }
+.hero { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 18px; align-items: center; }
+.dial { position: relative; width: 128px; height: 128px; }
+.dial svg { display: block; width: 100%; height: 100%; }
+.ticks line { stroke: var(--cl-strong); stroke-width: 1; }
+.ticks line.major { stroke: var(--cl-muted); stroke-width: 1.5; }
+.dial circle { fill: none; stroke-width: 6; }
+.track { stroke: var(--cl-line); }
+.fill { stroke: var(--cl-accent); }
+.flow { stroke: var(--cl-text); opacity: 0; }
+.ringval { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ringval .num { font-size: 30px; }
+.ringval .label { font-size: 11px; }
+.reads > div + div { border-top: 1px solid var(--cl-line); margin-top: 8px; padding-top: 8px; }
+.reads .label { line-height: 1.3; }
+.num.dur { font-family: inherit; font-size: 18px; }
+.stv { font-size: 16px; font-weight: 600; margin-top: 2px; }
+.stv.charging, .num.charging { color: var(--cl-accent); }
+.bar { padding-top: 14px; }
+.segs { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; height: 9px; }
+.segs i { background: var(--cl-line); }
+.segs i.lit { background: var(--cl-accent); }
+.segs i.next { background: color-mix(in srgb, var(--cl-accent) 40%, var(--cl-line)); }
+.scale { display: flex; justify-content: space-between; margin-top: 4px; font: 11px var(--cl-mono); color: var(--cl-muted); }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill {
-  border: none; border-radius: 999px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
-  background: var(--divider-color, #eceff1); color: var(--primary-text-color, #111);
+  min-height: 36px; padding: 0 14px; border-radius: 2px; font: 600 13px var(--paper-font-body1_-_font-family, system-ui, sans-serif);
+  cursor: pointer; background: none; color: var(--cl-text); border: 1px solid var(--cl-strong);
 }
+.pill:hover { border-color: var(--cl-text); }
 .pill[disabled] { opacity: .5; cursor: progress; }
-.pill.on { background: var(--carlinko-accent, ${DEFAULT_ACCENT}); color: #fff; }
-.three { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.pill.on { background: var(--cl-text); border-color: var(--cl-text); color: var(--cl-bg); }
+.three { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; align-items: end; }
 .three .r { text-align: right; }
-.three .r .big { font-size: 20px; }
-.bars { display: flex; align-items: flex-end; gap: 8px; height: 56px; margin-top: 14px; }
-.bars i { flex: 1; background: var(--carlinko-accent, ${DEFAULT_ACCENT}); border-radius: 4px; min-height: 3px; }
-.bars i.zero { opacity: .18; }
-.tyres { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-.tyre {
-  border: 1px solid var(--divider-color, #e6e6e6); border-radius: 10px; padding: 10px 12px;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
-}
-.tyre .label { font-size: 10px; white-space: nowrap; }
-.tyre .v { font-size: 18px; font-weight: 700; }
-.tyre .t { font-size: 12px; color: var(--secondary-text-color, #777); white-space: nowrap; }
-.tyre.low { border-color: var(--error-color, #db4437); }
-.tyre.low .v { color: var(--error-color, #db4437); }
-.tyre.warn { border-color: var(--warning-color, #ffa600); }
-.tyre.warn .v { color: var(--warning-color, #ffa600); }
+.three .r .num { font-size: 18px; }
+.sub { font: 11px var(--cl-mono); color: var(--cl-muted); margin-top: 2px; }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin-top: 14px; border-bottom: 1px solid var(--cl-line); }
+.bars i { flex: 1; background: var(--cl-strong); min-height: 2px; }
+.bars i:last-child { background: var(--cl-text); }
+.bars i.zero { opacity: .35; }
+.tgrid { display: grid; grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr); grid-template-rows: auto auto; gap: 12px 14px; align-items: center; margin-top: 12px; }
+.car { grid-column: 2; grid-row: 1 / 3; width: 100%; fill: none; stroke: var(--cl-strong); stroke-width: 1.5; }
+.tyre { display: grid; gap: 1px; }
+.tyre .num { font-size: 18px; }
+.tyre .t { font: 12px var(--cl-mono); color: var(--cl-muted); }
+.tyre.fl, .tyre.rl { grid-column: 1; text-align: right; }
+.tyre.fr, .tyre.rr { grid-column: 3; }
+.tyre.fl, .tyre.fr { grid-row: 1; }
+.tyre.rl, .tyre.rr { grid-row: 2; }
+.tyre.warn .num { color: var(--warning-color, #ffa600); }
+.tyre.low .num { color: var(--error-color, #db4437); }
+.tyre.warn .label::after, .tyre.low .label::after { content: ''; display: inline-block; width: 6px; height: 6px; margin: 0 0 1px 6px; background: var(--warning-color, #ffa600); }
+.tyre.low .label::after { background: var(--error-color, #db4437); }
 .tyre.none { opacity: .45; }
-footer { padding-top: 14px; border-top: 1px solid var(--divider-color, #e6e6e6); text-align: center;
-  font-size: 12px; color: var(--secondary-text-color, #777); }
+footer { padding-top: 12px; border-top: 1px solid var(--cl-line); text-align: center; font: 11px var(--cl-mono); color: var(--cl-muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .dot { animation: pulse 2.4s ease-in-out 4; }
+  .charging-anim .flow { animation: flow 3.2s cubic-bezier(.16, 1, .3, 1) 3; }
+  .charging-anim .segs i.next { animation: pulse 1.6s ease-in-out 6; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  @keyframes flow {
+    0% { stroke-dashoffset: 0; opacity: 0; } 15% { opacity: .8; } 85% { opacity: .8; }
+    100% { stroke-dashoffset: calc(-1 * var(--len) + 10px); opacity: 0; }
+  }
+}
 `
+
+const ICONS = {
+  eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>',
+}
 
 const num = (s: any): number | null => {
   const n = Number(s?.state)
@@ -195,7 +252,15 @@ class CarlinkoCard extends HTMLElement {
     const picture = map.vehicle ? this._hass.states[map.vehicle]?.attributes?.entity_picture : undefined
 
     const pct = battery === null ? 0 : Math.max(0, Math.min(100, battery))
-    const circ = 2 * Math.PI * 34
+    const R = 50
+    const circ = 2 * Math.PI * R
+    const arc = (circ * pct) / 100
+    const ticks = Array.from({ length: 40 }, (_, i) => i * 9)
+      .map((a) => `<line x1="70" y1="${a % 90 ? 4 : 2}" x2="70" y2="9" transform="rotate(${a} 70 70)"${a % 90 ? '' : ' class="major"'}></line>`)
+      .join('')
+    const lit = Math.floor(pct / 5)
+    const segs = Array.from({ length: 20 }, (_, i) => `<i class="${i < lit ? 'lit' : i === lit && charging ? 'next' : ''}"></i>`).join('')
+    const accent = `var(--carlinko-accent, ${this._hass.themes?.darkMode === false ? ACCENT_LIGHT : ACCENT_DARK})`
 
     const lockState = st('door_lock')?.state
     const pills: string[] = []
@@ -206,7 +271,7 @@ class CarlinkoCard extends HTMLElement {
     if (charging && map.stop_charging) pills.push(this._pill('stop_charging', t.stop, false))
 
     const acTemp = num(st('ac_temp'))
-    const acUnit = st('ac_temp')?.attributes?.unit_of_measurement ?? '\u00b0C'
+    const acUnit = st('ac_temp')?.attributes?.unit_of_measurement ?? '°C'
 
     const tyrePress = TYRES.map((k) => num(st(`tyre_${k}_pressure`)))
     const tyreLvl = tyreLevels(tyrePress)
@@ -214,12 +279,10 @@ class CarlinkoCard extends HTMLElement {
     const tyreCells = TYRES.map((k, i) => {
       const temp = num(st(`tyre_${k}_temp`))
       const tUnit = st(`tyre_${k}_temp`)?.attributes?.unit_of_measurement ?? '°C'
-      return `<div class="tyre ${tyreLvl[i]}">
-        <div>
-          <div class="label">${t[k]}</div>
-          <div class="v">${fmt(tyrePress[i], 2)}<span class="unit">${esc(String(tyreUnit))}</span></div>
-        </div>
-        ${temp === null ? '' : `<div class="t">${fmt(temp, 1)}${esc(String(tUnit))}</div>`}
+      return `<div class="tyre ${k} ${tyreLvl[i]}">
+        <div class="label">${t[k]}</div>
+        <div><span class="num">${fmt(tyrePress[i], 2)}</span><span class="unit">${esc(String(tyreUnit))}</span></div>
+        ${temp === null ? '' : `<div class="t">${fmt(temp, 1)} ${esc(String(tUnit))}</div>`}
       </div>`
     })
     const hasTyres = tyrePress.some((v) => v !== null)
@@ -231,43 +294,55 @@ class CarlinkoCard extends HTMLElement {
 
     const html = `
 <style>${CSS}</style>
-<div class="card">
+<div class="card${charging ? ' charging-anim' : ''}" style="--cl-accent:${accent}">
+  <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
   <div class="row">
     <div>
       <div class="model">${esc(model)}</div>
       <div class="name">${esc(name)}</div>
     </div>
-    <div>
-      <button class="iconbtn" data-act="mask" title="mask">${this._masked ? '&#128584;' : '&#128065;'}</button>
-      <button class="iconbtn" data-act="refresh" title="refresh">&#8635;</button>
+    <div class="btns">
+      <button class="iconbtn" data-act="mask" title="${t.mask}" aria-label="${t.mask}" aria-pressed="${this._masked}">${this._masked ? ICONS.eyeOff : ICONS.eye}</button>
+      <button class="iconbtn" data-act="refresh" title="${t.refresh}" aria-label="${t.refresh}">${ICONS.refresh}</button>
     </div>
   </div>
-  <div class="live"><span class="dot"></span>${t.live} &middot; ${ago === null ? '—' : ago + 'm'} ago</div>
+  <div class="live"><span class="dot"></span>${t.live} &middot; ${ago === null ? '—' : ago + 'm'} ${t.ago}</div>
 
   ${picture ? `<section style="border:0"><img class="carimg" src="${esc(String(picture))}" alt="${esc(model)}"></section>` : ''}
 
-  <section class="hero">
-    <div class="ring">
-      <svg width="84" height="84" viewBox="0 0 84 84">
-        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--divider-color,#e6e6e6)" stroke-width="6"></circle>
-        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--carlinko-accent, ${DEFAULT_ACCENT})" stroke-width="6"
-          stroke-linecap="round" transform="rotate(-90 42 42)"
-          stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${(circ * (1 - pct / 100)).toFixed(1)}"></circle>
-      </svg>
-      <span>${fmt(battery)}<i class="unit">%</i></span>
-    </div>
-    <div>
-      <div class="stat">
-        <div class="label">${t.range}</div>
-        <div class="big">${fmt(range)}<span class="unit">${esc(String(distUnit))}</span></div>
+  <section>
+    <div class="hero">
+      <div class="dial">
+        <svg viewBox="0 0 140 140" aria-hidden="true">
+          <g class="ticks">${ticks}</g>
+          <g transform="rotate(-90 70 70)">
+            <circle class="track" cx="70" cy="70" r="${R}"></circle>
+            <circle class="fill" cx="70" cy="70" r="${R}" stroke-dasharray="${arc.toFixed(1)} ${circ.toFixed(1)}"></circle>
+            <circle class="flow" cx="70" cy="70" r="${R}" stroke-dasharray="10 ${circ.toFixed(1)}" style="--len:${arc.toFixed(1)}px"></circle>
+          </g>
+        </svg>
+        <div class="ringval"><span><span class="num">${fmt(battery)}</span><i class="unit">%</i></span><span class="label">${t.battery}</span></div>
       </div>
-      <div class="stat">
-        <div class="label">${t.state}</div>
-        <div class="statev">${t[state]}</div>
-        ${charging && (kw !== null || mins !== null)
-          ? `<div class="sub">${fmt(kw, 1)} kW &middot; ${t.left_pre}${fmtDuration(mins, t.hr, t.min)}${t.left_post}</div>`
+      <div class="reads">
+        <div>
+          <div class="label">${t.range}</div>
+          <div><span class="num">${fmt(range)}</span><span class="unit">${esc(String(distUnit))}</span></div>
+        </div>
+        <div>
+          <div class="label">${t.state}</div>
+          <div class="stv ${state}">${t[state]}</div>
+        </div>
+        ${charging && kw !== null
+          ? `<div><div class="label">${t.power}</div><div><span class="num charging">${fmt(kw, 1)}</span><span class="unit">kW</span></div></div>`
+          : ''}
+        ${charging && mins !== null
+          ? `<div><div class="label">${t.remaining}</div><div class="num dur">${fmtDuration(mins, t.hr, t.min)}</div></div>`
           : ''}
       </div>
+    </div>
+    <div class="bar" aria-hidden="true">
+      <div class="segs">${segs}</div>
+      <div class="scale"><span>0</span><span>50</span><span>100</span></div>
     </div>
   </section>
 
@@ -277,7 +352,7 @@ class CarlinkoCard extends HTMLElement {
     ? ''
     : `<section>
     <div class="label">${t.ac_temp}</div>
-    <div class="big">${fmt(acTemp)}<span class="unit">${esc(String(acUnit))}</span></div>
+    <div><span class="num">${fmt(acTemp)}</span><span class="unit">${esc(String(acUnit))}</span></div>
   </section>`}
 
   ${driven
@@ -285,10 +360,10 @@ class CarlinkoCard extends HTMLElement {
     <div class="three">
       <div>
         <div class="label">${t.today}</div>
-        <div class="big">${fmt(driven.today)}<span class="unit">${esc(String(odoUnit))}</span></div>
+        <div><span class="num">${fmt(driven.today)}</span><span class="unit">${esc(String(odoUnit))}</span></div>
       </div>
-      <div class="r"><div class="label">${t.week}</div><div class="big">${fmt(driven.week)}</div></div>
-      <div class="r"><div class="label">${t.month}</div><div class="big">${fmt(driven.month)}</div></div>
+      <div class="r"><div class="label">${t.week}</div><div class="num">${fmt(driven.week)}</div></div>
+      <div class="r"><div class="label">${t.month}</div><div class="num">${fmt(driven.month)}</div></div>
     </div>
     <div class="bars">${this._bars
       .map((v) => `<i class="${v ? '' : 'zero'}" style="height:${Math.max(4, (v / maxBar) * 100)}%"></i>`)
@@ -300,18 +375,21 @@ class CarlinkoCard extends HTMLElement {
     <div class="three">
       <div>
         <div class="label">${t.efficiency}</div>
-        <div class="big">${fmt(consumption, 1)}</div>
+        <div class="num">${fmt(consumption, 1)}</div>
         <div class="sub">kWh / 100 km</div>
       </div>
-      <div class="r"><div class="label">${t.used}</div><div class="big">${fmt(usedToday, 1)}<span class="unit">kWh</span></div></div>
-      <div class="r"><div class="label">${t.left}</div><div class="big">${fmt(energyLeft, 1)}<span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.used}</div><div><span class="num">${fmt(usedToday, 1)}</span><span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.left}</div><div><span class="num">${fmt(energyLeft, 1)}</span><span class="unit">kWh</span></div></div>
     </div>
   </section>
 
   ${hasTyres
     ? `<section>
     <div class="label">${t.tyres}</div>
-    <div class="tyres">${tyreCells.join('')}</div>
+    <div class="tgrid">
+      <svg class="car" viewBox="0 0 60 120" aria-hidden="true"><rect x="8" y="4" width="44" height="112" rx="18"></rect><path d="M14 34 Q30 26 46 34 M14 88 Q30 95 46 88"></path></svg>
+      ${tyreCells.join('')}
+    </div>
   </section>`
     : ''}
 

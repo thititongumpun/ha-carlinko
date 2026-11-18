@@ -111,7 +111,7 @@ and sign in with the other account. Entities, history and dashboards are kept.
 
 ## Lovelace card
 
-Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.11`, type **JavaScript module**. Then:
+Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.21`, type **JavaScript module**. Then:
 
 ```yaml
 type: custom:carlinko-card

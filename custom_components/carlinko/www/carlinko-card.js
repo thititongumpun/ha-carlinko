@@ -1,43 +1,43 @@
-function pt(a, t = !0) {
-  return !t || a.length <= 4 ? a : a.slice(0, 1) + a.slice(1, -3).replace(/\S/g, "•") + a.slice(-3);
+function _t(i, t = !0) {
+  return !t || i.length <= 4 ? i : i.slice(0, 1) + i.slice(1, -3).replace(/\S/g, "•") + i.slice(-3);
 }
-function ft(a, t, e) {
-  return a === "charging" ? "charging" : t > 0 || e ? "driving" : "parked";
+function xt(i, t, e) {
+  return i === "charging" ? "charging" : t > 0 || e ? "driving" : "parked";
 }
-const Q = 864e5, $ = (a) => new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
-function ut(a, t = /* @__PURE__ */ new Date()) {
-  const e = $(t), s = e - 6 * Q, i = new Date(t.getFullYear(), t.getMonth(), 1).getTime();
-  let n = 0, o = 0, r = 0;
-  for (const p of a) {
-    const d = Number(p.change);
-    !Number.isFinite(d) || d < 0 || (p.start >= e && (n += d), p.start >= s && (o += d), p.start >= i && (r += d));
+const st = 864e5, M = (i) => new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime();
+function yt(i, t = /* @__PURE__ */ new Date()) {
+  const e = M(t), s = e - 6 * st, a = new Date(t.getFullYear(), t.getMonth(), 1).getTime();
+  let o = 0, l = 0, n = 0;
+  for (const g of i) {
+    const d = Number(g.change);
+    !Number.isFinite(d) || d < 0 || (g.start >= e && (o += d), g.start >= s && (l += d), g.start >= a && (n += d));
   }
-  return { today: n, week: o, month: r };
+  return { today: o, week: l, month: n };
 }
-function gt(a, t = /* @__PURE__ */ new Date()) {
-  const e = $(t), s = [0, 0, 0, 0, 0, 0, 0];
-  for (const i of a) {
-    const n = Number(i.change);
-    if (!Number.isFinite(n) || n < 0) continue;
-    const o = 6 - Math.round((e - $(new Date(i.start))) / Q);
-    o >= 0 && o < 7 && (s[o] += n);
+function kt(i, t = /* @__PURE__ */ new Date()) {
+  const e = M(t), s = [0, 0, 0, 0, 0, 0, 0];
+  for (const a of i) {
+    const o = Number(a.change);
+    if (!Number.isFinite(o) || o < 0) continue;
+    const l = 6 - Math.round((e - M(new Date(a.start))) / st);
+    l >= 0 && l < 7 && (s[l] += o);
   }
   return s;
 }
-function vt(a, t, e) {
-  if (a === null || !Number.isFinite(a) || a < 0) return "—";
-  const s = Math.floor(a / 60), i = Math.round(a % 60);
-  return s ? i ? `${s} ${t} ${i} ${e}` : `${s} ${t}` : `${i} ${e}`;
+function wt(i, t, e) {
+  if (i === null || !Number.isFinite(i) || i < 0) return "—";
+  const s = Math.floor(i / 60), a = Math.round(i % 60);
+  return s ? a ? `${s} ${t} ${a} ${e}` : `${s} ${t}` : `${a} ${e}`;
 }
-function _t(a) {
-  const t = a.filter((s) => s !== null && s > 0);
-  if (!t.length) return a.map(() => "none");
-  const e = t.reduce((s, i) => s + i, 0) / t.length;
-  return a.map(
+function $t(i) {
+  const t = i.filter((s) => s !== null && s > 0);
+  if (!t.length) return i.map(() => "none");
+  const e = t.reduce((s, a) => s + a, 0) / t.length;
+  return i.map(
     (s) => s === null || s <= 0 ? "none" : s < e * 0.9 ? "low" : s < e * 0.95 ? "warn" : "ok"
   );
 }
-const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, bt = {
+const tt = ["fl", "fr", "rl", "rr"], St = "#3ddfc4", Mt = "#0d7d70", Ct = 6e3, et = 300 * 1e3, Dt = {
   range: "Range",
   state: "State",
   parked: "Parked",
@@ -57,17 +57,21 @@ const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, bt =
   left: "Energy left",
   updated: "Updated",
   live: "live",
+  ago: "ago",
   hr: "hr",
   min: "min",
-  left_pre: "",
-  left_post: " left",
+  power: "Charging power",
+  remaining: "Time left",
+  battery: "battery",
   tyres: "Tyres",
   fl: "Front left",
   fr: "Front right",
   rl: "Rear left",
   rr: "Rear right",
-  ac_temp: "A/C set to"
-}, yt = {
+  ac_temp: "A/C set to",
+  mask: "Show or hide plate",
+  refresh: "Refresh"
+}, Tt = {
   range: "ระยะทาง",
   state: "สถานะ",
   parked: "จอดอยู่",
@@ -87,79 +91,133 @@ const G = ["fl", "fr", "rl", "rr"], b = "#1f6f4a", mt = 6e3, J = 300 * 1e3, bt =
   left: "พลังงานคงเหลือ",
   updated: "อัปเดต",
   live: "ออนไลน์",
+  ago: "ที่แล้ว",
   hr: "ชม.",
   min: "นาที",
-  left_pre: "เหลือ ",
-  left_post: "",
+  power: "กำลังไฟชาร์จ",
+  remaining: "ชาร์จเสร็จใน",
+  battery: "แบตเตอรี่",
   tyres: "ยาง",
   fl: "ซ้ายหน้า",
   fr: "ขวาหน้า",
   rl: "ซ้ายหลัง",
   rr: "ขวาหลัง",
-  ac_temp: "แอร์ตั้งไว้"
-}, xt = `
-:host { display: block; }
+  ac_temp: "แอร์ตั้งไว้",
+  mask: "แสดงหรือซ่อนทะเบียน",
+  refresh: "รีเฟรช"
+}, Ft = `
+:host {
+  display: block;
+  --cl-bg: var(--ha-card-background, var(--card-background-color, #1f2125));
+  --cl-text: var(--primary-text-color, #eceef1);
+  --cl-muted: var(--secondary-text-color, #a9aeb6);
+  --cl-line: var(--divider-color, rgba(127, 127, 127, .28));
+  --cl-strong: color-mix(in srgb, var(--cl-muted) 55%, transparent);
+  --cl-mono: ui-monospace, 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
 .card {
-  background: var(--card-background-color, #fff);
-  color: var(--primary-text-color, #111);
-  border-radius: var(--ha-card-border-radius, 12px);
+  position: relative; background: var(--cl-bg); color: var(--cl-text);
+  border: 1px solid var(--cl-line); border-radius: 2px;
   padding: 16px; box-sizing: border-box;
   font-family: var(--paper-font-body1_-_font-family, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums; line-height: 1.45;
 }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.model { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--secondary-text-color, #777); }
-.name { font-size: 26px; font-weight: 700; letter-spacing: .04em; margin-top: 4px; }
+.c { position: absolute; width: 10px; height: 10px; border: 0 solid var(--cl-strong); }
+.tl { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+.tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+.bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+.br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+.row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.model, .label { font-size: 12px; color: var(--cl-muted); }
+.name { font: 600 22px/1.2 var(--cl-mono); letter-spacing: .02em; margin-top: 2px; }
+.btns { display: flex; gap: 6px; }
 .iconbtn {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--divider-color, #e0e0e0);
-  background: none; color: var(--secondary-text-color, #777); cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1;
+  width: 34px; height: 34px; border-radius: 2px; border: 1px solid var(--cl-line);
+  background: none; color: var(--cl-muted); cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.live { margin-top: 8px; text-align: right; font-size: 12px; color: var(--secondary-text-color, #777); }
-.dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--carlinko-accent, ${b}); margin-right: 6px; }
-section { border-top: 1px solid var(--divider-color, #e6e6e6); padding: 18px 0; }
-.label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--secondary-text-color, #777); }
-.big { font-size: 32px; font-weight: 700; line-height: 1.1; }
-.unit { font-size: 13px; font-weight: 500; color: var(--secondary-text-color, #777); margin-left: 3px; }
-.carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; object-fit: contain; }
-.hero { display: flex; align-items: center; gap: 22px; }
-.ring { flex: 0 0 auto; position: relative; }
-.ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; }
-.hero .stat + .stat { margin-top: 14px; }
-.statev { font-size: 17px; color: var(--carlinko-accent, ${b}); font-weight: 600; margin-top: 2px; }
-.sub { font-size: 12px; color: var(--secondary-text-color, #777); margin-top: 2px; }
+.iconbtn:hover { color: var(--cl-text); border-color: var(--cl-strong); }
+.iconbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+button:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px; }
+.live { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--cl-muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cl-accent); }
+section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
+.num { font: 500 22px/1.15 var(--cl-mono); }
+.unit { font: 400 12px var(--cl-mono); color: var(--cl-muted); margin-left: 4px; font-style: normal; }
+.carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 180px; object-fit: contain; }
+.hero { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 18px; align-items: center; }
+.dial { position: relative; width: 128px; height: 128px; }
+.dial svg { display: block; width: 100%; height: 100%; }
+.ticks line { stroke: var(--cl-strong); stroke-width: 1; }
+.ticks line.major { stroke: var(--cl-muted); stroke-width: 1.5; }
+.dial circle { fill: none; stroke-width: 6; }
+.track { stroke: var(--cl-line); }
+.fill { stroke: var(--cl-accent); }
+.flow { stroke: var(--cl-text); opacity: 0; }
+.ringval { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ringval .num { font-size: 30px; }
+.ringval .label { font-size: 11px; }
+.reads > div + div { border-top: 1px solid var(--cl-line); margin-top: 8px; padding-top: 8px; }
+.reads .label { line-height: 1.3; }
+.num.dur { font-family: inherit; font-size: 18px; }
+.stv { font-size: 16px; font-weight: 600; margin-top: 2px; }
+.stv.charging, .num.charging { color: var(--cl-accent); }
+.bar { padding-top: 14px; }
+.segs { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; height: 9px; }
+.segs i { background: var(--cl-line); }
+.segs i.lit { background: var(--cl-accent); }
+.segs i.next { background: color-mix(in srgb, var(--cl-accent) 40%, var(--cl-line)); }
+.scale { display: flex; justify-content: space-between; margin-top: 4px; font: 11px var(--cl-mono); color: var(--cl-muted); }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill {
-  border: none; border-radius: 999px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
-  background: var(--divider-color, #eceff1); color: var(--primary-text-color, #111);
+  min-height: 36px; padding: 0 14px; border-radius: 2px; font: 600 13px var(--paper-font-body1_-_font-family, system-ui, sans-serif);
+  cursor: pointer; background: none; color: var(--cl-text); border: 1px solid var(--cl-strong);
 }
+.pill:hover { border-color: var(--cl-text); }
 .pill[disabled] { opacity: .5; cursor: progress; }
-.pill.on { background: var(--carlinko-accent, ${b}); color: #fff; }
-.three { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.pill.on { background: var(--cl-text); border-color: var(--cl-text); color: var(--cl-bg); }
+.three { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; align-items: end; }
 .three .r { text-align: right; }
-.three .r .big { font-size: 20px; }
-.bars { display: flex; align-items: flex-end; gap: 8px; height: 56px; margin-top: 14px; }
-.bars i { flex: 1; background: var(--carlinko-accent, ${b}); border-radius: 4px; min-height: 3px; }
-.bars i.zero { opacity: .18; }
-.tyres { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-.tyre {
-  border: 1px solid var(--divider-color, #e6e6e6); border-radius: 10px; padding: 10px 12px;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
-}
-.tyre .label { font-size: 10px; white-space: nowrap; }
-.tyre .v { font-size: 18px; font-weight: 700; }
-.tyre .t { font-size: 12px; color: var(--secondary-text-color, #777); white-space: nowrap; }
-.tyre.low { border-color: var(--error-color, #db4437); }
-.tyre.low .v { color: var(--error-color, #db4437); }
-.tyre.warn { border-color: var(--warning-color, #ffa600); }
-.tyre.warn .v { color: var(--warning-color, #ffa600); }
+.three .r .num { font-size: 18px; }
+.sub { font: 11px var(--cl-mono); color: var(--cl-muted); margin-top: 2px; }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin-top: 14px; border-bottom: 1px solid var(--cl-line); }
+.bars i { flex: 1; background: var(--cl-strong); min-height: 2px; }
+.bars i:last-child { background: var(--cl-text); }
+.bars i.zero { opacity: .35; }
+.tgrid { display: grid; grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr); grid-template-rows: auto auto; gap: 12px 14px; align-items: center; margin-top: 12px; }
+.car { grid-column: 2; grid-row: 1 / 3; width: 100%; fill: none; stroke: var(--cl-strong); stroke-width: 1.5; }
+.tyre { display: grid; gap: 1px; }
+.tyre .num { font-size: 18px; }
+.tyre .t { font: 12px var(--cl-mono); color: var(--cl-muted); }
+.tyre.fl, .tyre.rl { grid-column: 1; text-align: right; }
+.tyre.fr, .tyre.rr { grid-column: 3; }
+.tyre.fl, .tyre.fr { grid-row: 1; }
+.tyre.rl, .tyre.rr { grid-row: 2; }
+.tyre.warn .num { color: var(--warning-color, #ffa600); }
+.tyre.low .num { color: var(--error-color, #db4437); }
+.tyre.warn .label::after, .tyre.low .label::after { content: ''; display: inline-block; width: 6px; height: 6px; margin: 0 0 1px 6px; background: var(--warning-color, #ffa600); }
+.tyre.low .label::after { background: var(--error-color, #db4437); }
 .tyre.none { opacity: .45; }
-footer { padding-top: 14px; border-top: 1px solid var(--divider-color, #e6e6e6); text-align: center;
-  font-size: 12px; color: var(--secondary-text-color, #777); }
-`, f = (a) => {
-  const t = Number(a == null ? void 0 : a.state);
-  return a && Number.isFinite(t) ? t : null;
-}, l = (a, t = 0) => a === null ? "—" : a.toFixed(t), h = (a) => a.replace(/[&<>"]/g, (t) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[t]);
-class kt extends HTMLElement {
+footer { padding-top: 12px; border-top: 1px solid var(--cl-line); text-align: center; font: 11px var(--cl-mono); color: var(--cl-muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .dot { animation: pulse 2.4s ease-in-out 4; }
+  .charging-anim .flow { animation: flow 3.2s cubic-bezier(.16, 1, .3, 1) 3; }
+  .charging-anim .segs i.next { animation: pulse 1.6s ease-in-out 6; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  @keyframes flow {
+    0% { stroke-dashoffset: 0; opacity: 0; } 15% { opacity: .8; } 85% { opacity: .8; }
+    100% { stroke-dashoffset: calc(-1 * var(--len) + 10px); opacity: 0; }
+  }
+}
+`, S = {
+  eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>'
+}, u = (i) => {
+  const t = Number(i == null ? void 0 : i.state);
+  return i && Number.isFinite(t) ? t : null;
+}, p = (i, t = 0) => i === null ? "—" : i.toFixed(t), h = (i) => i.replace(/[&<>"]/g, (t) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[t]);
+class Rt extends HTMLElement {
   constructor() {
     super(...arguments), this._config = {}, this._root = this.attachShadow({ mode: "open" }), this._html = "", this._masked = !0, this._pending = /* @__PURE__ */ new Set(), this._stats = null, this._bars = [], this._statsAt = 0, this._odo = "";
   }
@@ -170,7 +228,7 @@ class kt extends HTMLElement {
     this._hass = t, this._safeRender();
   }
   connectedCallback() {
-    this._timer = setInterval(() => this._fetchStats(!0), J), this._hass && this._safeRender();
+    this._timer = setInterval(() => this._fetchStats(!0), et), this._hass && this._safeRender();
   }
   disconnectedCallback() {
     clearInterval(this._timer);
@@ -187,184 +245,195 @@ class kt extends HTMLElement {
   }
   /** entity registry -> { device, translation_key: entity_id } for the chosen car. */
   _resolve() {
-    var i, n, o;
-    const t = ((i = this._hass) == null ? void 0 : i.entities) || {};
+    var a, o, l;
+    const t = ((a = this._hass) == null ? void 0 : a.entities) || {};
     let e = this._config.device_id;
     const s = {};
     if (!e) {
-      for (const r of Object.values(t))
-        if ((r == null ? void 0 : r.platform) === "carlinko" && r.translation_key === "battery") {
-          e = r.device_id;
+      for (const n of Object.values(t))
+        if ((n == null ? void 0 : n.platform) === "carlinko" && n.translation_key === "battery") {
+          e = n.device_id;
           break;
         }
     }
     if (e)
-      for (const r of Object.values(t))
-        (r == null ? void 0 : r.platform) === "carlinko" && r.device_id === e && r.translation_key && (s[r.translation_key] = r.entity_id);
-    return { device: e ? (o = (n = this._hass) == null ? void 0 : n.devices) == null ? void 0 : o[e] : void 0, map: s };
+      for (const n of Object.values(t))
+        (n == null ? void 0 : n.platform) === "carlinko" && n.device_id === e && n.translation_key && (s[n.translation_key] = n.entity_id);
+    return { device: e ? (l = (o = this._hass) == null ? void 0 : o.devices) == null ? void 0 : l[e] : void 0, map: s };
   }
   _render() {
-    var j, L, A, E, U, W, P, Y, I, B, H, O, q;
+    var U, W, B, P, I, O, Y, H, K, q, G, Q, V, J;
     if (!this._hass) return;
-    const t = String(this._hass.language || "en").startsWith("th") ? yt : bt, { device: e, map: s } = this._resolve(), i = (c) => {
-      const u = s[c], v = u ? this._hass.states[u] : void 0;
-      return v && v.state !== "unavailable" && v.state !== "unknown" ? v : void 0;
-    }, n = (c) => {
-      var u;
-      return ((u = i(c)) == null ? void 0 : u.state) === "on";
+    const t = String(this._hass.language || "en").startsWith("th") ? Tt : Dt, { device: e, map: s } = this._resolve(), a = (r) => {
+      const c = s[r], f = c ? this._hass.states[c] : void 0;
+      return f && f.state !== "unavailable" && f.state !== "unknown" ? f : void 0;
+    }, o = (r) => {
+      var c;
+      return ((c = a(r)) == null ? void 0 : c.state) === "on";
     };
     this._maybeFetchStats(s.odometer);
-    const o = f(i("battery")), r = f(i("range")), p = f(i("speed")) ?? 0, d = ft((j = i("charge_state")) == null ? void 0 : j.state, p, n("hv_active")), m = d === "charging", S = f(i("charge_power")), D = f(i("charge_remaining")), x = f(i("consumption")), X = Number(this._config.battery_kwh) || 61, Z = ((A = (L = i("range")) == null ? void 0 : L.attributes) == null ? void 0 : A.unit_of_measurement) ?? "km", tt = s.odometer && ((U = (E = this._hass.states[s.odometer]) == null ? void 0 : E.attributes) == null ? void 0 : U.unit_of_measurement) || "km", C = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), et = C ? pt(String(C), this._masked) : "—", z = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", y = s.battery ? (W = this._hass.states[s.battery]) == null ? void 0 : W.last_updated : void 0, M = y ? Math.max(0, Math.round((Date.now() - new Date(y).getTime()) / 6e4)) : null, T = s.vehicle ? (Y = (P = this._hass.states[s.vehicle]) == null ? void 0 : P.attributes) == null ? void 0 : Y.entity_picture : void 0, st = o === null ? 0 : Math.max(0, Math.min(100, o)), F = 2 * Math.PI * 34, N = (I = i("door_lock")) == null ? void 0 : I.state, g = [];
-    s.door_lock && g.push(this._pill("lock", N === "locked" ? t.unlock : t.lock, N === "locked")), s.climate && g.push(this._pill("climate", t.ac, n("climate"))), s.find_car && g.push(this._pill("find_car", t.find, !1)), s.vent_windows && g.push(this._pill("vent_windows", t.vent, !1)), m && s.stop_charging && g.push(this._pill("stop_charging", t.stop, !1));
-    const R = f(i("ac_temp")), it = ((H = (B = i("ac_temp")) == null ? void 0 : B.attributes) == null ? void 0 : H.unit_of_measurement) ?? "°C", k = G.map((c) => f(i(`tyre_${c}_pressure`))), at = _t(k), rt = ((q = (O = i("tyre_fl_pressure")) == null ? void 0 : O.attributes) == null ? void 0 : q.unit_of_measurement) ?? "", nt = G.map((c, u) => {
-      var K, V;
-      const v = f(i(`tyre_${c}_temp`)), ht = ((V = (K = i(`tyre_${c}_temp`)) == null ? void 0 : K.attributes) == null ? void 0 : V.unit_of_measurement) ?? "°C";
-      return `<div class="tyre ${at[u]}">
-        <div>
-          <div class="label">${t[c]}</div>
-          <div class="v">${l(k[u], 2)}<span class="unit">${h(String(rt))}</span></div>
-        </div>
-        ${v === null ? "" : `<div class="t">${l(v, 1)}${h(String(ht))}</div>`}
+    const l = u(a("battery")), n = u(a("range")), g = u(a("speed")) ?? 0, d = xt((U = a("charge_state")) == null ? void 0 : U.state, g, o("hv_active")), m = d === "charging", C = u(a("charge_power")), D = u(a("charge_remaining")), y = u(a("consumption")), at = Number(this._config.battery_kwh) || 61, it = ((B = (W = a("range")) == null ? void 0 : W.attributes) == null ? void 0 : B.unit_of_measurement) ?? "km", rt = s.odometer && ((I = (P = this._hass.states[s.odometer]) == null ? void 0 : P.attributes) == null ? void 0 : I.unit_of_measurement) || "km", T = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), nt = T ? _t(String(T), this._masked) : "—", F = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", _ = s.battery ? (O = this._hass.states[s.battery]) == null ? void 0 : O.last_updated : void 0, R = _ ? Math.max(0, Math.round((Date.now() - new Date(_).getTime()) / 6e4)) : null, j = s.vehicle ? (H = (Y = this._hass.states[s.vehicle]) == null ? void 0 : Y.attributes) == null ? void 0 : H.entity_picture : void 0, A = l === null ? 0 : Math.max(0, Math.min(100, l)), x = 50, k = 2 * Math.PI * x, N = k * A / 100, ot = Array.from({ length: 40 }, (r, c) => c * 9).map((r) => `<line x1="70" y1="${r % 90 ? 4 : 2}" x2="70" y2="9" transform="rotate(${r} 70 70)"${r % 90 ? "" : ' class="major"'}></line>`).join(""), z = Math.floor(A / 5), lt = Array.from({ length: 20 }, (r, c) => `<i class="${c < z ? "lit" : c === z && m ? "next" : ""}"></i>`).join(""), ct = `var(--carlinko-accent, ${((K = this._hass.themes) == null ? void 0 : K.darkMode) === !1 ? Mt : St})`, L = (q = a("door_lock")) == null ? void 0 : q.state, v = [];
+    s.door_lock && v.push(this._pill("lock", L === "locked" ? t.unlock : t.lock, L === "locked")), s.climate && v.push(this._pill("climate", t.ac, o("climate"))), s.find_car && v.push(this._pill("find_car", t.find, !1)), s.vent_windows && v.push(this._pill("vent_windows", t.vent, !1)), m && s.stop_charging && v.push(this._pill("stop_charging", t.stop, !1));
+    const E = u(a("ac_temp")), dt = ((Q = (G = a("ac_temp")) == null ? void 0 : G.attributes) == null ? void 0 : Q.unit_of_measurement) ?? "°C", w = tt.map((r) => u(a(`tyre_${r}_pressure`))), pt = $t(w), ht = ((J = (V = a("tyre_fl_pressure")) == null ? void 0 : V.attributes) == null ? void 0 : J.unit_of_measurement) ?? "", gt = tt.map((r, c) => {
+      var X, Z;
+      const f = u(a(`tyre_${r}_temp`)), bt = ((Z = (X = a(`tyre_${r}_temp`)) == null ? void 0 : X.attributes) == null ? void 0 : Z.unit_of_measurement) ?? "°C";
+      return `<div class="tyre ${r} ${pt[c]}">
+        <div class="label">${t[r]}</div>
+        <div><span class="num">${p(w[c], 2)}</span><span class="unit">${h(String(ht))}</span></div>
+        ${f === null ? "" : `<div class="t">${p(f, 1)} ${h(String(bt))}</div>`}
       </div>`;
-    }), ot = k.some((c) => c !== null), _ = this._stats, ct = Math.max(1, ...this._bars), lt = _ && x !== null ? _.today * x / 100 : null, dt = o === null ? null : o * X / 100, w = `
-<style>${xt}</style>
-<div class="card">
+    }), ut = w.some((r) => r !== null), b = this._stats, mt = Math.max(1, ...this._bars), vt = b && y !== null ? b.today * y / 100 : null, ft = l === null ? null : l * at / 100, $ = `
+<style>${Ft}</style>
+<div class="card${m ? " charging-anim" : ""}" style="--cl-accent:${ct}">
+  <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
   <div class="row">
     <div>
-      <div class="model">${h(z)}</div>
-      <div class="name">${h(et)}</div>
+      <div class="model">${h(F)}</div>
+      <div class="name">${h(nt)}</div>
     </div>
-    <div>
-      <button class="iconbtn" data-act="mask" title="mask">${this._masked ? "&#128584;" : "&#128065;"}</button>
-      <button class="iconbtn" data-act="refresh" title="refresh">&#8635;</button>
+    <div class="btns">
+      <button class="iconbtn" data-act="mask" title="${t.mask}" aria-label="${t.mask}" aria-pressed="${this._masked}">${this._masked ? S.eyeOff : S.eye}</button>
+      <button class="iconbtn" data-act="refresh" title="${t.refresh}" aria-label="${t.refresh}">${S.refresh}</button>
     </div>
   </div>
-  <div class="live"><span class="dot"></span>${t.live} &middot; ${M === null ? "—" : M + "m"} ago</div>
+  <div class="live"><span class="dot"></span>${t.live} &middot; ${R === null ? "—" : R + "m"} ${t.ago}</div>
 
-  ${T ? `<section style="border:0"><img class="carimg" src="${h(String(T))}" alt="${h(z)}"></section>` : ""}
+  ${j ? `<section style="border:0"><img class="carimg" src="${h(String(j))}" alt="${h(F)}"></section>` : ""}
 
-  <section class="hero">
-    <div class="ring">
-      <svg width="84" height="84" viewBox="0 0 84 84">
-        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--divider-color,#e6e6e6)" stroke-width="6"></circle>
-        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--carlinko-accent, ${b})" stroke-width="6"
-          stroke-linecap="round" transform="rotate(-90 42 42)"
-          stroke-dasharray="${F.toFixed(1)}" stroke-dashoffset="${(F * (1 - st / 100)).toFixed(1)}"></circle>
-      </svg>
-      <span>${l(o)}<i class="unit">%</i></span>
+  <section>
+    <div class="hero">
+      <div class="dial">
+        <svg viewBox="0 0 140 140" aria-hidden="true">
+          <g class="ticks">${ot}</g>
+          <g transform="rotate(-90 70 70)">
+            <circle class="track" cx="70" cy="70" r="${x}"></circle>
+            <circle class="fill" cx="70" cy="70" r="${x}" stroke-dasharray="${N.toFixed(1)} ${k.toFixed(1)}"></circle>
+            <circle class="flow" cx="70" cy="70" r="${x}" stroke-dasharray="10 ${k.toFixed(1)}" style="--len:${N.toFixed(1)}px"></circle>
+          </g>
+        </svg>
+        <div class="ringval"><span><span class="num">${p(l)}</span><i class="unit">%</i></span><span class="label">${t.battery}</span></div>
+      </div>
+      <div class="reads">
+        <div>
+          <div class="label">${t.range}</div>
+          <div><span class="num">${p(n)}</span><span class="unit">${h(String(it))}</span></div>
+        </div>
+        <div>
+          <div class="label">${t.state}</div>
+          <div class="stv ${d}">${t[d]}</div>
+        </div>
+        ${m && C !== null ? `<div><div class="label">${t.power}</div><div><span class="num charging">${p(C, 1)}</span><span class="unit">kW</span></div></div>` : ""}
+        ${m && D !== null ? `<div><div class="label">${t.remaining}</div><div class="num dur">${wt(D, t.hr, t.min)}</div></div>` : ""}
+      </div>
     </div>
-    <div>
-      <div class="stat">
-        <div class="label">${t.range}</div>
-        <div class="big">${l(r)}<span class="unit">${h(String(Z))}</span></div>
-      </div>
-      <div class="stat">
-        <div class="label">${t.state}</div>
-        <div class="statev">${t[d]}</div>
-        ${m && (S !== null || D !== null) ? `<div class="sub">${l(S, 1)} kW &middot; ${t.left_pre}${vt(D, t.hr, t.min)}${t.left_post}</div>` : ""}
-      </div>
+    <div class="bar" aria-hidden="true">
+      <div class="segs">${lt}</div>
+      <div class="scale"><span>0</span><span>50</span><span>100</span></div>
     </div>
   </section>
 
-  ${g.length ? `<section class="pills">${g.join("")}</section>` : ""}
+  ${v.length ? `<section class="pills">${v.join("")}</section>` : ""}
 
-  ${R === null ? "" : `<section>
+  ${E === null ? "" : `<section>
     <div class="label">${t.ac_temp}</div>
-    <div class="big">${l(R)}<span class="unit">${h(String(it))}</span></div>
+    <div><span class="num">${p(E)}</span><span class="unit">${h(String(dt))}</span></div>
   </section>`}
 
-  ${_ ? `<section>
+  ${b ? `<section>
     <div class="three">
       <div>
         <div class="label">${t.today}</div>
-        <div class="big">${l(_.today)}<span class="unit">${h(String(tt))}</span></div>
+        <div><span class="num">${p(b.today)}</span><span class="unit">${h(String(rt))}</span></div>
       </div>
-      <div class="r"><div class="label">${t.week}</div><div class="big">${l(_.week)}</div></div>
-      <div class="r"><div class="label">${t.month}</div><div class="big">${l(_.month)}</div></div>
+      <div class="r"><div class="label">${t.week}</div><div class="num">${p(b.week)}</div></div>
+      <div class="r"><div class="label">${t.month}</div><div class="num">${p(b.month)}</div></div>
     </div>
-    <div class="bars">${this._bars.map((c) => `<i class="${c ? "" : "zero"}" style="height:${Math.max(4, c / ct * 100)}%"></i>`).join("")}</div>
+    <div class="bars">${this._bars.map((r) => `<i class="${r ? "" : "zero"}" style="height:${Math.max(4, r / mt * 100)}%"></i>`).join("")}</div>
   </section>` : ""}
 
   <section>
     <div class="three">
       <div>
         <div class="label">${t.efficiency}</div>
-        <div class="big">${l(x, 1)}</div>
+        <div class="num">${p(y, 1)}</div>
         <div class="sub">kWh / 100 km</div>
       </div>
-      <div class="r"><div class="label">${t.used}</div><div class="big">${l(lt, 1)}<span class="unit">kWh</span></div></div>
-      <div class="r"><div class="label">${t.left}</div><div class="big">${l(dt, 1)}<span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.used}</div><div><span class="num">${p(vt, 1)}</span><span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.left}</div><div><span class="num">${p(ft, 1)}</span><span class="unit">kWh</span></div></div>
     </div>
   </section>
 
-  ${ot ? `<section>
+  ${ut ? `<section>
     <div class="label">${t.tyres}</div>
-    <div class="tyres">${nt.join("")}</div>
+    <div class="tgrid">
+      <svg class="car" viewBox="0 0 60 120" aria-hidden="true"><rect x="8" y="4" width="44" height="112" rx="18"></rect><path d="M14 34 Q30 26 46 34 M14 88 Q30 95 46 88"></path></svg>
+      ${gt.join("")}
+    </div>
   </section>` : ""}
 
-  <footer>${t.updated} ${y ? h(new Date(y).toLocaleString()) : "—"}</footer>
+  <footer>${t.updated} ${_ ? h(new Date(_).toLocaleString()) : "—"}</footer>
 </div>`;
-    w !== this._html && (this._html = w, this._root.innerHTML = w, this._root.querySelectorAll("[data-act]").forEach(
-      (c) => c.addEventListener("click", () => this._act(c.dataset.act, s))
+    $ !== this._html && (this._html = $, this._root.innerHTML = $, this._root.querySelectorAll("[data-act]").forEach(
+      (r) => r.addEventListener("click", () => this._act(r.dataset.act, s))
     ));
   }
   _pill(t, e, s) {
-    const i = this._pending.has(t);
-    return `<button class="pill${s ? " on" : ""}" data-act="${t}"${i ? " disabled" : ""}>${i ? "…" : h(e)}</button>`;
+    const a = this._pending.has(t);
+    return `<button class="pill${s ? " on" : ""}" data-act="${t}"${a ? " disabled" : ""}>${a ? "…" : h(e)}</button>`;
   }
   _act(t, e) {
-    var n;
+    var o;
     if (t === "mask")
       return this._masked = !this._masked, this._html = "", this._safeRender();
     if (t === "refresh") {
       this._call("homeassistant", "update_entity", e.battery), this._fetchStats(!0);
       return;
     }
-    const i = {
-      lock: ["lock", ((n = this._hass.states[e.door_lock]) == null ? void 0 : n.state) === "locked" ? "unlock" : "lock", e.door_lock],
+    const a = {
+      lock: ["lock", ((o = this._hass.states[e.door_lock]) == null ? void 0 : o.state) === "locked" ? "unlock" : "lock", e.door_lock],
       climate: ["switch", "toggle", e.climate],
       find_car: ["button", "press", e.find_car],
       vent_windows: ["button", "press", e.vent_windows],
       stop_charging: ["button", "press", e.stop_charging]
     }[t];
-    !i || !i[2] || (this._call(i[0], i[1], i[2]), this._pending.add(t), this._html = "", this._safeRender(), setTimeout(() => {
+    !a || !a[2] || (this._call(a[0], a[1], a[2]), this._pending.add(t), this._html = "", this._safeRender(), setTimeout(() => {
       this._pending.delete(t), this._html = "", this._safeRender();
-    }, mt));
+    }, Ct));
   }
   _call(t, e, s) {
     s && Promise.resolve(this._hass.callService(t, e, { entity_id: s })).catch(
-      (i) => console.error("carlinko-card: service failed", i)
+      (a) => console.error("carlinko-card: service failed", a)
     );
   }
   _maybeFetchStats(t) {
     var s;
     if (!t) return;
     const e = ((s = this._hass.states[t]) == null ? void 0 : s.state) ?? "";
-    (e !== this._odo || Date.now() - this._statsAt > J) && (this._odo = e, this._fetchStats());
+    (e !== this._odo || Date.now() - this._statsAt > et) && (this._odo = e, this._fetchStats());
   }
   _fetchStats(t = !1) {
-    var r;
+    var n;
     const { map: e } = this._resolve(), s = e.odometer;
-    if (!s || !((r = this._hass) != null && r.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
+    if (!s || !((n = this._hass) != null && n.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
     this._statsAt = Date.now();
-    const i = /* @__PURE__ */ new Date(), n = new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime(), o = Math.min(n - 6 * 864e5, new Date(i.getFullYear(), i.getMonth(), 1).getTime());
+    const a = /* @__PURE__ */ new Date(), o = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime(), l = Math.min(o - 6 * 864e5, new Date(a.getFullYear(), a.getMonth(), 1).getTime());
     Promise.resolve(
       this._hass.callWS({
         type: "recorder/statistics_during_period",
-        start_time: new Date(o).toISOString(),
+        start_time: new Date(l).toISOString(),
         statistic_ids: [s],
         period: "day",
         types: ["change"]
       })
-    ).then((p) => {
-      const d = ((p == null ? void 0 : p[s]) || []).map((m) => ({ start: +new Date(m.start), change: m.change }));
-      this._stats = ut(d, i), this._bars = gt(d, i), this._html = "", this._safeRender();
+    ).then((g) => {
+      const d = ((g == null ? void 0 : g[s]) || []).map((m) => ({ start: +new Date(m.start), change: m.change }));
+      this._stats = yt(d, a), this._bars = kt(d, a), this._html = "", this._safeRender();
     }).catch(() => {
       this._stats = null, this._bars = [], this._html = "", this._safeRender();
     });
   }
 }
-customElements.define("carlinko-card", kt);
+customElements.define("carlinko-card", Rt);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "carlinko-card",
