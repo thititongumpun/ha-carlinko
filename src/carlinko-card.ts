@@ -21,7 +21,7 @@ const EN: Dict = {
   used: 'Used today', left: 'Energy left', updated: 'Updated', live: 'live', ago: 'ago', hr: 'hr', min: 'min',
   power: 'Charging power', remaining: 'Time left', battery: 'battery',
   tyres: 'Tyres', fl: 'Front left', fr: 'Front right', rl: 'Rear left', rr: 'Rear right',
-  ac_temp: 'A/C set to', mask: 'Show or hide plate', refresh: 'Refresh',
+  ac_temp: 'A/C set to', nav: 'Navigate to the car', locate: 'Show where the car is', mask: 'Show or hide plate', refresh: 'Refresh',
 }
 const TH: Dict = {
   range: 'ระยะทาง', state: 'สถานะ', parked: 'จอดอยู่', driving: 'กำลังขับ', charging: 'กำลังชาร์จ',
@@ -30,7 +30,7 @@ const TH: Dict = {
   used: 'ใช้ไปวันนี้', left: 'พลังงานคงเหลือ', updated: 'อัปเดต', live: 'ออนไลน์', ago: 'ที่แล้ว', hr: 'ชม.', min: 'นาที',
   power: 'กำลังไฟชาร์จ', remaining: 'ชาร์จเสร็จใน', battery: 'แบตเตอรี่',
   tyres: 'ยาง', fl: 'ซ้ายหน้า', fr: 'ขวาหน้า', rl: 'ซ้ายหลัง', rr: 'ขวาหลัง',
-  ac_temp: 'แอร์ตั้งไว้', mask: 'แสดงหรือซ่อนทะเบียน', refresh: 'รีเฟรช',
+  ac_temp: 'แอร์ตั้งไว้', nav: 'นำทางไปที่รถ', locate: 'ดูตำแหน่งรถ', mask: 'แสดงหรือซ่อนทะเบียน', refresh: 'รีเฟรช',
 }
 
 const CSS = `
@@ -72,6 +72,7 @@ button:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px;
 section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
 .num { font: 500 22px/1.15 var(--cl-mono); }
 .unit { font: 400 12px var(--cl-mono); color: var(--cl-muted); margin-left: 4px; font-style: normal; }
+.carbtn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
 .carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 180px; object-fit: contain; }
 .hero { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 18px; align-items: center; }
 .dial { position: relative; width: 128px; height: 128px; }
@@ -101,6 +102,7 @@ section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
   min-height: 36px; padding: 0 14px; border-radius: 2px; font: 600 13px var(--paper-font-body1_-_font-family, system-ui, sans-serif);
   cursor: pointer; background: none; color: var(--cl-text); border: 1px solid var(--cl-strong);
 }
+a.pill { display: inline-flex; align-items: center; text-decoration: none; }
 .pill:hover { border-color: var(--cl-text); }
 .pill[disabled] { opacity: .5; cursor: progress; }
 /* card bg can be translucent in some themes, so the label uses the solid page colour */
@@ -271,6 +273,17 @@ class CarlinkoCard extends HTMLElement {
     if (map.vent_windows) pills.push(this._pill('vent_windows', t.vent, false))
     if (charging && map.stop_charging) pills.push(this._pill('stop_charging', t.stop, false))
 
+    const loc = st('location')?.attributes
+    const ll = loc && Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude) ? `${loc.latitude},${loc.longitude}` : ''
+    const navLinks = ll
+      ? [
+          ['Google Maps', `https://www.google.com/maps/dir/?api=1&destination=${ll}`],
+          ['Waze', `https://waze.com/ul?ll=${ll}&navigate=yes`],
+        ]
+          .map(([label, href]) => `<a class="pill" href="${esc(href)}" target="_blank" rel="noopener">${label}</a>`)
+          .join('')
+      : ''
+
     const acTemp = num(st('ac_temp'))
     const acUnit = st('ac_temp')?.attributes?.unit_of_measurement ?? '°C'
 
@@ -309,7 +322,9 @@ class CarlinkoCard extends HTMLElement {
   </div>
   <div class="live"><span class="dot"></span>${t.live} &middot; ${ago === null ? '—' : ago + 'm'} ${t.ago}</div>
 
-  ${picture ? `<section style="border:0"><img class="carimg" src="${esc(String(picture))}" alt="${esc(model)}"></section>` : ''}
+  ${picture ? `<section style="border:0">${map.location
+      ? `<button class="carbtn" data-act="locate" title="${t.locate}" aria-label="${t.locate}"><img class="carimg" src="${esc(String(picture))}" alt=""></button>`
+      : `<img class="carimg" src="${esc(String(picture))}" alt="${esc(model)}">`}</section>` : ''}
 
   <section>
     <div class="hero">
@@ -348,6 +363,8 @@ class CarlinkoCard extends HTMLElement {
   </section>
 
   ${pills.length ? `<section class="pills">${pills.join('')}</section>` : ''}
+
+  ${navLinks ? `<section><div class="label">${t.nav}</div><div class="pills" style="margin-top:8px">${navLinks}</div></section>` : ''}
 
   ${acTemp === null
     ? ''
@@ -416,6 +433,7 @@ class CarlinkoCard extends HTMLElement {
       this._html = ''
       return this._safeRender()
     }
+    if (act === 'locate') return void this._openMap(map.location)
     if (act === 'refresh') {
       this._call('homeassistant', 'update_entity', map.battery)
       this._fetchStats(true)
@@ -439,6 +457,32 @@ class CarlinkoCard extends HTMLElement {
       this._html = ''
       this._safeRender()
     }, PENDING_MS)
+  }
+
+  /** Map pop-up. Mounted under <home-assistant>: inside the card a modal <dialog> lands off-centre (transformed
+   *  ancestor), and in document.body the map card never gets HA's i18n context, so it renders nothing. */
+  private async _openMap(entityId?: string) {
+    if (!entityId) return
+    const helpers = await (window as any).loadCardHelpers?.()
+    if (!helpers) return
+    const dlg = document.createElement('dialog')
+    // solid page colour: some themes make --ha-card-background transparent, which reads see-through in a pop-up
+    dlg.style.cssText =
+      'position:fixed;inset:0;margin:auto;width:min(720px,94vw);padding:0;border:0;border-radius:16px;overflow:hidden;' +
+      'background:var(--primary-background-color,#111);--ha-card-background:var(--primary-background-color,#111)'
+    const card = helpers.createCardElement({ type: 'map', entities: [entityId], default_zoom: 16, aspect_ratio: '4:3', theme_mode: 'auto' })
+    card.style.display = 'block'
+    // the map card is lazy-loaded: hass set before it upgrades is lost
+    await customElements.whenDefined(card.localName)
+    card.hass = this._hass
+    dlg.className = 'carlinko-map'
+    const bd = document.createElement('style') // ::backdrop can't be set inline; a <style> applies to the shadow tree it sits in
+    bd.textContent = 'dialog.carlinko-map::backdrop{background:rgba(0,0,0,.6)}'
+    dlg.append(bd, card)
+    dlg.addEventListener('click', (ev) => ev.target === dlg && dlg.close())
+    dlg.addEventListener('close', () => dlg.remove())
+    ;(document.querySelector('home-assistant')?.shadowRoot ?? document.body).appendChild(dlg)
+    dlg.showModal()
   }
 
   private _call(domain: string, service: string, entityId?: string) {

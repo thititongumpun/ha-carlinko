@@ -1,43 +1,43 @@
-function _t(i, t = !0) {
+function wt(i, t = !0) {
   return !t || i.length <= 4 ? i : i.slice(0, 1) + i.slice(1, -3).replace(/\S/g, "•") + i.slice(-3);
 }
-function xt(i, t, e) {
+function $t(i, t, e) {
   return i === "charging" ? "charging" : t > 0 || e ? "driving" : "parked";
 }
-const st = 864e5, M = (i) => new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime();
-function yt(i, t = /* @__PURE__ */ new Date()) {
-  const e = M(t), s = e - 6 * st, a = new Date(t.getFullYear(), t.getMonth(), 1).getTime();
+const nt = 864e5, F = (i) => new Date(i.getFullYear(), i.getMonth(), i.getDate()).getTime();
+function St(i, t = /* @__PURE__ */ new Date()) {
+  const e = F(t), a = e - 6 * nt, s = new Date(t.getFullYear(), t.getMonth(), 1).getTime();
   let o = 0, l = 0, n = 0;
-  for (const g of i) {
-    const d = Number(g.change);
-    !Number.isFinite(d) || d < 0 || (g.start >= e && (o += d), g.start >= s && (l += d), g.start >= a && (n += d));
+  for (const p of i) {
+    const h = Number(p.change);
+    !Number.isFinite(h) || h < 0 || (p.start >= e && (o += h), p.start >= a && (l += h), p.start >= s && (n += h));
   }
   return { today: o, week: l, month: n };
 }
-function kt(i, t = /* @__PURE__ */ new Date()) {
-  const e = M(t), s = [0, 0, 0, 0, 0, 0, 0];
-  for (const a of i) {
-    const o = Number(a.change);
+function Mt(i, t = /* @__PURE__ */ new Date()) {
+  const e = F(t), a = [0, 0, 0, 0, 0, 0, 0];
+  for (const s of i) {
+    const o = Number(s.change);
     if (!Number.isFinite(o) || o < 0) continue;
-    const l = 6 - Math.round((e - M(new Date(a.start))) / st);
-    l >= 0 && l < 7 && (s[l] += o);
+    const l = 6 - Math.round((e - F(new Date(s.start))) / nt);
+    l >= 0 && l < 7 && (a[l] += o);
   }
-  return s;
+  return a;
 }
-function wt(i, t, e) {
+function Ct(i, t, e) {
   if (i === null || !Number.isFinite(i) || i < 0) return "—";
-  const s = Math.floor(i / 60), a = Math.round(i % 60);
-  return s ? a ? `${s} ${t} ${a} ${e}` : `${s} ${t}` : `${a} ${e}`;
+  const a = Math.floor(i / 60), s = Math.round(i % 60);
+  return a ? s ? `${a} ${t} ${s} ${e}` : `${a} ${t}` : `${s} ${e}`;
 }
-function $t(i) {
-  const t = i.filter((s) => s !== null && s > 0);
+function Dt(i) {
+  const t = i.filter((a) => a !== null && a > 0);
   if (!t.length) return i.map(() => "none");
-  const e = t.reduce((s, a) => s + a, 0) / t.length;
+  const e = t.reduce((a, s) => a + s, 0) / t.length;
   return i.map(
-    (s) => s === null || s <= 0 ? "none" : s < e * 0.9 ? "low" : s < e * 0.95 ? "warn" : "ok"
+    (a) => a === null || a <= 0 ? "none" : a < e * 0.9 ? "low" : a < e * 0.95 ? "warn" : "ok"
   );
 }
-const tt = ["fl", "fr", "rl", "rr"], St = "#3ddfc4", Mt = "#0d7d70", Ct = 6e3, et = 300 * 1e3, Dt = {
+const it = ["fl", "fr", "rl", "rr"], Ft = "#3ddfc4", Tt = "#0d7d70", Nt = 6e3, rt = 300 * 1e3, zt = {
   range: "Range",
   state: "State",
   parked: "Parked",
@@ -69,9 +69,11 @@ const tt = ["fl", "fr", "rl", "rr"], St = "#3ddfc4", Mt = "#0d7d70", Ct = 6e3, e
   rl: "Rear left",
   rr: "Rear right",
   ac_temp: "A/C set to",
+  nav: "Navigate to the car",
+  locate: "Show where the car is",
   mask: "Show or hide plate",
   refresh: "Refresh"
-}, Tt = {
+}, Et = {
   range: "ระยะทาง",
   state: "สถานะ",
   parked: "จอดอยู่",
@@ -103,9 +105,11 @@ const tt = ["fl", "fr", "rl", "rr"], St = "#3ddfc4", Mt = "#0d7d70", Ct = 6e3, e
   rl: "ซ้ายหลัง",
   rr: "ขวาหลัง",
   ac_temp: "แอร์ตั้งไว้",
+  nav: "นำทางไปที่รถ",
+  locate: "ดูตำแหน่งรถ",
   mask: "แสดงหรือซ่อนทะเบียน",
   refresh: "รีเฟรช"
-}, Ft = `
+}, Rt = `
 :host {
   display: block;
   --cl-bg: var(--ha-card-background, var(--card-background-color, #1f2125));
@@ -144,6 +148,7 @@ button:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px;
 section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
 .num { font: 500 22px/1.15 var(--cl-mono); }
 .unit { font: 400 12px var(--cl-mono); color: var(--cl-muted); margin-left: 4px; font-style: normal; }
+.carbtn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
 .carimg { display: block; margin: 0 auto; max-width: 100%; max-height: 180px; object-fit: contain; }
 .hero { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 18px; align-items: center; }
 .dial { position: relative; width: 128px; height: 128px; }
@@ -173,6 +178,7 @@ section { border-top: 1px solid var(--cl-line); padding: 14px 0; }
   min-height: 36px; padding: 0 14px; border-radius: 2px; font: 600 13px var(--paper-font-body1_-_font-family, system-ui, sans-serif);
   cursor: pointer; background: none; color: var(--cl-text); border: 1px solid var(--cl-strong);
 }
+a.pill { display: inline-flex; align-items: center; text-decoration: none; }
 .pill:hover { border-color: var(--cl-text); }
 .pill[disabled] { opacity: .5; cursor: progress; }
 /* card bg can be translucent in some themes, so the label uses the solid page colour */
@@ -210,15 +216,15 @@ footer { padding-top: 12px; border-top: 1px solid var(--cl-line); text-align: ce
     100% { stroke-dashoffset: calc(-1 * var(--len) + 10px); opacity: 0; }
   }
 }
-`, S = {
+`, D = {
   eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   eyeOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
   refresh: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>'
 }, u = (i) => {
   const t = Number(i == null ? void 0 : i.state);
   return i && Number.isFinite(t) ? t : null;
-}, p = (i, t = 0) => i === null ? "—" : i.toFixed(t), h = (i) => i.replace(/[&<>"]/g, (t) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[t]);
-class Rt extends HTMLElement {
+}, g = (i, t = 0) => i === null ? "—" : i.toFixed(t), d = (i) => i.replace(/[&<>"]/g, (t) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[t]);
+class jt extends HTMLElement {
   constructor() {
     super(...arguments), this._config = {}, this._root = this.attachShadow({ mode: "open" }), this._html = "", this._masked = !0, this._pending = /* @__PURE__ */ new Set(), this._stats = null, this._bars = [], this._statsAt = 0, this._odo = "";
   }
@@ -229,7 +235,7 @@ class Rt extends HTMLElement {
     this._hass = t, this._safeRender();
   }
   connectedCallback() {
-    this._timer = setInterval(() => this._fetchStats(!0), et), this._hass && this._safeRender();
+    this._timer = setInterval(() => this._fetchStats(!0), rt), this._hass && this._safeRender();
   }
   disconnectedCallback() {
     clearInterval(this._timer);
@@ -246,10 +252,10 @@ class Rt extends HTMLElement {
   }
   /** entity registry -> { device, translation_key: entity_id } for the chosen car. */
   _resolve() {
-    var a, o, l;
-    const t = ((a = this._hass) == null ? void 0 : a.entities) || {};
+    var s, o, l;
+    const t = ((s = this._hass) == null ? void 0 : s.entities) || {};
     let e = this._config.device_id;
-    const s = {};
+    const a = {};
     if (!e) {
       for (const n of Object.values(t))
         if ((n == null ? void 0 : n.platform) === "carlinko" && n.translation_key === "battery") {
@@ -259,182 +265,202 @@ class Rt extends HTMLElement {
     }
     if (e)
       for (const n of Object.values(t))
-        (n == null ? void 0 : n.platform) === "carlinko" && n.device_id === e && n.translation_key && (s[n.translation_key] = n.entity_id);
-    return { device: e ? (l = (o = this._hass) == null ? void 0 : o.devices) == null ? void 0 : l[e] : void 0, map: s };
+        (n == null ? void 0 : n.platform) === "carlinko" && n.device_id === e && n.translation_key && (a[n.translation_key] = n.entity_id);
+    return { device: e ? (l = (o = this._hass) == null ? void 0 : o.devices) == null ? void 0 : l[e] : void 0, map: a };
   }
   _render() {
-    var U, W, B, P, I, O, Y, H, K, q, G, Q, V, J;
+    var P, I, O, Y, H, q, G, K, Q, V, J, X, Z, tt, et;
     if (!this._hass) return;
-    const t = String(this._hass.language || "en").startsWith("th") ? Tt : Dt, { device: e, map: s } = this._resolve(), a = (r) => {
-      const c = s[r], f = c ? this._hass.states[c] : void 0;
+    const t = String(this._hass.language || "en").startsWith("th") ? Et : zt, { device: e, map: a } = this._resolve(), s = (r) => {
+      const c = a[r], f = c ? this._hass.states[c] : void 0;
       return f && f.state !== "unavailable" && f.state !== "unknown" ? f : void 0;
     }, o = (r) => {
       var c;
-      return ((c = a(r)) == null ? void 0 : c.state) === "on";
+      return ((c = s(r)) == null ? void 0 : c.state) === "on";
     };
-    this._maybeFetchStats(s.odometer);
-    const l = u(a("battery")), n = u(a("range")), g = u(a("speed")) ?? 0, d = xt((U = a("charge_state")) == null ? void 0 : U.state, g, o("hv_active")), m = d === "charging", C = u(a("charge_power")), D = u(a("charge_remaining")), y = u(a("consumption")), at = Number(this._config.battery_kwh) || 61, it = ((B = (W = a("range")) == null ? void 0 : W.attributes) == null ? void 0 : B.unit_of_measurement) ?? "km", rt = s.odometer && ((I = (P = this._hass.states[s.odometer]) == null ? void 0 : P.attributes) == null ? void 0 : I.unit_of_measurement) || "km", T = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), nt = T ? _t(String(T), this._masked) : "—", F = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", _ = s.battery ? (O = this._hass.states[s.battery]) == null ? void 0 : O.last_updated : void 0, R = _ ? Math.max(0, Math.round((Date.now() - new Date(_).getTime()) / 6e4)) : null, j = s.vehicle ? (H = (Y = this._hass.states[s.vehicle]) == null ? void 0 : Y.attributes) == null ? void 0 : H.entity_picture : void 0, A = l === null ? 0 : Math.max(0, Math.min(100, l)), x = 50, k = 2 * Math.PI * x, N = k * A / 100, ot = Array.from({ length: 40 }, (r, c) => c * 9).map((r) => `<line x1="70" y1="${r % 90 ? 4 : 2}" x2="70" y2="9" transform="rotate(${r} 70 70)"${r % 90 ? "" : ' class="major"'}></line>`).join(""), z = Math.floor(A / 5), lt = Array.from({ length: 20 }, (r, c) => `<i class="${c < z ? "lit" : c === z && m ? "next" : ""}"></i>`).join(""), ct = `var(--carlinko-accent, ${((K = this._hass.themes) == null ? void 0 : K.darkMode) === !1 ? Mt : St})`, L = (q = a("door_lock")) == null ? void 0 : q.state, v = [];
-    s.door_lock && v.push(this._pill("lock", L === "locked" ? t.unlock : t.lock, L === "locked")), s.climate && v.push(this._pill("climate", t.ac, o("climate"))), s.find_car && v.push(this._pill("find_car", t.find, !1)), s.vent_windows && v.push(this._pill("vent_windows", t.vent, !1)), m && s.stop_charging && v.push(this._pill("stop_charging", t.stop, !1));
-    const E = u(a("ac_temp")), dt = ((Q = (G = a("ac_temp")) == null ? void 0 : G.attributes) == null ? void 0 : Q.unit_of_measurement) ?? "°C", w = tt.map((r) => u(a(`tyre_${r}_pressure`))), pt = $t(w), ht = ((J = (V = a("tyre_fl_pressure")) == null ? void 0 : V.attributes) == null ? void 0 : J.unit_of_measurement) ?? "", gt = tt.map((r, c) => {
-      var X, Z;
-      const f = u(a(`tyre_${r}_temp`)), bt = ((Z = (X = a(`tyre_${r}_temp`)) == null ? void 0 : X.attributes) == null ? void 0 : Z.unit_of_measurement) ?? "°C";
-      return `<div class="tyre ${r} ${pt[c]}">
+    this._maybeFetchStats(a.odometer);
+    const l = u(s("battery")), n = u(s("range")), p = u(s("speed")) ?? 0, h = $t((P = s("charge_state")) == null ? void 0 : P.state, p, o("hv_active")), m = h === "charging", T = u(s("charge_power")), N = u(s("charge_remaining")), k = u(s("consumption")), ot = Number(this._config.battery_kwh) || 61, lt = ((O = (I = s("range")) == null ? void 0 : I.attributes) == null ? void 0 : O.unit_of_measurement) ?? "km", ct = a.odometer && ((H = (Y = this._hass.states[a.odometer]) == null ? void 0 : Y.attributes) == null ? void 0 : H.unit_of_measurement) || "km", z = (e == null ? void 0 : e.name_by_user) || (e == null ? void 0 : e.name), dt = z ? wt(String(z), this._masked) : "—", E = (e != null && e.model && (e != null && e.manufacturer) && e.model.toUpperCase().startsWith(e.manufacturer.toUpperCase()) ? e.model : [e == null ? void 0 : e.manufacturer, e == null ? void 0 : e.model].filter(Boolean).join(" ")) || "CarLinko", x = a.battery ? (q = this._hass.states[a.battery]) == null ? void 0 : q.last_updated : void 0, R = x ? Math.max(0, Math.round((Date.now() - new Date(x).getTime()) / 6e4)) : null, w = a.vehicle ? (K = (G = this._hass.states[a.vehicle]) == null ? void 0 : G.attributes) == null ? void 0 : K.entity_picture : void 0, j = l === null ? 0 : Math.max(0, Math.min(100, l)), y = 50, $ = 2 * Math.PI * y, A = $ * j / 100, pt = Array.from({ length: 40 }, (r, c) => c * 9).map((r) => `<line x1="70" y1="${r % 90 ? 4 : 2}" x2="70" y2="9" transform="rotate(${r} 70 70)"${r % 90 ? "" : ' class="major"'}></line>`).join(""), L = Math.floor(j / 5), ht = Array.from({ length: 20 }, (r, c) => `<i class="${c < L ? "lit" : c === L && m ? "next" : ""}"></i>`).join(""), gt = `var(--carlinko-accent, ${((Q = this._hass.themes) == null ? void 0 : Q.darkMode) === !1 ? Tt : Ft})`, U = (V = s("door_lock")) == null ? void 0 : V.state, v = [];
+    a.door_lock && v.push(this._pill("lock", U === "locked" ? t.unlock : t.lock, U === "locked")), a.climate && v.push(this._pill("climate", t.ac, o("climate"))), a.find_car && v.push(this._pill("find_car", t.find, !1)), a.vent_windows && v.push(this._pill("vent_windows", t.vent, !1)), m && a.stop_charging && v.push(this._pill("stop_charging", t.stop, !1));
+    const _ = (J = s("location")) == null ? void 0 : J.attributes, S = _ && Number.isFinite(_.latitude) && Number.isFinite(_.longitude) ? `${_.latitude},${_.longitude}` : "", W = S ? [
+      ["Google Maps", `https://www.google.com/maps/dir/?api=1&destination=${S}`],
+      ["Waze", `https://waze.com/ul?ll=${S}&navigate=yes`]
+    ].map(([r, c]) => `<a class="pill" href="${d(c)}" target="_blank" rel="noopener">${r}</a>`).join("") : "", B = u(s("ac_temp")), ut = ((Z = (X = s("ac_temp")) == null ? void 0 : X.attributes) == null ? void 0 : Z.unit_of_measurement) ?? "°C", M = it.map((r) => u(s(`tyre_${r}_pressure`))), mt = Dt(M), vt = ((et = (tt = s("tyre_fl_pressure")) == null ? void 0 : tt.attributes) == null ? void 0 : et.unit_of_measurement) ?? "", ft = it.map((r, c) => {
+      var at, st;
+      const f = u(s(`tyre_${r}_temp`)), kt = ((st = (at = s(`tyre_${r}_temp`)) == null ? void 0 : at.attributes) == null ? void 0 : st.unit_of_measurement) ?? "°C";
+      return `<div class="tyre ${r} ${mt[c]}">
         <div class="label">${t[r]}</div>
-        <div><span class="num">${p(w[c], 2)}</span><span class="unit">${h(String(ht))}</span></div>
-        ${f === null ? "" : `<div class="t">${p(f, 1)} ${h(String(bt))}</div>`}
+        <div><span class="num">${g(M[c], 2)}</span><span class="unit">${d(String(vt))}</span></div>
+        ${f === null ? "" : `<div class="t">${g(f, 1)} ${d(String(kt))}</div>`}
       </div>`;
-    }), ut = w.some((r) => r !== null), b = this._stats, mt = Math.max(1, ...this._bars), vt = b && y !== null ? b.today * y / 100 : null, ft = l === null ? null : l * at / 100, $ = `
-<style>${Ft}</style>
-<div class="card${m ? " charging-anim" : ""}" style="--cl-accent:${ct}">
+    }), bt = M.some((r) => r !== null), b = this._stats, _t = Math.max(1, ...this._bars), xt = b && k !== null ? b.today * k / 100 : null, yt = l === null ? null : l * ot / 100, C = `
+<style>${Rt}</style>
+<div class="card${m ? " charging-anim" : ""}" style="--cl-accent:${gt}">
   <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
   <div class="row">
     <div>
-      <div class="model">${h(F)}</div>
-      <div class="name">${h(nt)}</div>
+      <div class="model">${d(E)}</div>
+      <div class="name">${d(dt)}</div>
     </div>
     <div class="btns">
-      <button class="iconbtn" data-act="mask" title="${t.mask}" aria-label="${t.mask}" aria-pressed="${this._masked}">${this._masked ? S.eyeOff : S.eye}</button>
-      <button class="iconbtn" data-act="refresh" title="${t.refresh}" aria-label="${t.refresh}">${S.refresh}</button>
+      <button class="iconbtn" data-act="mask" title="${t.mask}" aria-label="${t.mask}" aria-pressed="${this._masked}">${this._masked ? D.eyeOff : D.eye}</button>
+      <button class="iconbtn" data-act="refresh" title="${t.refresh}" aria-label="${t.refresh}">${D.refresh}</button>
     </div>
   </div>
   <div class="live"><span class="dot"></span>${t.live} &middot; ${R === null ? "—" : R + "m"} ${t.ago}</div>
 
-  ${j ? `<section style="border:0"><img class="carimg" src="${h(String(j))}" alt="${h(F)}"></section>` : ""}
+  ${w ? `<section style="border:0">${a.location ? `<button class="carbtn" data-act="locate" title="${t.locate}" aria-label="${t.locate}"><img class="carimg" src="${d(String(w))}" alt=""></button>` : `<img class="carimg" src="${d(String(w))}" alt="${d(E)}">`}</section>` : ""}
 
   <section>
     <div class="hero">
       <div class="dial">
         <svg viewBox="0 0 140 140" aria-hidden="true">
-          <g class="ticks">${ot}</g>
+          <g class="ticks">${pt}</g>
           <g transform="rotate(-90 70 70)">
-            <circle class="track" cx="70" cy="70" r="${x}"></circle>
-            <circle class="fill" cx="70" cy="70" r="${x}" stroke-dasharray="${N.toFixed(1)} ${k.toFixed(1)}"></circle>
-            <circle class="flow" cx="70" cy="70" r="${x}" stroke-dasharray="10 ${k.toFixed(1)}" style="--len:${N.toFixed(1)}px"></circle>
+            <circle class="track" cx="70" cy="70" r="${y}"></circle>
+            <circle class="fill" cx="70" cy="70" r="${y}" stroke-dasharray="${A.toFixed(1)} ${$.toFixed(1)}"></circle>
+            <circle class="flow" cx="70" cy="70" r="${y}" stroke-dasharray="10 ${$.toFixed(1)}" style="--len:${A.toFixed(1)}px"></circle>
           </g>
         </svg>
-        <div class="ringval"><span><span class="num">${p(l)}</span><i class="unit">%</i></span><span class="label">${t.battery}</span></div>
+        <div class="ringval"><span><span class="num">${g(l)}</span><i class="unit">%</i></span><span class="label">${t.battery}</span></div>
       </div>
       <div class="reads">
         <div>
           <div class="label">${t.range}</div>
-          <div><span class="num">${p(n)}</span><span class="unit">${h(String(it))}</span></div>
+          <div><span class="num">${g(n)}</span><span class="unit">${d(String(lt))}</span></div>
         </div>
         <div>
           <div class="label">${t.state}</div>
-          <div class="stv ${d}">${t[d]}</div>
+          <div class="stv ${h}">${t[h]}</div>
         </div>
-        ${m && C !== null ? `<div><div class="label">${t.power}</div><div><span class="num charging">${p(C, 1)}</span><span class="unit">kW</span></div></div>` : ""}
-        ${m && D !== null ? `<div><div class="label">${t.remaining}</div><div class="num dur">${wt(D, t.hr, t.min)}</div></div>` : ""}
+        ${m && T !== null ? `<div><div class="label">${t.power}</div><div><span class="num charging">${g(T, 1)}</span><span class="unit">kW</span></div></div>` : ""}
+        ${m && N !== null ? `<div><div class="label">${t.remaining}</div><div class="num dur">${Ct(N, t.hr, t.min)}</div></div>` : ""}
       </div>
     </div>
     <div class="bar" aria-hidden="true">
-      <div class="segs">${lt}</div>
+      <div class="segs">${ht}</div>
       <div class="scale"><span>0</span><span>50</span><span>100</span></div>
     </div>
   </section>
 
   ${v.length ? `<section class="pills">${v.join("")}</section>` : ""}
 
-  ${E === null ? "" : `<section>
+  ${W ? `<section><div class="label">${t.nav}</div><div class="pills" style="margin-top:8px">${W}</div></section>` : ""}
+
+  ${B === null ? "" : `<section>
     <div class="label">${t.ac_temp}</div>
-    <div><span class="num">${p(E)}</span><span class="unit">${h(String(dt))}</span></div>
+    <div><span class="num">${g(B)}</span><span class="unit">${d(String(ut))}</span></div>
   </section>`}
 
   ${b ? `<section>
     <div class="three">
       <div>
         <div class="label">${t.today}</div>
-        <div><span class="num">${p(b.today)}</span><span class="unit">${h(String(rt))}</span></div>
+        <div><span class="num">${g(b.today)}</span><span class="unit">${d(String(ct))}</span></div>
       </div>
-      <div class="r"><div class="label">${t.week}</div><div class="num">${p(b.week)}</div></div>
-      <div class="r"><div class="label">${t.month}</div><div class="num">${p(b.month)}</div></div>
+      <div class="r"><div class="label">${t.week}</div><div class="num">${g(b.week)}</div></div>
+      <div class="r"><div class="label">${t.month}</div><div class="num">${g(b.month)}</div></div>
     </div>
-    <div class="bars">${this._bars.map((r) => `<i class="${r ? "" : "zero"}" style="height:${Math.max(4, r / mt * 100)}%"></i>`).join("")}</div>
+    <div class="bars">${this._bars.map((r) => `<i class="${r ? "" : "zero"}" style="height:${Math.max(4, r / _t * 100)}%"></i>`).join("")}</div>
   </section>` : ""}
 
   <section>
     <div class="three">
       <div>
         <div class="label">${t.efficiency}</div>
-        <div class="num">${p(y, 1)}</div>
+        <div class="num">${g(k, 1)}</div>
         <div class="sub">kWh / 100 km</div>
       </div>
-      <div class="r"><div class="label">${t.used}</div><div><span class="num">${p(vt, 1)}</span><span class="unit">kWh</span></div></div>
-      <div class="r"><div class="label">${t.left}</div><div><span class="num">${p(ft, 1)}</span><span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.used}</div><div><span class="num">${g(xt, 1)}</span><span class="unit">kWh</span></div></div>
+      <div class="r"><div class="label">${t.left}</div><div><span class="num">${g(yt, 1)}</span><span class="unit">kWh</span></div></div>
     </div>
   </section>
 
-  ${ut ? `<section>
+  ${bt ? `<section>
     <div class="label">${t.tyres}</div>
     <div class="tgrid">
       <svg class="car" viewBox="0 0 60 120" aria-hidden="true"><rect x="8" y="4" width="44" height="112" rx="18"></rect><path d="M14 34 Q30 26 46 34 M14 88 Q30 95 46 88"></path></svg>
-      ${gt.join("")}
+      ${ft.join("")}
     </div>
   </section>` : ""}
 
-  <footer>${t.updated} ${_ ? h(new Date(_).toLocaleString()) : "—"}</footer>
+  <footer>${t.updated} ${x ? d(new Date(x).toLocaleString()) : "—"}</footer>
 </div>`;
-    $ !== this._html && (this._html = $, this._root.innerHTML = $, this._root.querySelectorAll("[data-act]").forEach(
-      (r) => r.addEventListener("click", () => this._act(r.dataset.act, s))
+    C !== this._html && (this._html = C, this._root.innerHTML = C, this._root.querySelectorAll("[data-act]").forEach(
+      (r) => r.addEventListener("click", () => this._act(r.dataset.act, a))
     ));
   }
-  _pill(t, e, s) {
-    const a = this._pending.has(t);
-    return `<button class="pill${s ? " on" : ""}" data-act="${t}"${a ? " disabled" : ""}>${a ? "…" : h(e)}</button>`;
+  _pill(t, e, a) {
+    const s = this._pending.has(t);
+    return `<button class="pill${a ? " on" : ""}" data-act="${t}"${s ? " disabled" : ""}>${s ? "…" : d(e)}</button>`;
   }
   _act(t, e) {
     var o;
     if (t === "mask")
       return this._masked = !this._masked, this._html = "", this._safeRender();
+    if (t === "locate") return void this._openMap(e.location);
     if (t === "refresh") {
       this._call("homeassistant", "update_entity", e.battery), this._fetchStats(!0);
       return;
     }
-    const a = {
+    const s = {
       lock: ["lock", ((o = this._hass.states[e.door_lock]) == null ? void 0 : o.state) === "locked" ? "unlock" : "lock", e.door_lock],
       climate: ["switch", "toggle", e.climate],
       find_car: ["button", "press", e.find_car],
       vent_windows: ["button", "press", e.vent_windows],
       stop_charging: ["button", "press", e.stop_charging]
     }[t];
-    !a || !a[2] || (this._call(a[0], a[1], a[2]), this._pending.add(t), this._html = "", this._safeRender(), setTimeout(() => {
+    !s || !s[2] || (this._call(s[0], s[1], s[2]), this._pending.add(t), this._html = "", this._safeRender(), setTimeout(() => {
       this._pending.delete(t), this._html = "", this._safeRender();
-    }, Ct));
+    }, Nt));
   }
-  _call(t, e, s) {
-    s && Promise.resolve(this._hass.callService(t, e, { entity_id: s })).catch(
-      (a) => console.error("carlinko-card: service failed", a)
+  /** Map pop-up. Mounted under <home-assistant>: inside the card a modal <dialog> lands off-centre (transformed
+   *  ancestor), and in document.body the map card never gets HA's i18n context, so it renders nothing. */
+  async _openMap(t) {
+    var l, n;
+    if (!t) return;
+    const e = await ((l = window.loadCardHelpers) == null ? void 0 : l.call(window));
+    if (!e) return;
+    const a = document.createElement("dialog");
+    a.style.cssText = "position:fixed;inset:0;margin:auto;width:min(720px,94vw);padding:0;border:0;border-radius:16px;overflow:hidden;background:var(--primary-background-color,#111);--ha-card-background:var(--primary-background-color,#111)";
+    const s = e.createCardElement({ type: "map", entities: [t], default_zoom: 16, aspect_ratio: "4:3", theme_mode: "auto" });
+    s.style.display = "block", await customElements.whenDefined(s.localName), s.hass = this._hass, a.className = "carlinko-map";
+    const o = document.createElement("style");
+    o.textContent = "dialog.carlinko-map::backdrop{background:rgba(0,0,0,.6)}", a.append(o, s), a.addEventListener("click", (p) => p.target === a && a.close()), a.addEventListener("close", () => a.remove()), (((n = document.querySelector("home-assistant")) == null ? void 0 : n.shadowRoot) ?? document.body).appendChild(a), a.showModal();
+  }
+  _call(t, e, a) {
+    a && Promise.resolve(this._hass.callService(t, e, { entity_id: a })).catch(
+      (s) => console.error("carlinko-card: service failed", s)
     );
   }
   _maybeFetchStats(t) {
-    var s;
+    var a;
     if (!t) return;
-    const e = ((s = this._hass.states[t]) == null ? void 0 : s.state) ?? "";
-    (e !== this._odo || Date.now() - this._statsAt > et) && (this._odo = e, this._fetchStats());
+    const e = ((a = this._hass.states[t]) == null ? void 0 : a.state) ?? "";
+    (e !== this._odo || Date.now() - this._statsAt > rt) && (this._odo = e, this._fetchStats());
   }
   _fetchStats(t = !1) {
     var n;
-    const { map: e } = this._resolve(), s = e.odometer;
-    if (!s || !((n = this._hass) != null && n.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
+    const { map: e } = this._resolve(), a = e.odometer;
+    if (!a || !((n = this._hass) != null && n.callWS) || !t && Date.now() - this._statsAt < 5e3) return;
     this._statsAt = Date.now();
-    const a = /* @__PURE__ */ new Date(), o = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime(), l = Math.min(o - 6 * 864e5, new Date(a.getFullYear(), a.getMonth(), 1).getTime());
+    const s = /* @__PURE__ */ new Date(), o = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime(), l = Math.min(o - 6 * 864e5, new Date(s.getFullYear(), s.getMonth(), 1).getTime());
     Promise.resolve(
       this._hass.callWS({
         type: "recorder/statistics_during_period",
         start_time: new Date(l).toISOString(),
-        statistic_ids: [s],
+        statistic_ids: [a],
         period: "day",
         types: ["change"]
       })
-    ).then((g) => {
-      const d = ((g == null ? void 0 : g[s]) || []).map((m) => ({ start: +new Date(m.start), change: m.change }));
-      this._stats = yt(d, a), this._bars = kt(d, a), this._html = "", this._safeRender();
+    ).then((p) => {
+      const h = ((p == null ? void 0 : p[a]) || []).map((m) => ({ start: +new Date(m.start), change: m.change }));
+      this._stats = St(h, s), this._bars = Mt(h, s), this._html = "", this._safeRender();
     }).catch(() => {
       this._stats = null, this._bars = [], this._html = "", this._safeRender();
     });
   }
 }
-customElements.define("carlinko-card", Rt);
+customElements.define("carlinko-card", jt);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "carlinko-card",
