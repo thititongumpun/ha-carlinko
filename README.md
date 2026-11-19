@@ -122,7 +122,7 @@ and sign in with the other account. Entities, history and dashboards are kept.
 
 ## Lovelace card
 
-Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.23`, type **JavaScript module**. Then:
+Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.24`, type **JavaScript module**. Then:
 
 ```yaml
 type: custom:carlinko-card
@@ -137,7 +137,7 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 
 | Platform | Entities |
 |---|---|
-| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4 |
+| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4; plug-in hybrids also get fuel %, fuel range, total range (EV + fuel) and fuel consumption |
 | Binary sensor | charging, cable connected, door open (any), driver / passenger / rear-left / rear-right door, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
 | Switch | air conditioning, defog |
@@ -203,7 +203,7 @@ else — no extra request. Both scalings were confirmed against the CarLinko app
 
 | Field | Bytes | Scaling |
 |---|---|---|
-| Pressure | 44–47 | `kPa = raw × 1.375` |
+| Pressure | 44–47 | `kPa = raw × scale`, scale from the model's `appKpaFormula` (C5 1.373, Tiggo 8 PHEV 1.779; 1.375 if absent) |
 | Temperature | 48–51 | `°C = raw × 0.5 − 25` |
 
 Order is front-left, front-right, rear-left, rear-right. `0x00` and `0xFF` mean "no reading" and
@@ -214,7 +214,7 @@ services → Entities → ⚙. The card and the dashboard example both follow wh
 they rate each tyre against the average of the corners that are reporting (amber below 95%, red
 below 90%) rather than against a fixed target, so there is nothing to configure per car.
 
-Resolution is one raw count, i.e. 1.375 kPa ≈ 0.2 psi.
+Resolution is one raw count, i.e. about 0.2 psi on the C5 and 0.26 psi on the Tiggo.
 
 ## Caveats
 

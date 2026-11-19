@@ -12,6 +12,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import time
 from typing import Any
 
@@ -57,6 +58,8 @@ def sign(params: dict, ts: str) -> str:
 
 
 _TYRES = ("fl", "fr", "rl", "rr")
+# Fallback raw-byte -> kPa factor when the model's config has no formula; C5-confirmed.
+TPMS_SCALE = 1.375
 
 # Seat comfort levels, one byte each (0 = off, 1-3 = level). Offsets from the
 # ha-carlinko project's live capture; 35 and 40 are skipped there too.
@@ -91,12 +94,15 @@ _BLOB_KEYS = (
     "charge_remain_min",
     "charge_power_kw",
     "wltc_range",
+    "fuel_pct",
+    "fuel_range",
+    "fuel_consumption",
     "windshield_heat",
     "steer_heat",
 ) + tuple(f"tyre_{pos}_{m}" for m in ("pressure", "temp") for pos in _TYRES) + tuple(_SEATS)
 
 
-def parse_blob(hex_str: str) -> dict[str, Any]:
+def parse_blob(hex_str: str, tpms_scale: float = TPMS_SCALE) -> dict[str, Any]:
     """Decode the 73-byte telemetry blob. All 19 keys always present.
 
     A short/odd blob yields ``None`` for the fields it cannot reach; only a
@@ -154,6 +160,12 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
 
     out["wltc_range"] = u16(68)
 
+    # PHEV only, all 0 on a BEV. Offsets from elad-bar/ha-carlinko's Tiggo 8 PHEV
+    # captures: b21 tank %, b53 L/100 km x0.1, b70-71 fuel range (dash-matched).
+    out["fuel_pct"] = u8(21)
+    out["fuel_consumption"] = scale(u8(53), 0.1, 1)
+    out["fuel_range"] = u16(70)
+
     # ponytail: seat/heat offsets are another project's capture, not confirmed on
     # this car. Gated on vehicleControlConfig, so an unequipped car shows nothing.
     for key, off in _SEATS.items():
@@ -164,12 +176,13 @@ def parse_blob(hex_str: str) -> dict[str, Any]:
     out["steer_heat"] = None if sh is None else sh != 0
 
     # TPMS, order FL, FR, RL, RR: b44-47 pressure, b48-51 temperature.
-    # kPa = raw * 1.375 (confirmed: 199/201 -> 39.7/40.1 psi, app shows 40).
+    # kPa = raw * tpms_scale, per model from vehicleControlConfig (C5 1.373:
+    # 199/201 -> 39.6/40.0 psi, app shows 40; Tiggo 8 PHEV 1.779, issue #3).
     # degC = raw * 0.5 - 25 (confirmed: 109/107 -> 29.5/28.5, app shows 30/29).
     # 0x00/0xFF mean "no reading" (a parked sample reports 0xFF on all eight).
     for i, pos in enumerate(_TYRES):
         kpa = u8(44 + i)
-        out[f"tyre_{pos}_pressure"] = None if kpa in (None, 0, 0xFF) else round(kpa * 1.375, 1)
+        out[f"tyre_{pos}_pressure"] = None if kpa in (None, 0, 0xFF) else round(kpa * tpms_scale, 1)
         temp = u8(48 + i)
         out[f"tyre_{pos}_temp"] = None if temp in (None, 0, 0xFF) else temp * 0.5 - 25
 
@@ -249,7 +262,21 @@ def caps(row: dict[str, Any]) -> dict[str, Any]:
     out.update({k: _seat_levels(ac, *v) for k, v in _CAP_SEATS.items()})
     # An OMODA C5 reports PowerLiftgate but not Trunk; either means "it opens".
     out["liftgate"] = bool(cfg.get("PowerLiftgate") or cfg.get("Trunk"))
+    out["phev"] = bool(cfg.get("fuelConsumption"))
+    out["tpms_scale"] = _tpms_scale(cfg)
     return out
+
+
+def _tpms_scale(cfg: dict[str, Any]) -> float:
+    """Raw tyre byte -> kPa factor from the model's "data * 1.373" formula."""
+    for key in ("appKpaFormula", "webTirePressureFormula"):
+        m = re.fullmatch(r"\s*data\s*\*\s*([0-9.]+)\s*", str(cfg.get(key) or ""))
+        if m:
+            try:
+                return float(m.group(1))
+            except ValueError:
+                pass
+    return TPMS_SCALE
 
 
 def charge_target(state: dict[str, Any], battery_kwh: float) -> float | None:
@@ -490,12 +517,12 @@ class CarlinkoApi:
         data = await self._request("GET", "/user/vehicle", sign_params={})
         return data if isinstance(data, list) else []
 
-    async def get_state(self, vehicle_id: str) -> dict[str, Any]:
+    async def get_state(self, vehicle_id: str, tpms_scale: float = TPMS_SCALE) -> dict[str, Any]:
         vid = str(vehicle_id)
         data = await self._request(
             "GET", f"/user/vehicle/state/{vid}", sign_params={"id": vid}
         )
-        state = parse_blob(data if isinstance(data, str) else "")
+        state = parse_blob(data if isinstance(data, str) else "", tpms_scale)
         state["raw"] = data
         return state
 

@@ -55,13 +55,13 @@ def test_parse_blob_sample():
     assert s["charge_remain_min"] is None  # 0x3FF sentinel
     assert s["charge_power_kw"] is None  # idle
     assert s["tyre_fl_pressure"] is None  # 0xFF = no TPMS reading
-    assert len(s) == 37
+    assert len(s) == 40
 
 
 def test_parse_blob_short_is_lenient():
     s = parse_blob("7700")
     assert s["battery_pct"] is None
-    assert len(s) == 37
+    assert len(s) == 40
 
 
 def test_parse_blob_comfort_bytes():
@@ -233,3 +233,28 @@ def test_control_verdict():
     assert "not authorised" in control_verdict("740100", "SN123__74010044")[1]
     assert control_verdict("740100", "SN123__740100AB") == (False, "car refused (code 0xAB)")
     assert control_verdict("740100", "") == (True, None)  # no verdict to judge
+
+
+def _patch(blob: str, at: int, hex_bytes: str) -> str:
+    b = bytearray.fromhex(blob)
+    b[at : at + len(hex_bytes) // 2] = bytes.fromhex(hex_bytes)
+    return b.hex()
+
+
+def test_tpms_scale_comes_from_the_model_config():
+    assert caps({})["tpms_scale"] == 1.375  # no formula: C5-confirmed fallback
+    assert caps({"vehicleControlConfig": json.dumps({"appKpaFormula": "data * 1.779"})})["tpms_scale"] == 1.779
+    assert caps({"vehicleControlConfig": json.dumps({"appKpaFormula": "eval(1)"})})["tpms_scale"] == 1.375
+    # Issue #3, Tiggo 8 CSH: raw 151 read 30 psi at 1.375; the app showed 39.
+    s = parse_blob(_patch(LIVE, 44, "97"), 1.779)
+    assert round(s["tyre_fl_pressure"] * 0.145038) == 39
+
+
+def test_parse_blob_phev_fuel():
+    # elad-bar Tiggo 8 PHEV capture: tank 58 %, 0.8 L/100 km, fuel range 652 km.
+    blob = _patch(_patch(_patch(LIVE, 21, "3A"), 53, "08"), 70, "028C")
+    s = parse_blob(blob)
+    assert (s["fuel_pct"], s["fuel_consumption"], s["fuel_range"]) == (58, 0.8, 652)
+    assert parse_blob(SAMPLE)["fuel_pct"] == 0  # BEV
+    assert caps({"vehicleControlConfig": json.dumps({"fuelConsumption": True})})["phev"] is True
+    assert caps({"vehicleControlConfig": C5_CONFIG})["phev"] is False

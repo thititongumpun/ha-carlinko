@@ -94,6 +94,18 @@
       "wltc_range": {
         "name": "Rated range (WLTC)"
       },
+      "fuel": {
+        "name": "Fuel"
+      },
+      "fuel_range": {
+        "name": "Fuel range"
+      },
+      "total_range": {
+        "name": "Total range"
+      },
+      "fuel_consumption": {
+        "name": "Fuel consumption"
+      },
       "km_until_service": {
         "name": "Distance until service"
       },

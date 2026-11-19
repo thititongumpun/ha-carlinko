@@ -12,7 +12,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import CarlinkoApi, CarlinkoAuthError, CarlinkoError
+from .api import CarlinkoApi, CarlinkoAuthError, CarlinkoError, caps
 from .const import CONF_TOKEN, DOMAIN, LOCATE_EVERY, SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                 if not vid_raw:
                     raise UpdateFailed("vehicle row without vehicleId")
                 vid = str(vid_raw)
-                state = await self.api.get_state(vid_raw)
+                state = await self.api.get_state(vid_raw, caps(row)["tpms_scale"])
                 try:
                     state["online"] = await self.api.is_online(vid_raw)
                 except CarlinkoError as err:

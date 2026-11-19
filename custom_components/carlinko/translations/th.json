@@ -94,6 +94,18 @@
       "wltc_range": {
         "name": "ระยะทางมาตรฐาน (WLTC)"
       },
+      "fuel": {
+        "name": "น้ำมันเชื้อเพลิง"
+      },
+      "fuel_range": {
+        "name": "ระยะทางจากน้ำมัน"
+      },
+      "total_range": {
+        "name": "ระยะทางรวม"
+      },
+      "fuel_consumption": {
+        "name": "อัตราสิ้นเปลืองน้ำมัน"
+      },
       "km_until_service": {
         "name": "ระยะทางก่อนเข้าศูนย์"
       },

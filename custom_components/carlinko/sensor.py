@@ -28,7 +28,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import CarlinkoConfigEntry
-from .api import charge_target
+from .api import caps, charge_target
 from .entity import CarlinkoEntity
 
 _CHARGE_STATE = {0: "idle", 1: "charging", 2: "complete", 3: "canceled", 4: "hot", 5: "stopped"}
@@ -41,6 +41,14 @@ class CarlinkoSensorDescription(SensorEntityDescription):
 
     value_fn: Callable[[dict], Any] | None = None
     service_fn: Callable[[int | None, int | None], Any] | None = None
+    phev: bool = False  # only created on a plug-in hybrid
+
+
+def total_range(d: dict) -> int | None:
+    """EV + fuel range. The car does not send a total; the app's own is exactly this sum."""
+    if d["range_km"] is None or d["fuel_range"] is None:
+        return None
+    return d["range_km"] + d["fuel_range"]
 
 
 def service_left(service: dict, odometer: int | None) -> tuple[int | None, int | None]:
@@ -165,6 +173,42 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         value_fn=lambda d: d["wltc_range"],
     ),
     CarlinkoSensorDescription(
+        key="fuel",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:gas-station",
+        phev=True,
+        value_fn=lambda d: d["fuel_pct"],
+    ),
+    CarlinkoSensorDescription(
+        key="fuel_range",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        phev=True,
+        value_fn=lambda d: d["fuel_range"],
+    ),
+    CarlinkoSensorDescription(
+        key="total_range",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        phev=True,
+        value_fn=total_range,
+    ),
+    CarlinkoSensorDescription(
+        key="fuel_consumption",
+        native_unit_of_measurement="L/100km",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:fuel",
+        phev=True,
+        value_fn=lambda d: d["fuel_consumption"],
+    ),
+    CarlinkoSensorDescription(
         key="tyre_fl_pressure",
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.KPA,
@@ -260,9 +304,15 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(
         CarlinkoSensor(coordinator, vehicle_id, description)
-        for vehicle_id in coordinator.data
+        for vehicle_id, data in coordinator.data.items()
         for description in SENSOR_DESCRIPTIONS
+        if not description.phev or is_phev(data)
     )
+
+
+def is_phev(data: dict) -> bool:
+    """Config says fuelConsumption, or the tank byte reads non-zero (always 0 on a BEV)."""
+    return caps(data["vehicle"])["phev"] or bool(data["state"].get("fuel_pct"))
 
 
 class CarlinkoSensor(CarlinkoEntity, SensorEntity):

@@ -55,7 +55,7 @@ async def run(args: argparse.Namespace) -> int:
             print(f"vehicleId={vid} vin={v.get('vin')} deviceId={sn} model={v.get('model')}")
 
             if args.cmd == "status":
-                state = await api.get_state(vid)
+                state = await api.get_state(vid, caps(v)["tpms_scale"])
                 raw = state.pop("raw", None)
                 for k, val in state.items():
                     print(f"  {k}: {val}")
