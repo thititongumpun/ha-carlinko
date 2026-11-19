@@ -43,160 +43,7 @@ views:
     cards:
     - type: custom:carlinko-card
       battery_kwh: 61
-      mask_plate: false
-  - type: grid
-    cards:
-    - type: heading
-      heading: ควบคุม
-      heading_style: title
-      icon: mdi:car-key
-    - type: custom:mushroom-template-card
-      entity: lock.CAR_door_lock
-      icon: mdi:car-door-lock
-      icon_color: '{{ ''green'' if is_state(''lock.CAR_door_lock'',''locked'') else ''grey'' }}'
-      primary: ล็อก
-      secondary: '{{ ''ล็อกอยู่'' if is_state(''lock.CAR_door_lock'',''locked'') else ''ปลดล็อกอยู่'' }}'
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: perform-action
-        perform_action: lock.lock
-        target:
-          entity_id: lock.CAR_door_lock
-      hold_action:
-        action: more-info
-    - type: custom:mushroom-template-card
-      entity: lock.CAR_door_lock
-      icon: mdi:car-door
-      icon_color: '{{ ''amber'' if is_state(''lock.CAR_door_lock'',''unlocked'') else ''grey'' }}'
-      primary: ปลดล็อก
-      secondary: แตะค้างเพื่อดูรายละเอียด
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: perform-action
-        perform_action: lock.unlock
-        target:
-          entity_id: lock.CAR_door_lock
-        confirmation:
-          text: ปลดล็อกรถตอนนี้?
-      hold_action:
-        action: more-info
-    - type: tile
-      entity: switch.CAR_air_conditioning
-      vertical: true
-      icon: mdi:air-conditioner
-      color: cyan
-      tap_action:
-        action: toggle
-      grid_options:
-        columns: 6
-      name: แอร์
-    - type: tile
-      entity: sensor.CAR_a_c_target_temperature
-      vertical: true
-      icon: mdi:thermostat
-      color: cyan
-      tap_action:
-        action: more-info
-      grid_options:
-        columns: 6
-      name: อุณหภูมิแอร์
-    - type: tile
-      entity: switch.CAR_defog
-      vertical: true
-      icon: mdi:car-defrost-front
-      color: cyan
-      tap_action:
-        action: toggle
-      grid_options:
-        columns: 6
-      name: ไล่ฝ้า
-    - type: custom:mushroom-template-card
-      icon: mdi:snowflake
-      icon_color: cyan
-      primary: ทำความเย็นเร็ว
-      secondary: เปิดแอร์แรงสุด
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: perform-action
-        perform_action: button.press
-        target:
-          entity_id: button.CAR_quick_cool
-    - type: tile
-      entity: select.CAR_driver_seat_ventilation
-      icon: mdi:car-seat-cooler
-      color: cyan
-      features:
-      - type: select-options
-      name: ระบายอากาศเบาะคนขับ
-    - type: tile
-      entity: select.CAR_passenger_seat_ventilation
-      icon: mdi:car-seat-cooler
-      color: cyan
-      features:
-      - type: select-options
-      name: ระบายอากาศเบาะผู้โดยสาร
-    - type: custom:mushroom-template-card
-      icon: mdi:car-search
-      icon_color: amber
-      primary: ค้นหารถ
-      secondary: กระพริบไฟ / แตร
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: perform-action
-        perform_action: button.press
-        target:
-          entity_id: button.CAR_find_car
-    - type: tile
-      entity: cover.CAR_windows
-      vertical: false
-      icon: mdi:window-closed-variant
-      color: teal
-      features:
-      - type: cover-open-close
-      name: กระจกหน้าต่าง
-    - type: custom:mushroom-template-card
-      icon: mdi:window-open-variant
-      icon_color: teal
-      primary: แง้มกระจก
-      secondary: เปิดกระจกทั้ง 4 บานเล็กน้อย
-      fill_container: true
-      tap_action:
-        action: perform-action
-        perform_action: button.press
-        target:
-          entity_id: button.CAR_vent_windows
-    - type: tile
-      entity: cover.CAR_tailgate
-      vertical: false
-      icon: mdi:boom-gate-up
-      color: teal
-      features:
-      - type: cover-open-close
-      grid_options:
-        columns: 6
-      name: ฝาท้าย
-    - type: tile
-      entity: cover.CAR_sunroof
-      vertical: false
-      icon: mdi:window-shutter
-      color: teal
-      features:
-      - type: cover-open-close
-      grid_options:
-        columns: 6
-      name: ซันรูฟ
+      mask_plate: true
     - type: custom:mushroom-chips-card
       alignment: center
       chips:
@@ -252,20 +99,255 @@ views:
   - type: grid
     cards:
     - type: heading
+      heading: ล็อกและการเข้าถึง
+      heading_style: title
+      icon: mdi:shield-car
+    - type: tile
+      entity: lock.CAR_door_lock
+      vertical: false
+      icon: mdi:car-door-lock
+      color: amber
+      features:
+      - type: lock-commands
+      features_position: inline
+      name: ล็อกประตู
+      grid_options:
+        columns: 12
+    - type: custom:mushroom-template-card
+      icon: mdi:car-search
+      icon_color: amber
+      primary: ค้นหารถ
+      secondary: กระพริบไฟ / แตร
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 6
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_find_car
+    - type: custom:mushroom-template-card
+      icon: mdi:window-open-variant
+      icon_color: teal
+      primary: แง้มกระจก
+      secondary: เปิดทุกบานเล็กน้อย
+      fill_container: true
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_vent_windows
+      grid_options:
+        columns: 6
+      layout: vertical
+    - type: heading
+      heading: กระจก ฝาท้าย ซันรูฟ
+      heading_style: subtitle
+    - type: tile
+      entity: cover.CAR_windows
+      vertical: false
+      icon: mdi:window-closed-variant
+      color: teal
+      features:
+      - type: cover-open-close
+      name: กระจกหน้าต่าง
+      grid_options:
+        columns: 12
+    - type: tile
+      entity: cover.CAR_tailgate
+      vertical: false
+      icon: mdi:boom-gate-up
+      color: teal
+      features:
+      - type: cover-open-close
+      grid_options:
+        columns: 6
+      name: ฝาท้าย
+    - type: tile
+      entity: cover.CAR_sunroof
+      vertical: false
+      icon: mdi:window-shutter
+      color: teal
+      features:
+      - type: cover-open-close
+      grid_options:
+        columns: 6
+      name: ซันรูฟ
+  - type: grid
+    cards:
+    - type: heading
+      heading: ปรับอากาศ
+      heading_style: title
+      icon: mdi:air-conditioner
+    - type: tile
+      entity: number.CAR_a_c_temperature
+      name: อุณหภูมิแอร์
+      icon: mdi:thermostat
+      color: cyan
+      vertical: false
+      grid_options:
+        columns: 12
+      tap_action:
+        action: more-info
+      features:
+      - type: numeric-input
+        style: buttons
+      features_position: inline
+    - type: tile
+      entity: switch.CAR_air_conditioning
+      vertical: true
+      icon: mdi:air-conditioner
+      color: cyan
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 4
+      name: แอร์
+    - type: tile
+      entity: switch.CAR_defog
+      vertical: true
+      icon: mdi:car-defrost-front
+      color: cyan
+      tap_action:
+        action: toggle
+      grid_options:
+        columns: 4
+      name: ไล่ฝ้า
+    - type: custom:mushroom-template-card
+      icon: mdi:snowflake
+      icon_color: cyan
+      primary: ทำความเย็นเร็ว
+      secondary: แรงสุด
+      layout: vertical
+      fill_container: true
+      grid_options:
+        columns: 4
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_quick_cool
+    - type: heading
+      heading: ระบายอากาศเบาะ
+      heading_style: subtitle
+    - type: tile
+      entity: select.CAR_driver_seat_ventilation
+      icon: mdi:car-seat-cooler
+      color: cyan
+      features:
+      - type: select-options
+      name: คนขับ
+      grid_options:
+        columns: 6
+    - type: tile
+      entity: select.CAR_passenger_seat_ventilation
+      icon: mdi:car-seat-cooler
+      color: cyan
+      features:
+      - type: select-options
+      name: ผู้โดยสาร
+      grid_options:
+        columns: 6
+  - type: grid
+    cards:
+    - type: heading
       heading: การชาร์จ
       heading_style: title
       icon: mdi:ev-station
     - type: custom:mushroom-template-card
       entity: sensor.CAR_battery
-      icon: '{% set b = states(''sensor.CAR_battery'')|int(0) %}mdi:battery{{ ''-charging'' if is_state(''binary_sensor.CAR_charging'',''on'') else '''' }}{{ '''' if b > 95 else ''-'' ~ ((b // 10) * 10
-        if b >= 10 else 10) }}'
+      icon: '{% set b = states(''sensor.CAR_battery'')|int(0) %}mdi:battery{{ ''-charging'' if is_state(''binary_sensor.CAR_charging'',''on'') else '''' }}{{ '''' if b > 95 else ''-'' ~ ((b
+        // 10) * 10 if b >= 10 else 10) }}'
       icon_color: '{% set b = states(''sensor.CAR_battery'')|int(0) %}{{ ''green'' if b > 50 else ''orange'' if b > 20 else ''red'' }}'
       primary: '{{ states(''sensor.CAR_battery'') }}% · วิ่งได้อีก {{ states(''sensor.CAR_range'')|int }} กม.'
       secondary: '{% set s = states(''sensor.CAR_charging_status'') %}{% set m = states(''sensor.CAR_charging_mode'') %}{% set p = states(''sensor.CAR_charging_power'') %}{% set t = states(''sensor.CAR_charging_time_remaining'')
-        %}{% if s == ''charging'' %}กำลังชาร์จ {{ ''DC'' if m == ''dc'' else ''AC'' }} {{ p }} kW · เหลือ {% set t = t|int(0) %}{% if t >= 60 %}{{ t // 60 }} ชม. {% if t % 60 %}{{ t % 60 }} นาที{% endif %}{% else %}{{ t }} นาที{% endif %}{% elif s == ''complete'' %}ชาร์จเสร็จแล้ว{% elif m != ''none'' %}เสียบสายอยู่ ยังไม่ชาร์จ{%
-        else %}ไม่ได้เสียบสาย{% endif %}'
+        %}{% if s == ''charging'' %}กำลังชาร์จ {{ ''DC'' if m == ''dc'' else ''AC'' }} {{ p }} kW · เหลือ {% set t = t|int(0) %}{% if t >= 60 %}{{ t // 60 }} ชม. {% if t % 60 %}{{ t % 60 }} นาที{% endif
+        %}{% else %}{{ t }} นาที{% endif %}{% elif s == ''complete'' %}ชาร์จเสร็จแล้ว{% elif m != ''none'' %}เสียบสายอยู่ ยังไม่ชาร์จ{% else %}ไม่ได้เสียบสาย{% endif %}'
       fill_container: true
       multiline_secondary: true
+      grid_options:
+        columns: 12
+    - type: custom:mushroom-template-card
+      icon: mdi:stop-circle
+      icon_color: red
+      primary: หยุดชาร์จ
+      secondary: แตะเพื่อหยุดชาร์จทันที
+      fill_container: true
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.CAR_stop_charging
+        confirmation:
+          text: หยุดชาร์จตอนนี้?
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
+      grid_options:
+        columns: 12
+    - type: tile
+      entity: sensor.CAR_charging_status
+      vertical: false
+      icon: mdi:battery-clock
+      color: blue
+      grid_options:
+        columns: 6
+      name: สถานะการชาร์จ
+    - type: tile
+      entity: sensor.CAR_charging_mode
+      vertical: false
+      icon: mdi:power-plug
+      color: blue
+      grid_options:
+        columns: 6
+      name: โหมดการชาร์จ
+    - type: tile
+      entity: sensor.CAR_charging_power
+      vertical: false
+      icon: mdi:flash
+      color: blue
+      grid_options:
+        columns: 6
+      name: กำลังไฟชาร์จ
+    - type: custom:mushroom-template-card
+      entity: sensor.CAR_charging_time_remaining
+      icon: mdi:timer-sand
+      icon_color: blue
+      primary: '{% set t = states(''sensor.CAR_charging_time_remaining'')|int(-1) %}{% if t < 0 %}—{% elif t >= 60 %}{{ t // 60 }} ชม.{% if t % 60 %} {{ t % 60 }} นาที{% endif %}{% else %}{{ t }}
+        นาที{% endif %}'
+      secondary: เวลาชาร์จที่เหลือ
+      fill_container: true
+      grid_options:
+        columns: 6
+    - type: tile
+      entity: sensor.CAR_charge_target_estimated
+      vertical: false
+      icon: mdi:battery-charging-high
+      color: blue
+      grid_options:
+        columns: 6
+      name: เป้าหมายการชาร์จ
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
+    - type: tile
+      entity: number.CAR_battery_capacity_usable
+      vertical: false
+      icon: mdi:car-battery
+      color: grey
+      features:
+      - type: numeric-input
+        style: buttons
+      grid_options:
+        columns: 6
+      name: ค่าปรับเทียบการชาร์จ
+      visibility:
+      - condition: state
+        entity: binary_sensor.CAR_charging
+        state: 'on'
     - type: custom:apexcharts-card
       header:
         show: true
@@ -304,83 +386,6 @@ views:
         opposite: true
         min: 0
         decimals: 1
-    - type: tile
-      entity: sensor.CAR_charging_status
-      vertical: false
-      icon: mdi:battery-clock
-      color: blue
-      grid_options:
-        columns: 6
-      name: สถานะการชาร์จ
-    - type: tile
-      entity: sensor.CAR_charging_mode
-      vertical: false
-      icon: mdi:power-plug
-      color: blue
-      grid_options:
-        columns: 6
-      name: โหมดการชาร์จ
-    - type: tile
-      entity: sensor.CAR_charging_power
-      vertical: false
-      icon: mdi:flash
-      color: blue
-      grid_options:
-        columns: 6
-      name: กำลังไฟชาร์จ
-    - type: custom:mushroom-template-card
-      entity: sensor.CAR_charging_time_remaining
-      icon: mdi:timer-sand
-      icon_color: blue
-      primary: '{% set t = states(''sensor.CAR_charging_time_remaining'')|int(-1) %}{% if t < 0 %}—{% elif t >= 60 %}{{ t // 60 }} ชม.{% if t % 60 %} {{ t % 60 }} นาที{% endif %}{% else %}{{ t }} นาที{% endif %}'
-      secondary: เวลาชาร์จที่เหลือ
-      fill_container: true
-      grid_options:
-        columns: 6
-    - type: tile
-      entity: sensor.CAR_charge_target_estimated
-      vertical: false
-      icon: mdi:battery-charging-high
-      color: blue
-      grid_options:
-        columns: 6
-      name: เป้าหมายการชาร์จ
-      visibility:
-      - condition: state
-        entity: binary_sensor.CAR_charging
-        state: 'on'
-    - type: tile
-      entity: number.CAR_battery_capacity_usable
-      vertical: false
-      icon: mdi:car-battery
-      color: grey
-      features:
-      - type: numeric-input
-        style: buttons
-      grid_options:
-        columns: 6
-      name: ค่าปรับเทียบการชาร์จ
-      visibility:
-      - condition: state
-        entity: binary_sensor.CAR_charging
-        state: 'on'
-    - type: custom:mushroom-template-card
-      icon: mdi:stop-circle
-      icon_color: red
-      primary: หยุดชาร์จ
-      secondary: แตะเพื่อหยุดชาร์จทันที
-      fill_container: true
-      tap_action:
-        action: perform-action
-        perform_action: button.press
-        target:
-          entity_id: button.CAR_stop_charging
-        confirmation:
-          text: หยุดชาร์จตอนนี้?
-      visibility:
-      - condition: state
-        entity: binary_sensor.CAR_charging
-        state: 'on'
   - type: grid
     cards:
     - type: heading
@@ -450,120 +455,13 @@ views:
   - type: grid
     cards:
     - type: heading
-      heading: ยาง
-      heading_style: title
-      icon: mdi:car-tire-alert
-    - type: custom:mushroom-template-card
-      entity: sensor.CAR_front_left_tyre_pressure
-      icon: mdi:car-tire-alert
-      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_front_left_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
-      primary: ซ้ายหน้า
-      secondary: "{{ states('sensor.CAR_front_left_tyre_pressure', with_unit=True) }}"
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: more-info
-    - type: custom:mushroom-template-card
-      entity: sensor.CAR_front_right_tyre_pressure
-      icon: mdi:car-tire-alert
-      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_front_right_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
-      primary: ขวาหน้า
-      secondary: "{{ states('sensor.CAR_front_right_tyre_pressure', with_unit=True) }}"
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: more-info
-    - type: custom:mushroom-template-card
-      entity: sensor.CAR_rear_left_tyre_pressure
-      icon: mdi:car-tire-alert
-      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_rear_left_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
-      primary: ซ้ายหลัง
-      secondary: "{{ states('sensor.CAR_rear_left_tyre_pressure', with_unit=True) }}"
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: more-info
-    - type: custom:mushroom-template-card
-      entity: sensor.CAR_rear_right_tyre_pressure
-      icon: mdi:car-tire-alert
-      icon_color: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{% set p = states('sensor.CAR_rear_right_tyre_pressure')|float(0) %}{{ 'grey' if not v or p == 0 else 'red' if p < avg * 0.9 else 'orange' if p < avg * 0.95 else 'green' }}"
-      primary: ขวาหลัง
-      secondary: "{{ states('sensor.CAR_rear_right_tyre_pressure', with_unit=True) }}"
-      layout: vertical
-      fill_container: true
-      grid_options:
-        columns: 6
-      tap_action:
-        action: more-info
-    - type: custom:mushroom-chips-card
-      alignment: center
-      chips:
-      - type: template
-        icon: mdi:thermometer
-        icon_color: orange
-        content: "{% set t = ['sensor.CAR_front_left_tyre_temperature','sensor.CAR_front_right_tyre_temperature','sensor.CAR_rear_left_tyre_temperature','sensor.CAR_rear_right_tyre_temperature']|map('states')|select('is_number')|map('float')|list %}{{ (t|max)|round(1) ~ ' °C' if t else 'ไม่มีข้อมูล' }}"
-        tap_action:
-          action: none
-      - type: template
-        icon: mdi:arrow-collapse-vertical
-        icon_color: grey
-        content: "{% set v = ['sensor.CAR_front_left_tyre_pressure','sensor.CAR_front_right_tyre_pressure','sensor.CAR_rear_left_tyre_pressure','sensor.CAR_rear_right_tyre_pressure']|map('states')|select('is_number')|map('float')|list %}{% set avg = (v|sum / v|count) if v else 0 %}{{ ('ต่างกัน ' ~ (v|max - v|min)|round(1)) if v else 'ไม่มีข้อมูล' }}"
-        tap_action:
-          action: none
-    - type: custom:apexcharts-card
-      header:
-        show: true
-        title: แรงดันลมยาง 24 ชั่วโมง
-        show_states: true
-        colorize_states: true
-      graph_span: 24h
-      apex_config:
-        chart:
-          height: 230
-      series:
-      - entity: sensor.CAR_front_left_tyre_pressure
-        name: ซ้ายหน้า
-        type: line
-        stroke_width: 2
-        group_by:
-          func: avg
-          duration: 30min
-      - entity: sensor.CAR_front_right_tyre_pressure
-        name: ขวาหน้า
-        type: line
-        stroke_width: 2
-        group_by:
-          func: avg
-          duration: 30min
-      - entity: sensor.CAR_rear_left_tyre_pressure
-        name: ซ้ายหลัง
-        type: line
-        stroke_width: 2
-        group_by:
-          func: avg
-          duration: 30min
-      - entity: sensor.CAR_rear_right_tyre_pressure
-        name: ขวาหลัง
-        type: line
-        stroke_width: 2
-        group_by:
-          func: avg
-          duration: 30min
-  - type: grid
-    cards:
-    - type: heading
       heading: ตำแหน่ง
       heading_style: title
       icon: mdi:map-marker
     - type: map
       entities:
       - entity: device_tracker.CAR_location
+      - entity: device_tracker.geely_ex2_location
       - entity: zone.home
       theme_mode: auto
       default_zoom: 15
@@ -635,6 +533,7 @@ views:
         color: '#f59e0b'
         group_by:
           func: raw
+          duration: 1h
       yaxis:
       - decimals: 2
         min: auto
