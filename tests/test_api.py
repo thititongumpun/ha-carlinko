@@ -245,6 +245,9 @@ def test_tpms_scale_comes_from_the_model_config():
     assert caps({})["tpms_scale"] == 1.375  # no formula: C5-confirmed fallback
     assert caps({"vehicleControlConfig": json.dumps({"appKpaFormula": "data * 1.779"})})["tpms_scale"] == 1.779
     assert caps({"vehicleControlConfig": json.dumps({"appKpaFormula": "eval(1)"})})["tpms_scale"] == 1.375
+    for model in ("TIGGO 8 CSH", "Tiggo 7 PHEV", "TIGGO 8 PRO PHEV"):
+        assert caps({"model": model, "vehicleControlConfig": json.dumps({"appKpaFormula": "data * 1.373"})})["tpms_scale"] == 1.779, model
+    assert caps({"model": "OMODA C5 EV"})["tpms_scale"] == 1.375
     # Issue #3, Tiggo 8 CSH: raw 151 read 30 psi at 1.375; the app showed 39.
     s = parse_blob(_patch(LIVE, 44, "97"), 1.779)
     assert round(s["tyre_fl_pressure"] * 0.145038) == 39

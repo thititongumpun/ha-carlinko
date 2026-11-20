@@ -263,12 +263,16 @@ def caps(row: dict[str, Any]) -> dict[str, Any]:
     # An OMODA C5 reports PowerLiftgate but not Trunk; either means "it opens".
     out["liftgate"] = bool(cfg.get("PowerLiftgate") or cfg.get("Trunk"))
     out["phev"] = bool(cfg.get("fuelConsumption"))
-    out["tpms_scale"] = _tpms_scale(cfg)
+    out["tpms_scale"] = _tpms_scale(cfg, str(row.get("model") or ""))
     return out
 
 
-def _tpms_scale(cfg: dict[str, Any]) -> float:
+def _tpms_scale(cfg: dict[str, Any], model: str) -> float:
     """Raw tyre byte -> kPa factor from the model's "data * 1.373" formula."""
+    # Tiggo 7/8 PHEV ("CSH" in MY/ID): owner-confirmed 1.779 (issue #3,
+    # elad-bar #1/#3). Wins over the config, which did not fix it in v0.0.24.
+    if re.search(r"tiggo.*\b(phev|csh)\b", model, re.IGNORECASE):
+        return 1.779
     for key in ("appKpaFormula", "webTirePressureFormula"):
         m = re.fullmatch(r"\s*data\s*\*\s*([0-9.]+)\s*", str(cfg.get(key) or ""))
         if m:

@@ -122,7 +122,7 @@ and sign in with the other account. Entities, history and dashboards are kept.
 
 ## Lovelace card
 
-Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.24`, type **JavaScript module**. Then:
+Add the resource once: Settings → Dashboards → ⋮ → Resources → `/carlinko/carlinko-card.js?v=0.0.25`, type **JavaScript module**. Then:
 
 ```yaml
 type: custom:carlinko-card
@@ -203,7 +203,7 @@ else — no extra request. Both scalings were confirmed against the CarLinko app
 
 | Field | Bytes | Scaling |
 |---|---|---|
-| Pressure | 44–47 | `kPa = raw × scale`, scale from the model's `appKpaFormula` (C5 1.373, Tiggo 8 PHEV 1.779; 1.375 if absent) |
+| Pressure | 44–47 | `kPa = raw × scale`, scale from the model's `appKpaFormula` (C5 1.373; 1.375 if absent). Tiggo 7/8 PHEV / CSH always use 1.779, matched by model name |
 | Temperature | 48–51 | `°C = raw × 0.5 − 25` |
 
 Order is front-left, front-right, rear-left, rear-right. `0x00` and `0xFF` mean "no reading" and
