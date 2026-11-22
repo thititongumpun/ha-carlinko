@@ -42,6 +42,15 @@ class CarlinkoError(Exception):
         self.code = code
 
 
+CHARGE_LIMITS = (80, 90, 100)  # the app's only slider stops; others are untested server-side
+
+
+def target_soc(data: Any) -> int | None:
+    """targetSoc from a terminalNoticeConfig reply; None when absent or off-scale."""
+    v = data.get("targetSoc") if isinstance(data, dict) else None
+    return v if isinstance(v, int) and v in CHARGE_LIMITS else None
+
+
 class CarlinkoAuthError(CarlinkoError):
     """Credentials rejected or no token returned."""
 
@@ -536,6 +545,22 @@ class CarlinkoApi:
             "GET", f"/user/vehicle/isOnline/{vid}", sign_params={"id": vid}
         )
         return data if isinstance(data, bool) else None
+
+    async def get_target_soc(self, vehicle_id: str) -> int | None:
+        vid = str(vehicle_id)
+        data = await self._request(
+            "GET",
+            f"/user/device/manage/terminalNoticeConfig/{vid}",
+            sign_params={"vehicleId": vid},
+        )
+        return target_soc(data)
+
+    async def set_target_soc(self, vehicle_id: str, value: int) -> None:
+        if value not in CHARGE_LIMITS:
+            raise CarlinkoError(f"charge limit must be one of {CHARGE_LIMITS}, got {value!r}")
+        # no "timestamp" in the body: the fork's live-confirmed contract signs exactly these two keys
+        body = {"targetSoc": value, "vehicleId": str(vehicle_id)}
+        await self._request("PUT", "/user/device/manage/targetSoc", body=body, sign_params=body)
 
     async def get_maintain(self, vehicle_id: str) -> list[dict[str, Any]]:
         """Dealer service records, newest first per the app; [] when none logged."""

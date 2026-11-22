@@ -75,6 +75,15 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                     _LOGGER.debug("isOnline failed for %s: %s", vid, err)
                     state["online"] = None
 
+                # one extra GET per locate tick (and on first refresh); carry the last value otherwise
+                prev_soc = ((self.data or {}).get(vid, {}).get("state") or {}).get("target_soc")
+                state["target_soc"] = prev_soc
+                if locate_now or self.data is None:
+                    try:
+                        state["target_soc"] = await self.api.get_target_soc(vid_raw)
+                    except CarlinkoError as err:
+                        _LOGGER.debug("targetSoc failed for %s: %s", vid, err)
+
                 location = (self.data or {}).get(vid, {}).get("location")
                 if locate_now:
                     sn = self._device_sn(row)
@@ -114,3 +123,12 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
             raise HomeAssistantError(str(err)) from err
         await asyncio.sleep(5)
         await self.async_request_refresh()
+
+    async def set_charge_limit(self, vehicle_id: str, value: int) -> None:
+        """Set the charge limit (80/90/100); the cloud read is 15 min apart, so update optimistically."""
+        try:
+            await self.api.set_target_soc(vehicle_id, value)
+        except CarlinkoError as err:
+            raise HomeAssistantError(str(err)) from err
+        self.data[vehicle_id]["state"]["target_soc"] = value
+        self.async_update_listeners()
