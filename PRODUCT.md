@@ -12,7 +12,7 @@ Astro (static output) in `/site`, deployed to GitHub Pages by GitHub Actions. En
 
 ## Users
 
-Home Assistant users who own an Omoda, Jaecoo or Chery car managed by the CarLinko app, mostly in Thailand and Southeast Asia. They want to know whether it works with their car, install it via HACS, sign in, and build dashboards and automations on top.
+Home Assistant users who own an Omoda, Jaecoo, Lepas or Chery car managed by the CarLinko app, mostly in Thailand and Southeast Asia. They want to know whether it works with their car, install it via HACS, sign in, and build dashboards and automations on top.
 
 ## Product Purpose
 
@@ -32,7 +32,7 @@ See README.md (source of truth for features, entities, caveats). Only the Omoda 
 
 ## Brand Commitments
 
-Must state it is unofficial and not affiliated with CarLinko, Chery, Omoda or Jaecoo. Do not use those brands' logos or trade dress. Credits to GodrezJr2/j5-ev-dashboard, elad-bar/ha-carlinko and openlinko.
+Must state it is unofficial and not affiliated with CarLinko, Chery, Omoda, Jaecoo or Lepas. Do not use those brands' logos or trade dress. Credits to GodrezJr2/j5-ev-dashboard, elad-bar/ha-carlinko and openlinko.
 
 ## Evidence on Hand
 
