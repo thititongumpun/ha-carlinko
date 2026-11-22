@@ -156,6 +156,7 @@ C5_CONFIG = json.dumps(
         "Sunroof": True,
         "SunroofTilting": True,
         "Engine": False,
+        "socUpperLimit": False,
         "FrontWindshieldHeater": False,
         "SteeringWheelHeater": False,
         "A/C": {
@@ -269,3 +270,8 @@ def test_target_soc():
     assert target_soc({"targetSoc": None}) is None
     assert target_soc(None) is None
     assert target_soc({"targetSoc": "90"}) is None
+
+
+def test_caps_soc_limit():
+    assert caps({"vehicleControlConfig": C5_CONFIG})["soc_limit"] is False
+    assert caps({"vehicleControlConfig": json.dumps({"socUpperLimit": True})})["soc_limit"] is True

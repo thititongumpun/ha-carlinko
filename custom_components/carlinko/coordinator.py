@@ -75,10 +75,10 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                     _LOGGER.debug("isOnline failed for %s: %s", vid, err)
                     state["online"] = None
 
-                # one extra GET per locate tick (and on first refresh); carry the last value otherwise
+                # only cars whose app has the slider; one GET per locate tick (and first refresh), else carry the last value
                 prev_soc = ((self.data or {}).get(vid, {}).get("state") or {}).get("target_soc")
                 state["target_soc"] = prev_soc
-                if locate_now or self.data is None:
+                if caps(row).get("soc_limit") and (locate_now or self.data is None):
                     try:
                         state["target_soc"] = await self.api.get_target_soc(vid_raw)
                     except CarlinkoError as err:

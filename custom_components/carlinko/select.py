@@ -32,11 +32,11 @@ async def async_setup_entry(
         for description in SEAT_DESCRIPTIONS
         if (levels := caps(data["vehicle"]).get(description.key, 0))
     )
-    # no capability flag for this: create it only when the cloud returned a limit
+    # the C5 stores a default targetSoc but its app has no slider, so gate on the flag
     async_add_entities(
         CarlinkoChargeLimitSelect(coordinator, vehicle_id)
         for vehicle_id, data in coordinator.data.items()
-        if data["state"].get("target_soc") is not None
+        if caps(data["vehicle"]).get("soc_limit")
     )
 
 

@@ -211,6 +211,7 @@ _CAP_FLAGS = {
     "windows_vent": "WindowsVent",
     "sunroof": "Sunroof",
     "sunroof_tilt": "SunroofTilting",
+    "soc_limit": "socUpperLimit",  # the app shows the charge-limit slider
 }
 
 _CAP_AC_FLAGS = {
