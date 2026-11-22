@@ -36,7 +36,9 @@ class CarlinkoNoticeEvent(CarlinkoEntity, EventEntity):
 
     def _handle_coordinator_update(self) -> None:
         notices = self.coordinator.data[self.vehicle_id].get("notices", [])
-        if self._seen is None:  # first update: seed only, so a restart does not replay old notices
+        # seed until the first non-empty list, so a failed or empty startup fetch can't replay old notices
+        # shortcut: an account with zero notices swallows its very first notice, upgrade if that matters
+        if not self._seen:
             self._seen = {str(n.get("noticeId")) for n in notices}
         else:
             for n in reversed(notices):  # oldest first
