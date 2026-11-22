@@ -12,7 +12,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import CarlinkoApi, CarlinkoAuthError, CarlinkoError, caps
+from .api import CarlinkoApi, CarlinkoAuthError, CarlinkoError, caps, last_charge
 from .const import CONF_TOKEN, DOMAIN, LOCATE_EVERY, SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
@@ -84,6 +84,14 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                     except CarlinkoError as err:
                         _LOGGER.debug("targetSoc failed for %s: %s", vid, err)
 
+                notices = (self.data or {}).get(vid, {}).get("notices", [])
+                if locate_now or self.data is None:
+                    try:
+                        notices = await self.api.get_notices(vid_raw)
+                    except CarlinkoError as err:
+                        _LOGGER.debug("notices failed for %s: %s", vid, err)
+                state["last_charge"] = last_charge(notices)
+
                 location = (self.data or {}).get(vid, {}).get("location")
                 if locate_now:
                     sn = self._device_sn(row)
@@ -97,7 +105,7 @@ class CarlinkoCoordinator(DataUpdateCoordinator[dict[str, dict]]):
                                 prev = (self.data or {}).get(vid, {}).get("location") or {}
                                 location["address"] = await self._reverse_geocode(location, prev)
 
-                data[vid] = {"vehicle": row, "state": state, "location": location}
+                data[vid] = {"vehicle": row, "state": state, "location": location, "notices": notices}
         except CarlinkoAuthError as err:
             raise ConfigEntryAuthFailed from err
         except CarlinkoError as err:

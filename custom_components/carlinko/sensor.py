@@ -287,6 +287,12 @@ SENSOR_DESCRIPTIONS: tuple[CarlinkoSensorDescription, ...] = (
         service_fn=lambda km, days: days,
     ),
     CarlinkoSensorDescription(
+        key="last_charge",
+        native_unit_of_measurement=PERCENTAGE,
+        icon="mdi:battery-charging",
+        value_fn=lambda d: (d.get("last_charge") or {}).get("end_soc"),
+    ),
+    CarlinkoSensorDescription(
         key="next_service",
         device_class=SensorDeviceClass.ENUM,
         options=["overdue", "km", "days", "unset"],
@@ -341,7 +347,10 @@ class CarlinkoSensor(CarlinkoEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
-        """Expose the raw km/days figures behind the next-service verdict."""
+        """Expose the raw km/days figures behind the next-service verdict, or the last session's start/end."""
+        if self.entity_description.key == "last_charge":
+            lc = self.state_data.get("last_charge")
+            return {k: lc.get(k) for k in ("start_soc", "started_at", "ended_at")} if lc else None
         if self.entity_description.key != "next_service":
             return None
         km, days = self._service_left

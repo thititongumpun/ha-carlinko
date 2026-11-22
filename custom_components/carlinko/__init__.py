@@ -21,6 +21,7 @@ PLATFORMS: list[Platform] = [
     Platform.COVER,
     Platform.DATE,
     Platform.DEVICE_TRACKER,
+    Platform.EVENT,
     Platform.IMAGE,
     Platform.LOCK,
     Platform.NUMBER,

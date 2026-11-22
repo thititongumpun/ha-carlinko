@@ -14,6 +14,7 @@ import logging
 import os
 import re
 import time
+from datetime import UTC, datetime
 from typing import Any
 
 import aiohttp
@@ -49,6 +50,47 @@ def target_soc(data: Any) -> int | None:
     """targetSoc from a terminalNoticeConfig reply; None when absent or off-scale."""
     v = data.get("targetSoc") if isinstance(data, dict) else None
     return v if isinstance(v, int) and v in CHARGE_LIMITS else None
+
+
+def notice_time(s: Any) -> datetime | None:
+    """CarLinko notice ``createdTime`` ("YYYY-MM-DD HH:MM:SS", UTC); None when unparseable."""
+    try:
+        return datetime.strptime(s, "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)
+    except (TypeError, ValueError):
+        return None
+
+
+def charge_notice(text: Any) -> tuple[str, float] | None:
+    """("start" | "complete", soc %) for a charging notice, else None."""
+    if not isinstance(text, str):
+        return None
+    pct = re.findall(r"(\d+(?:\.\d+)?)\s*%", text)
+    if not pct:
+        return None
+    low = text.lower()
+    # shortcut: English wording guessed (app language follows the account), adjust when an English-account notice is seen
+    if "ชาร์จเสร็จ" in text or ("charg" in low and any(w in low for w in ("complet", "finish", "full"))):
+        return "complete", float(pct[-1])
+    if "เริ่มชาร์จ" in text or ("charg" in low and "start" in low):
+        return "start", float(pct[-1])
+    return None
+
+
+def last_charge(notices: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Latest charging session from vehicle notices (newest first); None without charging notices."""
+    found = [(t, c, n) for n in notices if (c := (charge_notice(n.get("title")) or charge_notice(n.get("contents"))))
+             and (t := notice_time(n.get("createdTime")))]
+    if not found:
+        return None
+    iso = lambda t: t.isoformat() if t else None  # noqa: E731
+    end = found[0] if found[0][1][0] == "complete" else None
+    start = next((f for f in found[1 if end else 0:] if f[1][0] == "start"), None)
+    return {
+        "end_soc": end[1][1] if end else None,
+        "ended_at": iso(end[0]) if end else None,
+        "start_soc": start[1][1] if start else None,
+        "started_at": iso(start[0]) if start else None,
+    }
 
 
 class CarlinkoAuthError(CarlinkoError):
@@ -567,6 +609,12 @@ class CarlinkoApi:
         """Dealer service records, newest first per the app; [] when none logged."""
         q = {"vehicleId": str(vehicle_id), "queryKey": "", "page": "1", "size": "20"}
         data = await self._request("GET", "/user/maintain/page", params=q, sign_params=q)
+        return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+
+    async def get_notices(self, vehicle_id: str) -> list[dict[str, Any]]:
+        """Vehicle notices (type 2), newest first; [] when none. Read-only, never marks as read."""
+        q = {"page": "1", "size": "20", "type": "2", "vehicleId": str(vehicle_id)}
+        data = await self._request("GET", "/user/notice/page", params=q, sign_params=q)
         return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
 
     async def get_maintain_details(self, maintain_id: str) -> dict[str, Any]:

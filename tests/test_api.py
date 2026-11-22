@@ -5,11 +5,24 @@ import hashlib
 import hmac
 import json
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
-from carlinko.api import CarlinkoError, caps, charge_target, control_verdict, encrypt_control, parse_blob, sign, target_soc
+from carlinko.api import (
+    CarlinkoError,
+    caps,
+    charge_notice,
+    charge_target,
+    control_verdict,
+    encrypt_control,
+    last_charge,
+    notice_time,
+    parse_blob,
+    sign,
+    target_soc,
+)
 
 # Sample from api-map.md: J5 EV parked/asleep, 73 bytes.
 SAMPLE = (
@@ -275,3 +288,40 @@ def test_target_soc():
 def test_caps_soc_limit():
     assert caps({"vehicleControlConfig": C5_CONFIG})["soc_limit"] is False
     assert caps({"vehicleControlConfig": json.dumps({"socUpperLimit": True})})["soc_limit"] is True
+
+
+NOTICE_START = "รถของคุณ OMODA C5 EV XXX เริ่มชาร์จแล้ว ระดับแบตเตอรี่: 45.0%"
+NOTICE_DONE = "รถของคุณ OMODA C5 EV XXX ชาร์จเสร็จแล้ว ระดับแบตเตอรี่: 100.0%"
+
+
+def _n(ts, text):
+    return {"createdTime": ts, "title": text, "contents": None}
+
+
+def test_charge_notice():
+    assert charge_notice(NOTICE_START) == ("start", 45.0)
+    assert charge_notice(NOTICE_DONE) == ("complete", 100.0)
+    assert charge_notice("XXX ประตูปลดล็อกอยู่") is None
+    assert charge_notice(None) is None
+
+
+def test_notice_time():
+    assert notice_time("2026-11-22 01:32:00") == datetime(2026, 11, 22, 1, 32, tzinfo=UTC)
+    assert notice_time("bad") is None
+
+
+def test_last_charge():
+    got = last_charge([
+        _n("2026-11-15 14:48:00", NOTICE_DONE),
+        _n("2026-11-15 09:13:00", NOTICE_START.replace("45.0", "55.6")),
+        _n("2026-11-15 05:06:00", NOTICE_DONE),
+    ])
+    assert got == {
+        "end_soc": 100.0,
+        "ended_at": "2026-11-15T14:48:00+00:00",
+        "start_soc": 55.6,
+        "started_at": "2026-11-15T09:13:00+00:00",
+    }
+    now = last_charge([_n("2026-11-22 01:32:00", NOTICE_START)])
+    assert now["end_soc"] is None and now["start_soc"] == 45.0
+    assert last_charge([]) is None

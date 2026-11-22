@@ -139,12 +139,13 @@ Options, a sections-view example and a full Thai dashboard (Mushroom + ApexChart
 
 | Platform | Entities |
 |---|---|
-| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4; plug-in hybrids also get fuel %, fuel range, total range (EV + fuel) and fuel consumption |
+| Sensor | battery, range, odometer, speed, 12 V battery voltage, energy consumption, rated range (WLTC), charging power, charging time remaining, charging status, charging mode, charge target (estimated), last charge (end %, with start % and times as attributes), A/C target temperature, distance until service, days until service, next service, tyre pressure ×4, tyre temperature ×4; plug-in hybrids also get fuel %, fuel range, total range (EV + fuel) and fuel consumption |
 | Binary sensor | charging, cable connected, door open (any), driver / passenger / rear-left / rear-right door, tailgate open, air conditioning, high-voltage system (car on), online |
 | Lock | door lock |
 | Switch | air conditioning, defog |
 | Number | A/C temperature (15–31 °C, cars that report `SetTemperature`), service settings |
 | Select | seat ventilation, per seat (off / level 1-3); charge limit (80 / 90 / 100 %), cars whose app has the slider (`socUpperLimit`) |
+| Event | vehicle notices (charging started / finished, door open, door unlocked, lights on), fired as they arrive |
 | Cover | windows, tailgate, sunroof (open / close / tilt) |
 | Button | find car, vent windows, quick cool, stop charging |
 | Device tracker | location (+ `address` attribute) |
@@ -222,6 +223,7 @@ Resolution is one raw count, i.e. about 0.2 psi on the C5 and 0.26 psi on the Ti
 
 - **One session per account.** Logging in from Home Assistant can sign the phone app out and vice versa. The token is stored, so restarts don't re-login. A [shared account](#owner-account-or-shared-account) avoids this.
 - **Charge limit select** (80 / 90 / 100 %) comes from the fork-documented `targetSoc` REST call. The C5 EV does not support it (set in the car); expected on cars like the Lepas L6, not yet confirmed.
+- **Vehicle notices** are polled every 15 min, so an event can arrive up to 15 min late, and the text follows the account's app language (Thai on a Thai account; English wording is a guess).
 - **Static-decode commands.** A/C on/off, defog, quick cool, seat vent, find car and sunroof opcodes come from the app's decompiled code and are not yet confirmed on every car. Lock/unlock, windows open/close/vent, tailgate and stop-charging are runtime-confirmed (Omoda C5 EV, Jaecoo J5).
 - **A/C temperature** sends `7411` + the plain °C value (`741118` = 24 °C), runtime-confirmed on the Omoda C5 EV, where the target-temperature sensor reads the same plain °C. The Jaecoo J5 and Tiggo 7 encode it as `0x80 + 2 × °C`, so on those cars the slider is likely refused or shows the wrong value; please open an issue if you have one.
 - **Tyre pressure** depends on the car having direct TPMS. Confirmed working on the C5 EV; cars with indirect TPMS report no data and the entities stay unknown.
