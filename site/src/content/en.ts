@@ -6,7 +6,7 @@ export default {
   lang: 'en',
   title: 'ha-carlinko · CarLinko cars in Home Assistant',
   description:
-    'Unofficial Home Assistant integration for Omoda, Jaecoo and Chery cars managed by the CarLinko app: battery, charging, tyres, door lock, A/C and remote controls.',
+    'Unofficial Home Assistant integration for Omoda, Jaecoo, Lepas and Chery cars managed by the CarLinko app: battery, charging, tyres, door lock, A/C and remote controls.',
   skip: 'Skip to content',
   navLabel: 'Sections',
   nav: [
@@ -26,11 +26,11 @@ export default {
   hero: {
     title: 'Your CarLinko car, as Home Assistant entities.',
     lede:
-      'Battery, charging, tyres, door lock, A/C and remote controls for <strong>Omoda</strong>, <strong>Jaecoo</strong> and <strong>Chery</strong> cars managed by the CarLinko app. Sign in with your CarLinko account; the car shows up as a normal device with a ready-made Lovelace card.',
+      'Battery, charging, tyres, door lock, A/C and remote controls for <strong>Omoda</strong>, <strong>Jaecoo</strong>, <strong>Lepas</strong> and <strong>Chery</strong> cars managed by the CarLinko app. Sign in with your CarLinko account; the car shows up as a normal device with a ready-made Lovelace card.',
     primary: 'Install from Marketplace',
     secondary: 'View on GitHub',
     facts: ['Home Assistant 2025.1+', 'No extra Python dependencies', 'English and Thai'],
-    unofficial: 'Unofficial. Not made, endorsed or supported by CarLinko, Chery, Omoda or Jaecoo.',
+    unofficial: 'Unofficial. Not made, endorsed or supported by CarLinko, Chery, Omoda, Jaecoo or Lepas.',
   },
   hud: {
     caption: 'Demo values. The entity IDs are the ones the integration creates.',
@@ -49,12 +49,13 @@ export default {
   compat: {
     title: 'Will it work with my car?',
     intro:
-      'If your car is managed through the CarLinko app, it is worth trying. The integration talks to the app’s account API, not to any one model, so it supports whatever CarLinko supports: cars sold as Omoda, Jaecoo or Chery across Thailand, Malaysia, Indonesia, Vietnam, UAE, Uzbekistan, South Africa and elsewhere.',
+      'If your car is managed through the CarLinko app, it is worth trying. The integration talks to the app’s account API, not to any one model, so it supports whatever CarLinko supports: cars sold as Omoda, Jaecoo, Lepas or Chery across Thailand, Malaysia, Indonesia, Vietnam, UAE, Uzbekistan, South Africa and elsewhere.',
     head: ['Car', 'Status', 'What that means'],
     rows: [
       ['Omoda C5 EV (Thailand)', 'Verified', 'Developed and tested against daily. Everything the README describes is confirmed on this car.'],
       ['Jaecoo J5', 'Partly confirmed', 'Lock/unlock, windows, tailgate and stop-charging confirmed by an upstream contributor.'],
-      ['Other Chery, Omoda and Jaecoo models on CarLinko', 'Expected', 'Untested. Reports welcome.'],
+      ['Lepas L6', 'Expected', 'Runs on the CarLinko app (owner-confirmed). Not yet tested with this integration. Reports welcome.'],
+      ['Other Chery, Omoda, Jaecoo and Lepas models on CarLinko', 'Expected', 'Untested. Reports welcome.'],
     ],
     caveat:
       'On another model, expect the core telemetry to work and some decoded fields to be wrong or missing. The 73-byte telemetry blob is reverse-engineered and roughly a third of it is still unidentified, so model-specific fields (A/C temperature, tyre pressure on cars with indirect TPMS) may read nonsense or stay unknown.',
@@ -198,7 +199,7 @@ export default {
 
   footer: {
     disclaimer:
-      '<strong>Unofficial and unaffiliated.</strong> This project is not made, endorsed or supported by CarLinko, Chery, Omoda or Jaecoo. It talks to a reverse-engineered private API; an app update can break it at any time. Use at your own risk.',
+      '<strong>Unofficial and unaffiliated.</strong> This project is not made, endorsed or supported by CarLinko, Chery, Omoda, Jaecoo or Lepas. It talks to a reverse-engineered private API; an app update can break it at any time. Use at your own risk.',
     credits:
       'API reverse engineering by <a href="https://github.com/GodrezJr2/j5-ev-dashboard">GodrezJr2/j5-ev-dashboard</a> and <a href="https://github.com/elad-bar/ha-carlinko">elad-bar/ha-carlinko</a>. Command encryption scheme from <a href="https://github.com/GodrezJr2/openlinko">openlinko</a>. Vehicle renders are served from CarLinko’s own CDN.',
     links: [

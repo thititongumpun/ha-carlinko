@@ -4,14 +4,14 @@
 [![HA Marketplace](https://img.shields.io/badge/HA%20Marketplace-custom%20repository-41BDF5.svg)](https://www.hacs.xyz/docs/marketplace/)
 ![HA 2025.1+](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue)
 
-Bring your **Omoda**, **Jaecoo** or **Chery** car into Home Assistant — battery, charging, tyres,
+Bring your **Omoda**, **Jaecoo**, **Lepas** or **Chery** car into Home Assistant — battery, charging, tyres,
 door lock, A/C and remote controls — if it is one of the cars managed by the **CarLinko** app.
 
 Sign in with your CarLinko account and the integration polls the same cloud API the phone app uses,
 exposing the car as normal Home Assistant entities plus a ready-made Lovelace card.
 
 > **Unofficial and unaffiliated.** This project is not made, endorsed or supported by CarLinko,
-> Chery, Omoda or Jaecoo. It talks to a reverse-engineered private API; an app update can break it
+> Chery, Omoda, Jaecoo or Lepas. It talks to a reverse-engineered private API; an app update can break it
 > at any time. Use at your own risk.
 
 <p align="center">
@@ -26,14 +26,15 @@ exposing the car as normal Home Assistant entities plus a ready-made Lovelace ca
 
 If your car is managed through the **CarLinko** app, it is worth trying. The integration talks to
 the app's account API, not to any one model, so the cars it supports are whatever CarLinko supports —
-sold as Omoda, Jaecoo or Chery across Thailand, Malaysia, Indonesia, Vietnam, UAE, Uzbekistan,
+sold as Omoda, Jaecoo, Lepas or Chery across Thailand, Malaysia, Indonesia, Vietnam, UAE, Uzbekistan,
 South Africa and elsewhere.
 
 | Car | Status |
 |---|---|
 | **Omoda C5 EV** (Thailand) | Developed and tested against daily. Everything in this README is confirmed here. |
 | **Jaecoo J5** | Lock/unlock, windows, tailgate and stop-charging confirmed by an upstream contributor. |
-| Chery, Omoda and Jaecoo models on CarLinko generally | Expected to work. Untested — reports welcome. |
+| **Lepas L6** | Runs on the CarLinko app (owner-confirmed). Integration untested — reports welcome. |
+| Chery, Omoda, Jaecoo and Lepas models on CarLinko generally | Expected to work. Untested — reports welcome. |
 
 Only the C5 EV is verified by the author. On another model expect the core telemetry to work and
 some decoded fields to be wrong or missing: the 73-byte telemetry blob is reverse-engineered and
@@ -232,7 +233,7 @@ Resolution is one raw count, i.e. about 0.2 psi on the C5 and 0.26 psi on the Ti
 - **T-Box firmware 2.3.1_051A01R+ (Nov 2026)** rejects plain commands; since v0.0.18 they are AES-encrypted like app 1.14.10 does (scheme from [openlinko](https://github.com/GodrezJr2/openlinko)), falling back to plain for older firmware.
 - The API is forced to IPv4 because it misbehaves over IPv6 on some ISPs.
 - **Only the Omoda C5 EV (Thailand) is verified.** Other CarLinko cars are expected to work; see [Will it work with my car?](#will-it-work-with-my-car).
-- Unofficial, reverse-engineered API, not affiliated with CarLinko, Chery, Omoda or Jaecoo. Use at your own risk; a CarLinko app update can break it.
+- Unofficial, reverse-engineered API, not affiliated with CarLinko, Chery, Omoda, Jaecoo or Lepas. Use at your own risk; a CarLinko app update can break it.
 
 ## Troubleshooting
 
