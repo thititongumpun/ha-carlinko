@@ -18,6 +18,7 @@ exposing the car as normal Home Assistant entities plus a ready-made Lovelace ca
   <img src="docs/screenshots/card.gif" width="360" alt="carlinko-card loading on an Omoda C5 EV">
   <img src="docs/screenshots/dashboard.png" width="360" alt="Thai dashboard">
   <img src="docs/screenshots/charging.png" width="360" alt="My Car dashboard">
+  <img src="docs/screenshots/charging-now.png" width="360" alt="Card while AC charging: 6.2 kW, time left, Stop charging button">
   <img src="docs/screenshots/12vandspeed.png" width="360" alt="12 V battery and speed history">
 </p>
 

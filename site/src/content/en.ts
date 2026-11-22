@@ -77,6 +77,7 @@ export default {
       ['Vehicle image', 'The CDN render of your exact car, as an <code>image</code> entity.'],
     ],
     shots: [
+      ['charging-now.png', 1440, 1000, 'The CarLinko card while the car AC-charges: state Charging, 6.2 kW, 4 hr 17 min left, and a Stop charging button.', 'Charging: live power, time left and a stop button.'],
       ['charging.png', 1440, 1000, 'A Home Assistant dashboard in Thai with the CarLinko card, door, A/C and window controls, and a 24-hour battery and charging power chart.', 'Thai dashboard: card, controls and a 24-hour battery chart.'],
       ['12vandspeed.png', 542, 470, 'History charts of 12 V battery voltage and speed.', '12 V battery and speed history.'],
     ],
