@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from carlinko.api import CarlinkoError, caps, charge_target, control_verdict, encrypt_control, parse_blob, sign
+from carlinko.api import CarlinkoError, caps, charge_target, control_verdict, encrypt_control, parse_blob, sign, target_soc
 
 # Sample from api-map.md: J5 EV parked/asleep, 73 bytes.
 SAMPLE = (
@@ -156,6 +156,7 @@ C5_CONFIG = json.dumps(
         "Sunroof": True,
         "SunroofTilting": True,
         "Engine": False,
+        "socUpperLimit": False,
         "FrontWindshieldHeater": False,
         "SteeringWheelHeater": False,
         "A/C": {
@@ -261,3 +262,16 @@ def test_parse_blob_phev_fuel():
     assert parse_blob(SAMPLE)["fuel_pct"] == 0  # BEV
     assert caps({"vehicleControlConfig": json.dumps({"fuelConsumption": True})})["phev"] is True
     assert caps({"vehicleControlConfig": C5_CONFIG})["phev"] is False
+
+
+def test_target_soc():
+    assert target_soc({"targetSoc": 90}) == 90
+    assert target_soc({"targetSoc": 85}) is None
+    assert target_soc({"targetSoc": None}) is None
+    assert target_soc(None) is None
+    assert target_soc({"targetSoc": "90"}) is None
+
+
+def test_caps_soc_limit():
+    assert caps({"vehicleControlConfig": C5_CONFIG})["soc_limit"] is False
+    assert caps({"vehicleControlConfig": json.dumps({"socUpperLimit": True})})["soc_limit"] is True
